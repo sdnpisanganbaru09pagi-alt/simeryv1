@@ -21,7 +21,7 @@ html,body{height:100%;margin:0;padding:0}
 body{
   background: linear-gradient(180deg,#f6f9f6 0%, #eef7ee 100%);
   -webkit-font-smoothing:antialiased;
-  padding:12px;
+  padding:0;
   display:flex;
   justify-content:center;
   align-items:flex-start;
@@ -30,12 +30,13 @@ body{
 }
 .app {
   width:100%;
-  max-width:900px;
+  max-width:100%;
   background: var(--card);
-  border-radius:14px;
+  border-radius:0;
   overflow:hidden;
-  box-shadow: 0 10px 30px rgba(2,6,23,0.08);
-  margin-bottom:24px;
+  box-shadow: none;
+  margin-bottom:0;
+  min-height:100vh;
 }
 .header {
   padding: 16px;
@@ -350,20 +351,22 @@ textarea {
 .notification {
   position: fixed;
   top: 20px;
+  left: 20px;
   right: 20px;
+  margin: 0 auto;
+  max-width: 400px;
+  transform: translateY(-100px);
   padding: 16px 20px;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   z-index: 5000;
-  max-width: 400px;
-  transform: translateX(120%);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   opacity: 0;
   color: white;
 }
 
 .notification.show {
-  transform: translateX(0);
+  transform: translateY(0);
   opacity: 1;
 }
 
@@ -2556,8 +2559,8 @@ function openScanner(onScan){
         } else {
           el('q').value = decodedText;
           renderItems(decodedText);
+          showNotification('success', 'Barcode berhasil discan!');
         }
-        showNotification('success', 'Barcode berhasil discan!');
       } catch(e){ 
         console.error('onScan error', e);
         showNotification('error', 'Error memproses barcode');
@@ -2622,10 +2625,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput.dataset.selectedId = item.id;
         showNotification('success', 'Barcode terdeteksi!', `${item.name} dipilih`);
         
-        const qtyInput = el('stockOutQty');
-        if (qtyInput) {
-          qtyInput.focus();
-        }
+        // Delay focus agar user melihat toast notification terlebih dahulu
+        setTimeout(() => {
+          const qtyInput = el('stockOutQty');
+          if (qtyInput) {
+            // Scroll smooth ke input field
+            qtyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Focus setelah scroll selesai
+            setTimeout(() => qtyInput.focus(), 300);
+          }
+        }, 1500); // Delay 1.5 detik agar toast terlihat
       } else {
         showNotification('warning', 'Barcode tidak ditemukan', 'Barang dengan barcode ini tidak ada di inventory');
       }
