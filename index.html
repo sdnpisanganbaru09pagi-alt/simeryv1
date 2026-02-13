@@ -1,0 +1,2684 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SiMERY – Aplikasi Manajemen Inventory</title>
+  <style>
+:root{
+  --bg-1:#ffffff;
+  --card:#ffffff;
+  --accent-1:#2f9b4a;
+  --accent-2:#16a34a;
+  --muted:#6b7280;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0}
+body{
+  background: linear-gradient(180deg,#f6f9f6 0%, #eef7ee 100%);
+  -webkit-font-smoothing:antialiased;
+  padding:12px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  font-size:15px;
+  color:#0b1220;
+}
+.app {
+  width:100%;
+  max-width:900px;
+  background: var(--card);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.08);
+  margin-bottom:24px;
+}
+.header {
+  padding: 16px;
+  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  color: white;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.brand{display:flex;gap:12px;align-items:center;flex:1}
+.logo{width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700}
+.title{font-weight:700;font-size:1.05rem}
+.subtitle{font-size:0.85rem;opacity:0.95}
+
+.main{padding:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{
+  flex:1;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(11,17,34,0.06);
+  font-weight:600;text-align:center;color:var(--muted);
+  cursor:pointer;user-select:none;
+}
+.tab.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#fff; box-shadow:0 6px 18px rgba(16,185,129,0.12); border:transparent;}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#fff;padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(11,17,34,0.04)}
+.stat .n{font-weight:800;font-size:1.25rem;color:var(--accent-1);margin-bottom:4px}
+.stat .label{font-size:12px;color:var(--muted);font-weight:500}
+
+.search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:stretch}
+.search input{
+  flex:1 1 100%;
+  min-width:0;
+  padding:14px 16px;
+  border-radius:10px;
+  border:1px solid rgba(11,17,34,0.08);
+  background: #fafafa;
+  transition: all 0.2s ease;
+}
+.search input:focus {
+  background: #ffffff;
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.08);
+}
+.search .btn, .search .btn-barcode{
+  flex:1 1 calc(50% - 4px); 
+  min-width:120px; 
+  padding:14px 16px; 
+  border-radius:10px; 
+  font-weight:600;
+  height: auto;
+}
+@media(min-width:700px){
+  .search{flex-wrap:nowrap}
+  .search input{flex:1}
+  .search .btn, .search .btn-barcode{flex:initial}
+}
+
+input, select, button, textarea { 
+  font-family: inherit; 
+  font-size:14px;
+  outline: none;
+}
+
+input, select, textarea {
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  justify-content:center;
+  border-radius:10px;
+  padding:12px 16px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.ghost{
+  background:transparent;
+  border:1px solid rgba(11,17,34,0.08);
+  color:var(--muted);
+}
+
+.btn.ghost:hover {
+  background: rgba(11,17,34,0.04);
+  border-color: rgba(11,17,34,0.12);
+}
+
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  color:white;
+  box-shadow:0 6px 18px rgba(16,185,129,0.08);
+}
+
+.btn.primary:hover {
+  box-shadow:0 8px 24px rgba(16,185,129,0.15);
+}
+
+.btn.orange{
+  background:linear-gradient(90deg,#f97316,#ea580c);
+  color:white;
+  box-shadow:0 6px 18px rgba(249,115,22,0.15);
+}
+
+.btn.orange:hover {
+  box-shadow:0 8px 24px rgba(249,115,22,0.25);
+}
+
+.btn.green{
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:white;
+  box-shadow:0 6px 18px rgba(34,197,94,0.15);
+}
+
+.btn.green:hover {
+  box-shadow:0 8px 24px rgba(34,197,94,0.25);
+}
+
+.btn-barcode {
+  background: linear-gradient(90deg, #8b5cf6, #a855f7);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-barcode:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
+}
+
+.btn-barcode:active {
+  transform: translateY(0);
+}
+
+.list{display:grid;gap:12px}
+.card{display:flex;flex-direction:column;padding:14px;border-radius:10px;background:#fff;border:1px solid rgba(11,17,34,0.04);box-shadow:0 2px 8px rgba(2,6,23,0.02)}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.card h3{margin:0;font-size:1rem;font-weight:700}
+.badge{padding:6px 12px;border-radius:20px;font-weight:700;font-size:11px}
+.badge.available{background:linear-gradient(90deg,#10b981,#34d399);color:white}
+.badge.empty{background:linear-gradient(90deg,#ef4444,#dc2626);color:white}
+.meta{color:var(--muted);font-size:13px;line-height:1.4}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+.form{display:grid;gap:16px}
+.form label{
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:600;
+  margin-bottom: 6px;
+}
+.form input, .form select, .form textarea { 
+  padding:14px 16px;
+  border-radius:10px;
+  border:1px solid rgba(11,17,34,0.08);
+  width: 100%;
+  margin-top: 6px;
+  background: #fafafa;
+}
+
+.form input:focus, .form select:focus, .form textarea:focus {
+  background: #ffffff;
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.08);
+}
+
+.barcode-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 6px;
+}
+
+.barcode-input-group input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.barcode-input-group .btn-barcode {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  min-width: auto;
+}
+
+.view.hidden{display:none}
+
+#scannerModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  z-index: 3000;
+  padding: 16px;
+}
+
+#scannerModal .modal-card {
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#scannerModal h3 {
+  margin: 0 0 16px 0;
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--accent-1);
+}
+
+#reader {
+  width: 100%;
+  max-width: 100%;
+  height: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px;
+}
+
+#reader canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  border-radius: 12px;
+}
+
+#reader > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#reader::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border: 2px solid var(--accent-1);
+  border-radius: 12px;
+  background: transparent;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-actions button {
+  min-width: 100px;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 5000;
+  max-width: 400px;
+  transform: translateX(120%);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  color: white;
+}
+
+.notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.notification.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+}
+
+.notification.info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.notification-text {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.notification-message {
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.3;
+}
+
+.notification.single-line .notification-content {
+  align-items: center;
+}
+
+.notification.single-line .notification-title {
+  margin-bottom: 0;
+}
+
+.stock-out-form {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stock-out-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 1.1em;
+  color: var(--accent-1);
+  font-weight: bold;
+}
+
+.selected-item-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.selected-item-info {
+  flex: 1;
+}
+
+.selected-item-name {
+  font-weight: 600;
+  color: #0b1220;
+  margin-bottom: 4px;
+}
+
+.selected-item-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.selected-item-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-remove {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid rgba(11,17,34,0.08);
+  border-radius: 10px;
+  margin-top: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 1000;
+  display: none;
+}
+
+.suggestions-dropdown.show {
+  display: block;
+}
+
+.suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(11,17,34,0.04);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: #f9fafb;
+}
+
+.suggestion-item-name {
+  font-weight: 600;
+  color: #0b1220;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.suggestion-item-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.suggestion-item-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.suggestion-item-stock.low {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.suggestion-item-stock.available {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.suggestion-no-results {
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.stock-out-search-wrapper {
+  position: relative;
+}
+
+#signatureCanvas {
+  background: #ffffff;
+  border: 2px dashed #d1d5db;
+  transition: border-color 0.2s ease;
+}
+
+#signatureCanvas:hover {
+  border-color: var(--accent-1);
+}
+
+@media (max-width: 480px) {
+  .notification {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+  
+  #scannerModal .modal-card {
+    margin: 0;
+    padding: 16px;
+    max-width: calc(100vw - 32px);
+  }
+  
+  #reader {
+    height: 220px;
+  }
+  
+  #reader::after {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #scannerModal .modal-card {
+    max-height: 95vh;
+  }
+  
+  #reader {
+    height: 180px;
+  }
+}
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">📦</div>
+        <div>
+          <div class="title">SiMERY</div>
+          <div class="subtitle">Aplikasi Manajemen Inventory</div>
+		  <div class="subtitle">Dikembangkan Oleh Twin Insani, S.Kom</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">Dasbor</button>
+        <button class="tab" data-tab="manage">Kelola Barang</button>
+        <button class="tab" data-tab="stockOut">Keluarkan Stok</button>
+        <button class="tab" data-tab="history">Riwayat</button>
+      </nav>
+
+      <!-- Dashboard -->
+      <section class="view" id="dashboard">
+        <div class="stats">
+          <div class="stat"><div class="n" id="totalN">0</div><div class="label">Total Barang</div></div>
+          <div class="stat"><div class="n" id="stockN">0</div><div class="label">Total Stok</div></div>
+          <div class="stat"><div class="n" id="lowN">0</div><div class="label">Stok Rendah (≤5)</div></div>
+        </div>
+
+        <div class="search">
+          <input id="q" placeholder="Cari barang..." />
+          <button class="btn ghost" id="clearSearch">Bersihkan</button>
+        </div>
+
+        <div class="list" id="items"></div>
+      </section>
+
+      <!-- Manage -->
+      <section class="view hidden" id="manage">
+        <div class="meta" style="font-weight:bold;margin-bottom:8px;font-size:1.1em;color:#22c55e;">📦 Tambah Barang Baru</div>
+        <div style="background:#ffffff;border:1px solid #ddd;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:16px;">
+          <form id="addForm" class="form">
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
+                </svg>
+                Nama Barang
+              </div>
+              <input id="name" placeholder="Contoh: Pulpen" required />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5"/>
+                </svg>
+                Kategori
+              </div>
+              <select id="category" required>
+                <option value="">Pilih Kategori</option>
+                <option value="Alat Kebersihan">Alat Kebersihan</option>
+                <option value="Bahan Kebersihan">Bahan Kebersihan</option>
+                <option value="Alat Tulis Kantor">Alat Tulis Kantor</option>
+                <option value="Alat Kelistrikan">Alat Kelistrikan</option>
+                <option value="Alat Olahraga">Alat Olahraga</option>
+                <option value="Alat Kesehatan">Alat Kesehatan</option>
+              </select>
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4V2C7 1.45 7.45 1 8 1S9 1.45 9 2V4H15V2C15 1.45 15.45 1 16 1S17 1.45 17 2V4H20C21.11 4 22 4.89 22 6V20C22 21.11 21.11 22 20 22H4C2.89 22 2 21.11 2 20V6C2 4.89 2.89 4 4 4H7M4 8V20H20V8H4M6 10H8V12H6V10M10 10H12V12H10V10M14 10H16V12H14V10M6 14H8V16H6V14M10 14H12V16H10V14M14 14H16V16H14V14"/>
+                </svg>
+                Stok Awal
+              </div>
+              <input id="stock" type="number" min="0" value="0" />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+                </svg>
+                Barcode (Opsional)
+              </div>
+              <div class="barcode-input-group">
+                <input id="barcode" placeholder="Scan atau ketik barcode" />
+                <button type="button" class="btn-barcode" id="scanBarcodeBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+                  </svg>
+                  Scan Barcode
+                </button>
+              </div>
+            </label>
+            
+            <div class="actions" style="margin-top:16px;">
+              <button class="btn primary" type="submit">Tambah Barang</button>
+            </div>
+          </form>
+        </div>
+        
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#eee,transparent);margin:16px 0;border-radius:2px;"></div>
+        
+        <div class="search">
+          <input id="manageSearch" placeholder="Cari barang yang sudah ada..." />
+          <button class="btn ghost" id="clearManageSearch">Bersihkan</button>
+        </div>
+        
+        <div class="actions" style="margin-bottom:12px; gap:6px; flex-wrap:wrap">
+          <button class="btn ghost active" data-manage-filter="all" type="button">Semua</button>
+          <button class="btn ghost" data-manage-filter="available" type="button">Tersedia</button>
+          <button class="btn ghost" data-manage-filter="empty" type="button">Stok Habis</button>
+        </div>
+
+        <div class="list" id="manageList"></div>
+      </section>
+
+      <!-- Stock Out - Multi-item Selection -->
+      <section class="view hidden" id="stockOut">
+        <div class="stock-out-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5"/>
+          </svg>
+          Keluarkan Stok Barang
+        </div>
+        
+        <div class="stock-out-form">
+          <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:2px dashed #e5e7eb;">
+            <div style="font-weight:600;margin-bottom:12px;color:var(--accent-1);">Tambah Barang ke Daftar</div>
+            <div class="form" style="gap:12px;">
+              <label>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
+                  </svg>
+                  Pilih Barang
+                </div>
+                
+                <div class="stock-out-search-wrapper">
+                  <div style="display:flex;gap:8px;">
+                    <input id="stockOutSearch" placeholder="Ketik nama / kategori / barcode..." autocomplete="off" style="flex:1;">
+                    <button type="button" class="btn-barcode" id="scanStockOutBtn" style="flex-shrink:0;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+                      </svg>
+                      Scan
+                    </button>
+                  </div>
+                  <div id="stockOutSuggestions" class="suggestions-dropdown"></div>
+                </div>
+              </label>
+              
+              <label>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 7H5V5H19V7ZM19 11H5V9H19V11ZM19 15H5V13H19V15ZM19 19H5V17H19V19Z"/>
+                  </svg>
+                  Jumlah
+                </div>
+                <input id="stockOutQty" type="number" min="1" placeholder="Masukkan jumlah" />
+              </label>
+              
+              <button class="btn green" type="button" id="addItemToList">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                </svg>
+                Tambah ke Daftar
+              </button>
+            </div>
+          </div>
+          
+          <div id="selectedItemsList" style="margin-bottom:20px;display:none;">
+            <div style="font-weight:600;margin-bottom:12px;color:var(--accent-1);display:flex;justify-content:space-between;align-items:center;">
+              <span>Daftar Barang yang Akan Dikeluarkan</span>
+              <span style="font-size:12px;color:var(--muted);font-weight:500;" id="totalItemsCount">0 item</span>
+            </div>
+            <div id="selectedItemsContainer" style="display:grid;gap:8px;margin-bottom:16px;"></div>
+          </div>
+          
+          <form id="stockOutForm" class="form">
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                </svg>
+                Penerima
+              </div>
+              <input id="stockOutRecipient" placeholder="Nama penerima barang" required />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,10H12V8H14M14,16H12V12H14M20,8H17.19C16.74,7.22 16.12,6.55 15.37,6.04L17,4.41L15.59,3L13.42,5.17C12.96,5.06 12.5,5 12,5C11.5,5 11.04,5.06 10.59,5.17L8.41,3L7,4.41L8.62,6.04C7.88,6.55 7.26,7.22 6.81,8H4V10H6.09C6.04,10.33 6,10.66 6,11V12H4V14H6V15C6,15.34 6.04,15.67 6.09,16H4V18H6.81C7.85,19.79 9.78,21 12,21C14.22,21 16.15,19.79 17.19,18H20V16H17.91C17.96,15.67 18,15.34 18,15V14H20V12H18V11C18,10.66 17.96,10.33 17.91,10H20V8Z"/>
+                </svg>
+                Keterangan
+              </div>
+              <textarea id="stockOutNotes" placeholder="Keterangan tambahan (opsional)"></textarea>
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                  </svg>
+                  Tanda Tangan Penerima <span style="color:#ef4444;">*</span>
+                </div>
+                <button type="button" class="btn ghost" id="clearSignature" style="padding:6px 12px;font-size:12px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                  </svg>
+                  Hapus
+                </button>
+              </div>
+              <div style="border:2px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fafafa;">
+                <canvas id="signatureCanvas" width="600" height="200" style="display:block;width:100%;height:auto;cursor:crosshair;touch-action:none;"></canvas>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;">
+                ✍️ Tanda tangani di area kotak di atas
+              </div>
+            </label>
+            
+            <div class="actions" style="margin-top:20px;">
+              <button class="btn primary" type="submit" id="submitStockOut">Keluarkan Semua Stok</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section class="view hidden" id="history">
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="font-weight:600;color:var(--accent-1);">Filter Riwayat</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn primary" id="exportPdfBtn" style="padding:10px 16px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
+                </svg>
+                Export Riwayat
+              </button>
+              <button class="btn green" id="exportPerItemBtn" style="padding:10px 16px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
+                </svg>
+                Export Per Barang
+              </button>
+            </div>
+          </div>
+          <div class="actions" style="gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="btn ghost active" data-history-filter="all" type="button">Semua</button>
+            <button class="btn ghost" data-history-filter="in" type="button">Stok Masuk</button>
+            <button class="btn ghost" data-history-filter="out" type="button">Stok Keluar</button>
+          </div>
+          <select id="historyCategoryFilter" style="padding:12px 16px;border-radius:10px;border:1px solid rgba(11,17,34,0.08);width:100%;background:#fafafa;">
+            <option value="">Semua Kategori</option>
+          </select>
+        </div>
+        <div class="list" id="historyList"></div>
+      </section>
+
+<!-- Edit Item Modal -->
+      <div id="editModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3000;padding:16px;">
+        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:16px;background:#fff;overflow:hidden;">
+          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--accent-1);">Edit Barang</h3>
+          
+          <form id="editForm" class="form">
+            <label>Nama Barang
+              <input id="editName" placeholder="Nama barang" required />
+            </label>
+            <label>Kategori
+              <input id="editCategory" placeholder="Kategori barang" />
+            </label>
+            <label>Stok
+              <input id="editStock" type="number" min="0" required />
+            </label>
+            <label>Barcode (Opsional)
+              <div class="barcode-input-group">
+                <input id="editBarcode" placeholder="Scan atau ketik barcode" />
+                <button type="button" class="btn-barcode" id="editScanBarcodeBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+                  </svg>
+                  Scan Barcode
+                </button>
+              </div>
+            </label>
+            
+            <div class="modal-actions">
+              <button type="button" class="btn ghost" id="cancelEdit">Batal</button>
+              <button type="submit" class="btn primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Add Stock Modal -->
+      <div id="addStockModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3000;padding:16px;">
+        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:16px;background:#fff;overflow:hidden;">
+          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--accent-1);display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+            </svg>
+            Tambah Stok
+          </h3>
+          
+          <form id="addStockForm" class="form">
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
+                </svg>
+                Nama Barang
+              </div>
+              <input id="addStockName" placeholder="Nama barang" readonly style="background:#f0f0f0;color:#666;" />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5"/>
+                </svg>
+                Kategori
+              </div>
+              <input id="addStockCategory" placeholder="Kategori barang" readonly style="background:#f0f0f0;color:#666;" />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4V2C7 1.45 7.45 1 8 1S9 1.45 9 2V4H15V2C15 1.45 15.45 1 16 1S17 1.45 17 2V4H20C21.11 4 22 4.89 22 6V20C22 21.11 21.11 22 20 22H4C2.89 22 2 21.11 2 20V6C2 4.89 2.89 4 4 4H7M4 8V20H20V8H4M6 10H8V12H6V10M10 10H12V12H10V10M14 10H16V12H14V10M6 14H8V16H6V14M10 14H12V16H10V14M14 14H16V16H14V14"/>
+                </svg>
+                Stok Saat Ini
+              </div>
+              <input id="addStockCurrent" type="number" placeholder="Stok saat ini" readonly style="background:#f0f0f0;color:#666;" />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                </svg>
+                Tambah Stok
+              </div>
+              <input id="addStockQuantity" type="number" min="1" placeholder="Masukkan jumlah stok yang ditambah" required />
+            </label>
+            
+            <label>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,10H12V8H14M14,16H12V12H14M20,8H17.19C16.74,7.22 16.12,6.55 15.37,6.04L17,4.41L15.59,3L13.42,5.17C12.96,5.06 12.5,5 12,5C11.5,5 11.04,5.06 10.59,5.17L8.41,3L7,4.41L8.62,6.04C7.88,6.55 7.26,7.22 6.81,8H4V10H6.09C6.04,10.33 6,10.66 6,11V12H4V14H6V15C6,15.34 6.04,15.67 6.09,16H4V18H6.81C7.85,19.79 9.78,21 12,21C14.22,21 16.15,19.79 17.19,18H20V16H17.91C17.96,15.67 18,15.34 18,15V14H20V12H18V11C18,10.66 17.96,10.33 17.91,10H20V8Z"/>
+                </svg>
+                Keterangan (Opsional)
+              </div>
+              <textarea id="addStockNotes" placeholder="Alasan penambahan stok, supplier, dll."></textarea>
+            </label>
+            
+            <div class="modal-actions">
+              <button type="button" class="btn ghost" id="cancelAddStock">Batal</button>
+              <button type="submit" class="btn primary">Tambah Stok</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Enhanced Scanner Modal -->
+      <div id="scannerModal">
+        <div class="modal-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: text-top;">
+              <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+            </svg>
+            Scan Barcode
+          </h3>
+          <div id="reader"></div>
+          <div class="modal-actions">
+            <button id="closeScanner" class="btn ghost">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+// IndexedDB Configuration
+const DB_NAME = 'SimeryDB';
+const DB_VERSION = 1;
+const SIGNATURE_STORE = 'signatures';
+let _db = null;
+
+// Initialize IndexedDB
+function initIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = () => {
+      console.error('IndexedDB error:', request.error);
+      reject(request.error);
+    };
+    
+    request.onsuccess = () => {
+      _db = request.result;
+      console.log('IndexedDB initialized successfully');
+      resolve(_db);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      
+      // Create signatures object store if it doesn't exist
+      if (!db.objectStoreNames.contains(SIGNATURE_STORE)) {
+        const objectStore = db.createObjectStore(SIGNATURE_STORE, { keyPath: 'historyId' });
+        objectStore.createIndex('historyId', 'historyId', { unique: true });
+        console.log('Signatures object store created');
+      }
+    };
+  });
+}
+
+// Save signature to IndexedDB
+function saveSignatureToIndexedDB(historyId, signatureData) {
+  return new Promise((resolve, reject) => {
+    if (!_db) {
+      reject(new Error('Database not initialized'));
+      return;
+    }
+    
+    const transaction = _db.transaction([SIGNATURE_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(SIGNATURE_STORE);
+    
+    const data = {
+      historyId: historyId,
+      signature: signatureData,
+      timestamp: new Date().toISOString()
+    };
+    
+    const request = objectStore.put(data);
+    
+    request.onsuccess = () => {
+      console.log('Signature saved to IndexedDB:', historyId);
+      resolve(true);
+    };
+    
+    request.onerror = () => {
+      console.error('Error saving signature:', request.error);
+      reject(request.error);
+    };
+  });
+}
+
+// Get signature from IndexedDB
+function getSignatureFromIndexedDB(historyId) {
+  return new Promise((resolve, reject) => {
+    if (!_db) {
+      reject(new Error('Database not initialized'));
+      return;
+    }
+    
+    const transaction = _db.transaction([SIGNATURE_STORE], 'readonly');
+    const objectStore = transaction.objectStore(SIGNATURE_STORE);
+    const request = objectStore.get(historyId);
+    
+    request.onsuccess = () => {
+      if (request.result) {
+        resolve(request.result.signature);
+      } else {
+        resolve(null);
+      }
+    };
+    
+    request.onerror = () => {
+      console.error('Error getting signature:', request.error);
+      reject(request.error);
+    };
+  });
+}
+
+// Get all signatures from IndexedDB
+function getAllSignaturesFromIndexedDB() {
+  return new Promise((resolve, reject) => {
+    if (!_db) {
+      reject(new Error('Database not initialized'));
+      return;
+    }
+    
+    const transaction = _db.transaction([SIGNATURE_STORE], 'readonly');
+    const objectStore = transaction.objectStore(SIGNATURE_STORE);
+    const request = objectStore.getAll();
+    
+    request.onsuccess = () => {
+      const signatures = {};
+      request.result.forEach(item => {
+        signatures[item.historyId] = item.signature;
+      });
+      resolve(signatures);
+    };
+    
+    request.onerror = () => {
+      console.error('Error getting all signatures:', request.error);
+      reject(request.error);
+    };
+  });
+}
+
+// Delete signature from IndexedDB
+function deleteSignatureFromIndexedDB(historyId) {
+  return new Promise((resolve, reject) => {
+    if (!_db) {
+      reject(new Error('Database not initialized'));
+      return;
+    }
+    
+    const transaction = _db.transaction([SIGNATURE_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(SIGNATURE_STORE);
+    const request = objectStore.delete(historyId);
+    
+    request.onsuccess = () => {
+      console.log('Signature deleted from IndexedDB:', historyId);
+      resolve(true);
+    };
+    
+    request.onerror = () => {
+      console.error('Error deleting signature:', request.error);
+      reject(request.error);
+    };
+  });
+}
+
+// App State and Variables
+const STORAGE_KEY = 'simery_inventory_v2';
+const el = id => document.getElementById(id);
+const uid = () => 'id-' + Math.random().toString(36).slice(2,9);
+const escapeHtml = s => (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const fmtDate = s => new Date(s).toLocaleString('id-ID');
+
+let state = { items: [], history: [] };
+let _selectedItems = [];
+let _currentHistoryFilter = 'all';
+let _currentHistoryCategoryFilter = '';
+let _currentManageFilter = 'all';
+let _scanner = null;
+let _currentEditItem = null;
+let _currentAddStockItem = null;
+let _signatureCanvas = null;
+let _signatureCtx = null;
+let _isDrawing = false;
+let _signatureData = null;
+
+function load(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      state = JSON.parse(raw);
+    } else {
+      state.items = [
+        { id: 'itm-1', name: 'Pulpen', category: 'Alat Tulis Kantor', stock: 25, barcode: '123456789' },
+        { id: 'itm-2', name: 'Kertas A4', category: 'Alat Tulis Kantor', stock: 15, barcode: '987654321' }
+      ];
+      save();
+    }
+  } catch(e){
+    console.error('load error', e);
+    state = { items: [], history: [] };
+  }
+}
+
+function save(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){ console.error('save error', e); }
+}
+
+function renderCounts(){
+  el('totalN').textContent = state.items.length;
+  el('stockN').textContent = state.items.reduce((a,b)=>a+(+b.stock||0),0);
+  el('lowN').textContent = state.items.filter(i => (+i.stock) <= 5).length;
+}
+
+function renderItems(query=''){
+  const container = el('items');
+  container.innerHTML = '';
+  const q = (query||'').toString().trim().toLowerCase();
+
+  const filtered = state.items.filter(item => {
+    if(!q) return true;
+    return (item.name||'').toLowerCase().includes(q) ||
+           (item.category||'').toLowerCase().includes(q) ||
+           (item.barcode||'').toLowerCase().includes(q);
+  });
+
+  if(filtered.length === 0){
+    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada barang.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const badgeClass = item.stock > 0 ? 'available' : 'empty';
+    const badgeText = item.stock > 0 ? 'Tersedia' : 'Kosong';
+
+    card.innerHTML = `
+      <div class="top">
+        <h3>${escapeHtml(item.name)}</h3>
+        <div class="badge ${badgeClass}">${badgeText}</div>
+      </div>
+      <div class="meta">${escapeHtml(item.category || '-')} | Stok: ${item.stock}${item.barcode ? '<br/>🏷️ ' + escapeHtml(item.barcode) : ''}</div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+
+    const outBtn = document.createElement('button');
+    outBtn.className = 'btn orange';
+    outBtn.textContent = 'Keluarkan';
+    outBtn.onclick = () => {
+      switchTab('stockOut');
+      setTimeout(() => {
+        const searchInput = el('stockOutSearch');
+        if(searchInput) {
+          searchInput.value = item.name;
+          searchInput.dataset.selectedId = item.id;
+        }
+        const qty = el('stockOutQty');
+        if(qty) qty.focus();
+      }, 80);
+    };
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn green';
+    editBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+      </svg>
+      Tambah Stok
+    `;
+    editBtn.onclick = ()=> addStock(item.id);
+
+    actions.appendChild(outBtn);
+    actions.appendChild(editBtn);
+    card.appendChild(actions);
+    container.appendChild(card);
+  });
+}
+function renderManageList(query = '', filter = 'all'){
+  const container = el('manageList');
+  container.innerHTML = '';
+  if(state.items.length === 0){ 
+    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Belum ada barang.</div>'; 
+    return; 
+  }
+
+  const q = (query||'').toString().trim().toLowerCase();
+  
+  let filtered = state.items.filter(item => {
+    const matchesSearch = !q || 
+      (item.name||'').toLowerCase().includes(q) ||
+      (item.category||'').toLowerCase().includes(q) ||
+      (item.barcode||'').toLowerCase().includes(q);
+    
+    let matchesFilter = true;
+    if (filter === 'available') {
+      matchesFilter = item.stock > 0;
+    } else if (filter === 'empty') {
+      matchesFilter = item.stock <= 0;
+    }
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  if(filtered.length === 0){
+    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada barang yang sesuai.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="top">
+        <h3>${escapeHtml(item.name)}</h3>
+        <div class="badge ${item.stock>0 ? 'available' : 'empty'}">${item.stock}</div>
+      </div>
+      <div class="meta">Kategori: ${escapeHtml(item.category || '-')} ${item.barcode ? '<br/>🏷️ ' + escapeHtml(item.barcode) : ''}</div>
+    `;
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+
+    const edit = document.createElement('button');
+    edit.className = 'btn ghost';
+    edit.textContent = 'Edit';
+    edit.onclick = () => editItem(item.id);
+
+    const del = document.createElement('button');
+    del.className = 'btn';
+    del.textContent = 'Hapus';
+    del.onclick = () => {
+      if(confirm(`Hapus ${item.name}?`)){
+        state.items = state.items.filter(x => x.id !== item.id);
+        save(); renderAll();
+        showNotification('error', 'Barang dihapus', `${item.name} telah dihapus dari inventory`);
+      }
+    };
+
+    actions.appendChild(edit);
+    actions.appendChild(del);
+    card.appendChild(actions);
+    container.appendChild(card);
+  });
+}
+
+function renderSelects() {
+  const categoryFilter = el('historyCategoryFilter');
+  if (categoryFilter) {
+    const categories = [...new Set(state.items.map(item => item.category).filter(c => c))];
+    categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
+    categories.forEach(cat => {
+      const o = document.createElement('option');
+      o.value = cat;
+      o.textContent = cat;
+      categoryFilter.appendChild(o);
+    });
+  }
+}
+
+function renderHistory(){
+  const c = el('historyList');
+  c.innerHTML = '';
+  if(!state.history || state.history.length === 0){ 
+    c.innerHTML = '<div style="padding:12px;color:var(--muted)">Belum ada riwayat.</div>'; 
+    return; 
+  }
+  
+  let filtered = state.history.slice().reverse();
+  
+  if (_currentHistoryFilter !== 'all') {
+    filtered = filtered.filter(h => h.type === _currentHistoryFilter);
+  }
+  
+  if (_currentHistoryCategoryFilter) {
+    filtered = filtered.filter(h => {
+      const item = state.items.find(x => x.id === h.itemId);
+      return item && item.category === _currentHistoryCategoryFilter;
+    });
+  }
+  
+  if (filtered.length === 0) {
+    c.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada riwayat yang sesuai dengan filter.</div>';
+    return;
+  }
+  
+  filtered.forEach(h => {
+    const item = state.items.find(x => x.id === h.itemId);
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    let metaInfo = `${h.qty} — ${fmtDate(h.date)}`;
+    if (item && item.category) {
+      metaInfo += `<br/>📦 Kategori: ${escapeHtml(item.category)}`;
+    }
+    if (h.recipient) {
+      metaInfo += `<br/>👤 Penerima: ${escapeHtml(h.recipient)}`;
+    }
+    if (h.note && h.note.trim()) {
+      metaInfo += `<br/>📝 ${escapeHtml(h.note)}`;
+    }
+    if (h.type === 'out' && h.signatureId) {
+      metaInfo += `<br/>✍️ Tanda tangan tersimpan`;
+    }
+    
+    card.innerHTML = `
+      <div class="top">
+        <h3>${escapeHtml(item?.name || '[deleted]')}</h3>
+        <div class="badge ${h.type === 'in' ? 'available' : 'empty'}">${h.type === 'in' ? 'Masuk' : 'Keluar'}</div>
+      </div>
+      <div class="meta">${metaInfo}</div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+function renderAll(){
+  renderCounts();
+  renderItems(el('q')?.value || '');
+  renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
+  renderSelects();
+  renderHistory();
+}
+
+function switchTab(tabName){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const active = document.querySelector(`[data-tab="${tabName}"]`);
+  if(active) active.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  const view = el(tabName);
+  if(view) view.classList.remove('hidden');
+  
+  if (tabName === 'stockOut') {
+    _selectedItems = [];
+    renderSelectedItems();
+    clearSignature();
+  }
+  
+  renderAll();
+}
+
+function addItemToStockOutList() {
+  const inputEl = el('stockOutSearch');
+  const qtyEl = el('stockOutQty');
+  
+  const selectedItemId = inputEl.dataset.selectedId;
+  const qty = parseInt(qtyEl.value) || 0;
+  
+  if (!selectedItemId) {
+    alert('Pilih barang dari daftar terlebih dahulu');
+    return;
+  }
+  
+  const item = state.items.find(x => x.id === selectedItemId);
+  
+  if (!item) {
+    alert('Barang tidak ditemukan');
+    return;
+  }
+
+  if (qty <= 0) {
+    alert('Jumlah harus lebih dari 0');
+    return;
+  }
+
+  if (qty > item.stock) {
+    alert(`Stok tidak cukup. Stok tersedia: ${item.stock}`);
+    return;
+  }
+
+  const existingIndex = _selectedItems.findIndex(x => x.itemId === item.id);
+  if (existingIndex >= 0) {
+    const totalQty = _selectedItems[existingIndex].qty + qty;
+    if (totalQty > item.stock) {
+      alert(`Total jumlah melebihi stok. Stok tersedia: ${item.stock}`);
+      return;
+    }
+    _selectedItems[existingIndex].qty = totalQty;
+    showNotification('info', 'Jumlah diperbarui', `${item.name}: ${totalQty} unit`);
+  } else {
+    _selectedItems.push({
+      itemId: item.id,
+      itemName: item.name,
+      category: item.category || '-',
+      qty: qty,
+      maxStock: item.stock
+    });
+    showNotification('success', 'Barang ditambahkan', `${item.name}: ${qty} unit`);
+  }
+
+  inputEl.value = '';
+  inputEl.dataset.selectedId = '';
+  qtyEl.value = '';
+  hideSuggestions();
+  
+  renderSelectedItems();
+}
+
+function removeItemFromStockOutList(itemId) {
+  const item = _selectedItems.find(x => x.itemId === itemId);
+  _selectedItems = _selectedItems.filter(x => x.itemId !== itemId);
+  renderSelectedItems();
+  if (item) {
+    showNotification('warning', 'Barang dihapus dari daftar', item.itemName);
+  }
+}
+
+function renderSelectedItems() {
+  const container = el('selectedItemsContainer');
+  const listSection = el('selectedItemsList');
+  const countEl = el('totalItemsCount');
+  
+  if (_selectedItems.length === 0) {
+    listSection.style.display = 'none';
+    return;
+  }
+  
+  listSection.style.display = 'block';
+  countEl.textContent = `${_selectedItems.length} item`;
+  container.innerHTML = '';
+  
+  _selectedItems.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'selected-item-card';
+    card.innerHTML = `
+      <div class="selected-item-info">
+        <div class="selected-item-name">${escapeHtml(item.itemName)}</div>
+        <div class="selected-item-meta">Kategori: ${escapeHtml(item.category)} | Jumlah: ${item.qty} | Stok tersedia: ${item.maxStock}</div>
+      </div>
+      <div class="selected-item-actions">
+        <button class="btn-remove" onclick="removeItemFromStockOutList('${item.itemId}')">Hapus</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function addStock(itemId){
+  const item = state.items.find(x=>x.id===itemId);
+  if(!item) return alert('Barang tidak ditemukan');
+  
+  _currentAddStockItem = item;
+  
+  el('addStockName').value = item.name || '';
+  el('addStockCategory').value = item.category || '';
+  el('addStockCurrent').value = item.stock || 0;
+  
+  el('addStockQuantity').value = '';
+  el('addStockNotes').value = '';
+  
+  el('addStockModal').style.display = 'flex';
+  
+  setTimeout(() => el('addStockQuantity').focus(), 100);
+}
+
+function closeAddStockModal() {
+  el('addStockModal').style.display = 'none';
+  _currentAddStockItem = null;
+}
+
+function saveAddStock() {
+  if (!_currentAddStockItem) return;
+  
+  const addQuantity = parseInt(el('addStockQuantity').value) || 0;
+  const notes = (el('addStockNotes').value || '').trim();
+  
+  if (addQuantity <= 0) {
+    alert('Jumlah stok yang ditambah harus lebih dari 0');
+    return;
+  }
+  
+  const itemName = _currentAddStockItem.name;
+  const oldStock = _currentAddStockItem.stock;
+  const newStock = oldStock + addQuantity;
+  
+  _currentAddStockItem.stock += addQuantity;
+  
+  state.history = state.history || [];
+  state.history.push({ 
+    id: uid(), 
+    itemId: _currentAddStockItem.id, 
+    type: 'in', 
+    qty: addQuantity, 
+    date: new Date().toISOString(), 
+    recipient: 'System',
+    note: notes || 'Penambahan stok'
+  });
+  
+  save();
+  renderAll();
+  closeAddStockModal();
+  
+  showSuccessNotification(
+    `Stok berhasil ditambahkan!`,
+    `${itemName}: ${oldStock} → ${newStock} (+${addQuantity})`
+  );
+}
+
+function editItem(itemId){
+  const item = state.items.find(x=>x.id===itemId);
+  if(!item) return alert('Barang tidak ditemukan');
+  
+  _currentEditItem = item;
+  
+  el('editName').value = item.name || '';
+  el('editCategory').value = item.category || '';
+  el('editStock').value = item.stock || 0;
+  el('editBarcode').value = item.barcode || '';
+  
+  el('editModal').style.display = 'flex';
+  
+  setTimeout(() => el('editName').focus(), 100);
+}
+
+function closeEditModal() {
+  el('editModal').style.display = 'none';
+  _currentEditItem = null;
+}
+
+function saveEditItem() {
+  if (!_currentEditItem) return;
+  
+  const newName = el('editName').value.trim();
+  const newCategory = el('editCategory').value.trim();
+  const newStock = parseInt(el('editStock').value) || 0;
+  const newBarcode = el('editBarcode').value.trim();
+  
+  if (!newName) {
+    alert('Nama barang tidak boleh kosong');
+    return;
+  }
+  
+  _currentEditItem.name = newName;
+  _currentEditItem.category = newCategory;
+  _currentEditItem.stock = newStock;
+  _currentEditItem.barcode = newBarcode;
+  
+  save();
+  renderAll();
+  closeEditModal();
+  showNotification('success', 'Barang berhasil diperbarui', `${newName} telah diperbarui`);
+}
+
+function showToast(text){
+  showNotification('info', text);
+}
+
+function showSuccessNotification(title, message){
+  showNotification('success', title, message);
+}
+
+function showNotification(type = 'info', title, message = null) {
+  try {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
+    
+    let iconSvg = '';
+    switch(type) {
+      case 'success':
+        iconSvg = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z"/>';
+        break;
+      case 'error':
+        iconSvg = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>';
+        break;
+      case 'warning':
+        iconSvg = '<path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>';
+        break;
+      case 'info':
+      default:
+        iconSvg = '<path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>';
+        break;
+    }
+    
+    notification.innerHTML = `
+      <div class="notification-content">
+        <div class="notification-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            ${iconSvg}
+          </svg>
+        </div>
+        <div class="notification-text">
+          <div class="notification-title">${escapeHtml(title)}</div>
+          ${message ? `<div class="notification-message">${escapeHtml(message)}</div>` : ''}
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    const duration = message ? 4500 : 3000;
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => notification.remove(), 300);
+    }, duration);
+    
+  } catch(e) { 
+    console.log(`${type.toUpperCase()}: ${title}${message ? ' - ' + message : ''}`); 
+  }
+}
+
+function initForms(){
+  const addForm = el('addForm');
+  addForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const item = {
+      id: uid(),
+      name: (el('name').value || '').trim() || 'Untitled',
+      category: (el('category').value || '').trim() || '',
+      stock: parseInt(el('stock').value) || 0,
+      barcode: (el('barcode').value || '').trim()
+    };
+    state.items.push(item);
+    save(); renderAll();
+    addForm.reset();
+    showNotification('success', 'Barang berhasil ditambahkan!', `${item.name} dengan stok ${item.stock} telah ditambahkan`);
+  });
+
+  const stockOutForm = el('stockOutForm');
+  stockOutForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    
+    if (_selectedItems.length === 0) {
+      alert('Tambahkan minimal 1 barang ke daftar');
+      return;
+    }
+    
+    const recipient = (el('stockOutRecipient').value || '').trim();
+    const notes = (el('stockOutNotes').value || '').trim();
+    
+    if(!recipient){ 
+      return alert('Nama penerima harus diisi'); 
+    }
+    
+    // Validasi tanda tangan
+    if (!isSignatureValid()) {
+      alert('Tanda tangan penerima harus diisi!');
+      return;
+    }
+    
+    // Dapatkan signature data
+    const signatureImage = _signatureCanvas.toDataURL('image/png');
+    
+    for (let selectedItem of _selectedItems) {
+      const item = state.items.find(x => x.id === selectedItem.itemId);
+      if (!item) {
+        alert(`Barang ${selectedItem.itemName} tidak ditemukan`);
+        return;
+      }
+      if (selectedItem.qty > item.stock) {
+        alert(`Stok ${item.name} tidak cukup. Stok tersedia: ${item.stock}`);
+        return;
+      }
+    }
+    
+    const processedItems = [];
+    
+    for (let selectedItem of _selectedItems) {
+      const item = state.items.find(x => x.id === selectedItem.itemId);
+      if (item) {
+        item.stock -= selectedItem.qty;
+        
+        const historyId = uid();
+        
+        state.history = state.history || [];
+        state.history.push({ 
+          id: historyId, 
+          itemId: item.id, 
+          type: 'out', 
+          qty: selectedItem.qty, 
+          date: new Date().toISOString(), 
+          recipient: recipient,
+          note: notes,
+          signatureId: historyId
+        });
+        
+        // Simpan signature ke IndexedDB
+        try {
+          await saveSignatureToIndexedDB(historyId, signatureImage);
+        } catch(error) {
+          console.error('Error saving signature:', error);
+        }
+        
+        processedItems.push(`${item.name} (${selectedItem.qty} unit)`);
+      }
+    }
+    
+    save(); 
+    renderAll();
+    stockOutForm.reset();
+    _selectedItems = [];
+    renderSelectedItems();
+    clearSignature();
+    
+    showNotification('warning', 'Stok berhasil dikeluarkan', 
+      `${processedItems.length} jenis barang untuk ${recipient}`);
+  });
+
+  const addStockForm = el('addStockForm');
+  addStockForm.addEventListener('submit', e => {
+    e.preventDefault();
+    saveAddStock();
+  });
+}
+
+function initTabs(){
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+}
+
+function initSearch(){
+  const q = el('q');
+  let isScrolling = false;
+  
+  q.addEventListener('input', e => {
+    if (!isScrolling) {
+      renderItems(e.target.value);
+    }
+  });
+  
+  q.addEventListener('focus', () => {
+    isScrolling = true;
+    setTimeout(() => {
+      q.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        isScrolling = false;
+      }, 500);
+    }, 300);
+  });
+  
+  el('clearSearch').addEventListener('click', () => { q.value = ''; renderItems(); });
+  
+  const manageSearch = el('manageSearch');
+  let isManageScrolling = false;
+  
+  if (manageSearch) {
+    manageSearch.addEventListener('input', e => {
+      if (!isManageScrolling) {
+        renderManageList(e.target.value, _currentManageFilter);
+      }
+    });
+    
+    manageSearch.addEventListener('focus', () => {
+      isManageScrolling = true;
+      setTimeout(() => {
+        manageSearch.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+          isManageScrolling = false;
+        }, 500);
+      }, 300);
+    });
+  }
+  
+  const clearManageSearch = el('clearManageSearch');
+  if (clearManageSearch) {
+    clearManageSearch.addEventListener('click', () => {
+      manageSearch.value = '';
+      renderManageList('', _currentManageFilter);
+    });
+  }
+  
+  document.querySelectorAll('[data-manage-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-manage-filter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      _currentManageFilter = btn.dataset.manageFilter;
+      renderManageList(manageSearch?.value || '', _currentManageFilter);
+    });
+  });
+  
+  document.querySelectorAll('[data-history-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-history-filter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      _currentHistoryFilter = btn.dataset.historyFilter;
+      renderHistory();
+    });
+  });
+  
+  const historyCategoryFilter = el('historyCategoryFilter');
+  if (historyCategoryFilter) {
+    historyCategoryFilter.addEventListener('change', (e) => {
+      _currentHistoryCategoryFilter = e.target.value;
+      renderHistory();
+    });
+  }
+  
+  initStockOutSearch();
+}
+function initStockOutSearch() {
+  const searchInput = el('stockOutSearch');
+  const suggestionsDiv = el('stockOutSuggestions');
+  
+  if (!searchInput || !suggestionsDiv) return;
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    
+    if (query.length === 0) {
+      hideSuggestions();
+      searchInput.dataset.selectedId = '';
+      return;
+    }
+    
+    const filtered = state.items.filter(item => 
+      item.name.toLowerCase().includes(query) ||
+      (item.category && item.category.toLowerCase().includes(query)) ||
+      (item.barcode && item.barcode.toLowerCase().includes(query))
+    );
+    
+    if (filtered.length === 0) {
+      suggestionsDiv.innerHTML = '<div class="suggestion-no-results">Tidak ada barang yang sesuai</div>';
+      suggestionsDiv.classList.add('show');
+    } else {
+      suggestionsDiv.innerHTML = '';
+      filtered.forEach(item => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'suggestion-item';
+        
+        const stockClass = item.stock <= 5 ? 'low' : 'available';
+        const stockIcon = item.stock <= 5 ? '⚠️' : '✓';
+        
+        suggestionItem.innerHTML = `
+          <div class="suggestion-item-name">${escapeHtml(item.name)}</div>
+          <div class="suggestion-item-meta">
+            <span>📦 ${escapeHtml(item.category || '-')}</span>
+            <span class="suggestion-item-stock ${stockClass}">${stockIcon} Stok: ${item.stock}</span>
+            ${item.barcode ? `<span>🏷️ ${escapeHtml(item.barcode)}</span>` : ''}
+          </div>
+        `;
+        
+        suggestionItem.addEventListener('click', () => {
+          searchInput.value = item.name;
+          searchInput.dataset.selectedId = item.id;
+          hideSuggestions();
+          
+          const qtyInput = el('stockOutQty');
+          if (qtyInput) {
+            qtyInput.focus();
+          }
+        });
+        
+        suggestionsDiv.appendChild(suggestionItem);
+      });
+      suggestionsDiv.classList.add('show');
+    }
+  });
+  
+  searchInput.addEventListener('blur', () => {
+    setTimeout(() => hideSuggestions(), 200);
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+      hideSuggestions();
+    }
+  });
+}
+
+function hideSuggestions() {
+  const suggestionsDiv = el('stockOutSuggestions');
+  if (suggestionsDiv) {
+    suggestionsDiv.classList.remove('show');
+  }
+}
+
+function initSignatureCanvas() {
+  _signatureCanvas = el('signatureCanvas');
+  if (!_signatureCanvas) return;
+  
+  _signatureCtx = _signatureCanvas.getContext('2d');
+  
+  // Fungsi untuk mengatur style context
+  const setContextStyle = () => {
+    _signatureCtx.strokeStyle = '#000';
+    _signatureCtx.lineWidth = 2;
+    _signatureCtx.lineCap = 'round';
+    _signatureCtx.lineJoin = 'round';
+  };
+  
+  setContextStyle();
+  
+  const startDrawing = (e) => {
+    _isDrawing = true;
+    
+    // Set ulang style setiap kali mulai menggambar
+    setContextStyle();
+    
+    const rect = _signatureCanvas.getBoundingClientRect();
+    const scaleX = _signatureCanvas.width / rect.width;
+    const scaleY = _signatureCanvas.height / rect.height;
+    
+    let x, y;
+    if (e.type.startsWith('touch')) {
+      e.preventDefault();
+      x = (e.touches[0].clientX - rect.left) * scaleX;
+      y = (e.touches[0].clientY - rect.top) * scaleY;
+    } else {
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
+    }
+    
+    _signatureCtx.beginPath();
+    _signatureCtx.moveTo(x, y);
+  };
+  
+  const draw = (e) => {
+    if (!_isDrawing) return;
+    
+    const rect = _signatureCanvas.getBoundingClientRect();
+    const scaleX = _signatureCanvas.width / rect.width;
+    const scaleY = _signatureCanvas.height / rect.height;
+    
+    let x, y;
+    if (e.type.startsWith('touch')) {
+      e.preventDefault();
+      x = (e.touches[0].clientX - rect.left) * scaleX;
+      y = (e.touches[0].clientY - rect.top) * scaleY;
+    } else {
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
+    }
+    
+    _signatureCtx.lineTo(x, y);
+    _signatureCtx.stroke();
+    _signatureCtx.beginPath();
+    _signatureCtx.moveTo(x, y);
+  };
+  
+  const stopDrawing = () => {
+    if (_isDrawing) {
+      _isDrawing = false;
+    }
+  };
+  
+  _signatureCanvas.addEventListener('mousedown', startDrawing);
+  _signatureCanvas.addEventListener('mousemove', draw);
+  _signatureCanvas.addEventListener('mouseup', stopDrawing);
+  _signatureCanvas.addEventListener('mouseout', stopDrawing);
+  
+  _signatureCanvas.addEventListener('touchstart', startDrawing);
+  _signatureCanvas.addEventListener('touchmove', draw);
+  _signatureCanvas.addEventListener('touchend', stopDrawing);
+  
+  const clearBtn = el('clearSignature');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearSignature);
+  }
+}
+
+function clearSignature() {
+  if (_signatureCtx && _signatureCanvas) {
+    _signatureCtx.clearRect(0, 0, _signatureCanvas.width, _signatureCanvas.height);
+  }
+}
+
+function isSignatureValid() {
+  if (!_signatureCanvas || !_signatureCtx) return false;
+  
+  const pixelData = _signatureCtx.getImageData(0, 0, _signatureCanvas.width, _signatureCanvas.height);
+  const data = pixelData.data;
+  
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] !== 0) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+async function exportHistoryToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  let filtered = state.history.slice();
+  
+  if (_currentHistoryFilter !== 'all') {
+    filtered = filtered.filter(h => h.type === _currentHistoryFilter);
+  }
+  
+  if (_currentHistoryCategoryFilter) {
+    filtered = filtered.filter(h => {
+      const item = state.items.find(x => x.id === h.itemId);
+      return item && item.category === _currentHistoryCategoryFilter;
+    });
+  }
+  
+  if (filtered.length === 0) {
+    alert('Tidak ada data riwayat untuk di-export');
+    return;
+  }
+  
+  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Ambil semua signatures dari IndexedDB
+  let signatures = {};
+  try {
+    signatures = await getAllSignaturesFromIndexedDB();
+  } catch(error) {
+    console.error('Error fetching signatures:', error);
+  }
+  
+  // Group berdasarkan transaksi (recipient + waktu yang dekat + type + note yang sama)
+  const groupedByRecipient = {};
+  
+  filtered.forEach(h => {
+    const item = state.items.find(x => x.id === h.itemId);
+    const recipient = h.recipient || 'Tanpa Nama';
+    const note = h.note || '-';
+    const hDate = new Date(h.date);
+    
+    // Cari grup yang cocok (recipient sama, type sama, note sama, waktu dalam 5 detik)
+    let foundGroup = null;
+    for (const key in groupedByRecipient) {
+      const group = groupedByRecipient[key];
+      const groupDate = new Date(group.date);
+      const timeDiff = Math.abs(hDate - groupDate);
+      
+      // Jika recipient, type, note sama dan waktu dalam 5 detik, gabungkan
+      if (group.recipient === recipient && 
+          group.type === h.type && 
+          group.keterangan === note &&
+          timeDiff < 5000) { // 5 detik
+        foundGroup = key;
+        break;
+      }
+    }
+    
+    if (foundGroup) {
+      // Tambahkan ke grup yang ada
+      groupedByRecipient[foundGroup].items.push({
+        nama: item?.name || '[deleted]',
+        kategori: item?.category || 'Tanpa Kategori',
+        jumlah: h.qty,
+        date: hDate
+      });
+      
+      // Update signature jika belum ada
+      if (!groupedByRecipient[foundGroup].signature && h.signatureId && signatures[h.signatureId]) {
+        groupedByRecipient[foundGroup].signature = signatures[h.signatureId];
+      }
+    } else {
+      // Buat grup baru
+      const transactionKey = `${recipient}_${h.date}_${h.type}_${uid()}`;
+      groupedByRecipient[transactionKey] = {
+        recipient: recipient,
+        type: h.type,
+        date: h.date,
+        items: [{
+          nama: item?.name || '[deleted]',
+          kategori: item?.category || 'Tanpa Kategori',
+          jumlah: h.qty,
+          date: hDate
+        }],
+        signature: h.signatureId ? signatures[h.signatureId] : null,
+        keterangan: note
+      };
+    }
+  });
+  
+  doc.setFontSize(18);
+  doc.setFont(undefined, 'bold');
+  doc.text('LAPORAN RIWAYAT INVENTORY', 105, 15, { align: 'center' });
+  
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'normal');
+  doc.text('SiMERY - Aplikasi Manajemen Inventory', 105, 22, { align: 'center' });
+  
+  doc.setFontSize(9);
+  const exportDate = new Date().toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  doc.text(`Dicetak pada: ${exportDate} WIB`, 105, 28, { align: 'center' });
+  
+  let yPos = 35;
+  
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'italic');
+  let filterText = 'Filter: ';
+  if (_currentHistoryFilter === 'in') filterText += 'Stok Masuk';
+  else if (_currentHistoryFilter === 'out') filterText += 'Stok Keluar';
+  else filterText += 'Semua';
+  
+  if (_currentHistoryCategoryFilter) {
+    filterText += ` | Kategori: ${_currentHistoryCategoryFilter}`;
+  }
+  doc.text(filterText, 14, yPos);
+  yPos += 10;
+  
+  // Render setiap transaksi sebagai tabel terpisah
+  let transactionNumber = 1;
+  const sortedTransactions = Object.entries(groupedByRecipient).sort((a, b) => 
+    new Date(b[1].date) - new Date(a[1].date)
+  );
+  
+  sortedTransactions.forEach(([key, transaction]) => {
+    // Cek jika perlu halaman baru
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    // Header transaksi
+    const transactionDate = new Date(transaction.date);
+    const dateStr = transactionDate.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const timeStr = transactionDate.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    
+    const typeLabel = transaction.type === 'in' ? 'STOK MASUK' : 'STOK KELUAR';
+    const typeColor = transaction.type === 'in' ? [16, 185, 129] : [239, 68, 68];
+    
+    // Box header transaksi
+    doc.setFillColor(...typeColor);
+    doc.roundedRect(14, yPos, 182, 12, 2, 2, 'F');
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${typeLabel} - ${transaction.recipient}`, 16, yPos + 5);
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${dateStr} | ${timeStr} WIB`, 16, yPos + 10);
+    
+    doc.setTextColor(0, 0, 0);
+    yPos += 15;
+    
+    // Tabel items
+    const tableData = transaction.items.map((item, idx) => [
+      (idx + 1).toString(),
+      item.nama,
+      item.jumlah.toString(),
+      item.kategori,
+      dateStr,
+      `${timeStr} WIB`,
+      transaction.keterangan
+    ]);
+    
+    doc.autoTable({
+      startY: yPos,
+      head: [['No', 'Nama Barang', 'Jumlah', 'Jenis Barang', 'Tanggal', 'Waktu', 'Keterangan']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { 
+        fillColor: typeColor,
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      bodyStyles: { 
+        fontSize: 8,
+        valign: 'middle'
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 15, halign: 'center' },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 22, halign: 'center' },
+        5: { cellWidth: 25, halign: 'center' },
+        6: { cellWidth: 35 }
+      },
+      margin: { left: 14, right: 14 }
+    });
+    
+    yPos = doc.lastAutoTable.finalY + 5;
+    
+    // Tanda tangan - positioned di kanan bawah dengan layout yang rapi
+    if (transaction.signature) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      const signatureWidth = 50;
+      const signatureHeight = 20;
+      const signatureX = 196 - signatureWidth - 10; // 10mm dari margin kanan
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      const labelWidth = doc.getTextWidth('Tanda Tangan');
+      const labelX = signatureX + (signatureWidth - labelWidth) / 2; // Center label
+      doc.text('Tanda Tangan', labelX, yPos);
+      yPos += 4;
+      
+      try {
+        doc.addImage(transaction.signature, 'PNG', signatureX, yPos, signatureWidth, signatureHeight);
+        yPos += signatureHeight + 2;
+      } catch (e) {
+        console.error('Error adding signature to PDF:', e);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'italic');
+        doc.setTextColor(150, 150, 150);
+        const errorWidth = doc.getTextWidth('[Tanda tangan tidak dapat ditampilkan]');
+        const errorX = signatureX + (signatureWidth - errorWidth) / 2;
+        doc.text('[Tanda tangan tidak dapat ditampilkan]', errorX, yPos);
+        doc.setTextColor(0, 0, 0);
+        yPos += 5;
+      }
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      const nameText = `(${transaction.recipient})`;
+      const nameWidth = doc.getTextWidth(nameText);
+      const nameX = signatureX + (signatureWidth - nameWidth) / 2; // Center nama
+      doc.text(nameText, nameX, yPos);
+      yPos += 3;
+    } else {
+      const signatureWidth = 50;
+      const signatureX = 196 - signatureWidth - 10;
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'italic');
+      doc.setTextColor(150, 150, 150);
+      const noSignText = 'Tanda Tangan: -';
+      const noSignWidth = doc.getTextWidth(noSignText);
+      const noSignX = signatureX + (signatureWidth - noSignWidth) / 2;
+      doc.text(noSignText, noSignX, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += 3;
+    }
+    
+    // Garis pemisah
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(14, yPos + 3, 196, yPos + 3);
+    yPos += 10;
+    
+    transactionNumber++;
+  });
+  
+  if (yPos > 240) {
+    doc.addPage();
+    yPos = 20;
+  }
+  
+  // Garis pemisah sebelum ringkasan
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(1);
+  doc.line(14, yPos, 196, yPos);
+  yPos += 8;
+  
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text('RINGKASAN', 14, yPos);
+  yPos += 8;
+  
+  const totalTransactions = sortedTransactions.length;
+  const totalIn = sortedTransactions.filter(([k, t]) => t.type === 'in').length;
+  const totalOut = sortedTransactions.filter(([k, t]) => t.type === 'out').length;
+  
+  const totalItemsIn = sortedTransactions
+    .filter(([k, t]) => t.type === 'in')
+    .reduce((sum, [k, t]) => sum + t.items.reduce((s, i) => s + i.jumlah, 0), 0);
+  
+  const totalItemsOut = sortedTransactions
+    .filter(([k, t]) => t.type === 'out')
+    .reduce((sum, [k, t]) => sum + t.items.reduce((s, i) => s + i.jumlah, 0), 0);
+  
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9);
+  doc.text(`Total Transaksi: ${totalTransactions} transaksi`, 14, yPos);
+  yPos += 5;
+  doc.text(`  - Transaksi Stok Masuk: ${totalIn} transaksi (${totalItemsIn} unit)`, 14, yPos);
+  yPos += 5;
+  doc.text(`  - Transaksi Stok Keluar: ${totalOut} transaksi (${totalItemsOut} unit)`, 14, yPos);
+  yPos += 8;
+  
+  // Unique recipients
+  const uniqueRecipients = new Set(sortedTransactions.map(([k, t]) => t.recipient));
+  doc.text(`Total Penerima/Pengirim Berbeda: ${uniqueRecipients.size}`, 14, yPos);
+  
+  const fileName = `Riwayat_Inventory_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+  
+  showNotification('success', 'PDF berhasil di-export!', `File: ${fileName}`);
+}
+
+function exportPerItemPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  if (state.items.length === 0) {
+    alert('Tidak ada data barang untuk di-export');
+    return;
+  }
+
+  const sanitize = (v) => (v === null || v === undefined || v === '' ? '-' : String(v).replace(/&/g, 'dan'));
+
+  const itemStats = state.items.map(item => {
+    const itemHistory = (state.history || []).filter(h => h.itemId === item.id);
+    const stockIn = itemHistory.filter(h => h.type === 'in').reduce((sum, h) => sum + h.qty, 0);
+    const stockOut = itemHistory.filter(h => h.type === 'out').reduce((sum, h) => sum + h.qty, 0);
+    return {
+      nama: sanitize(item.name),
+      kategori: sanitize(item.category || 'Tanpa Kategori'),
+      barcode: sanitize(item.barcode || '-'),
+      masuk: stockIn,
+      keluar: stockOut,
+      sisa: item.stock || 0,
+      transaksi: itemHistory.length
+    };
+  });
+
+  const grouped = {};
+  itemStats.forEach(it => {
+    if (!grouped[it.kategori]) grouped[it.kategori] = [];
+    grouped[it.kategori].push(it);
+  });
+
+  doc.setFontSize(18);
+  doc.setFont(undefined, 'bold');
+  doc.text('LAPORAN STOK PER BARANG', 105, 15, { align: 'center' });
+
+  doc.setFontSize(11);
+  doc.text('SiMERY - Aplikasi Manajemen Inventory', 105, 22, { align: 'center' });
+
+  doc.setFontSize(9);
+  const exportDate = new Date().toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  doc.text(`Dicetak pada: ${exportDate} WIB`, 105, 28, { align: 'center' });
+
+  let yPos = 38;
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  doc.text('Ringkasan', 14, yPos);
+  yPos += 6;
+
+  const totalMasuk = itemStats.reduce((s, i) => s + i.masuk, 0);
+  const totalKeluar = itemStats.reduce((s, i) => s + i.keluar, 0);
+  const totalSisa = itemStats.reduce((s, i) => s + i.sisa, 0);
+
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9);
+  doc.text(`Total Barang: ${itemStats.length}`, 14, yPos); yPos += 5;
+  doc.text(`Total Masuk: ${totalMasuk}`, 14, yPos); yPos += 5;
+  doc.text(`Total Keluar: ${totalKeluar}`, 14, yPos); yPos += 5;
+  doc.text(`Total Stok Sekarang: ${totalSisa}`, 14, yPos); yPos += 10;
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text('DETAIL PER KATEGORI', 14, yPos);
+  yPos += 8;
+
+  Object.keys(grouped).forEach((kategori, idx) => {
+    if (yPos > 250) { doc.addPage(); yPos = 20; }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(47, 155, 74);
+    doc.text(`${idx + 1}. ${kategori}`, 14, yPos);
+    doc.setTextColor(0, 0, 0);
+    yPos += 4;
+
+    const body = grouped[kategori].map(it => [
+      it.nama,
+      it.barcode,
+      it.masuk.toString(),
+      it.keluar.toString(),
+      it.sisa.toString(),
+      it.transaksi.toString()
+    ]);
+
+    doc.autoTable({
+      startY: yPos,
+      head: [['Nama Barang', 'Barcode', 'Masuk', 'Keluar', 'Sisa', 'Transaksi']],
+      body,
+      theme: 'grid',
+      headStyles: { fillColor: [47, 155, 74], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 8 },
+      margin: { left: 14, right: 14 },
+      columnStyles: {
+        0: { cellWidth: 55 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 20, halign: 'center' },
+        3: { cellWidth: 20, halign: 'center' },
+        4: { cellWidth: 20, halign: 'center' },
+        5: { cellWidth: 22, halign: 'center' }
+      },
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          const stockVal = parseInt(data.cell.text[0]);
+          if (stockVal <= 5) {
+            doc.setFillColor(239, 68, 68, 0.1);
+            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+            doc.setTextColor(239, 68, 68);
+            doc.setFont(undefined, 'bold');
+            doc.text(data.cell.text[0], data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2, {
+              align: 'center', baseline: 'middle'
+            });
+            doc.setTextColor(0, 0, 0);
+          }
+        }
+      }
+    });
+
+    yPos = doc.lastAutoTable.finalY + 8;
+  });
+
+  const fileName = `Laporan_Stok_Per_Barang_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+  showNotification('success', 'PDF berhasil di-export!', `File: ${fileName}`);
+}
+
+function openScanner(onScan){
+  el('scannerModal').style.display = 'flex';
+  
+  if(_scanner){
+    try{ _scanner.stop().then(()=> _scanner.clear()); } catch(e){ console.warn('Scanner cleanup error:', e); }
+    _scanner = null;
+  }
+  
+  const reader = el('reader');
+  reader.innerHTML = '';
+  
+  const html5QrCode = new Html5Qrcode("reader");
+  _scanner = html5QrCode;
+  
+  const config = {
+    fps: 10,
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      const minDimension = Math.min(viewfinderWidth, viewfinderHeight);
+      const qrboxSize = Math.floor(minDimension * 0.7);
+      return {
+        width: qrboxSize,
+        height: qrboxSize
+      };
+    },
+    aspectRatio: 1.0
+  };
+  
+  html5QrCode.start(
+    { facingMode: "environment" },
+    config,
+    (decodedText) => {
+      try {
+        if(typeof onScan === 'function') {
+          onScan(decodedText);
+        } else {
+          el('q').value = decodedText;
+          renderItems(decodedText);
+        }
+        showNotification('success', 'Barcode berhasil discan!');
+      } catch(e){ 
+        console.error('onScan error', e);
+        showNotification('error', 'Error memproses barcode');
+      }
+      closeScanner();
+    },
+    (error) => {
+    }
+  ).catch(err => {
+    console.error('Scanner start error:', err);
+    showNotification('error', 'Gagal mengakses kamera', err.toString());
+    closeScanner();
+  });
+}
+
+function closeScanner(){
+  if(_scanner){
+    _scanner.stop().then(()=> {
+      try{ _scanner.clear(); } catch(e){ console.warn('Scanner clear error:', e); }
+      _scanner = null;
+      el('scannerModal').style.display = 'none';
+    }).catch((err)=> {
+      console.warn('Scanner stop error:', err);
+      _scanner = null;
+      el('scannerModal').style.display = 'none';
+    });
+  } else {
+    el('scannerModal').style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize IndexedDB first
+  try {
+    await initIndexedDB();
+    console.log('IndexedDB ready');
+  } catch(error) {
+    console.error('Failed to initialize IndexedDB:', error);
+    alert('Peringatan: Penyimpanan tanda tangan mungkin tidak berfungsi dengan baik.');
+  }
+  
+  load();
+  initTabs();
+  initForms();
+  initSearch();
+  initSignatureCanvas();
+  renderAll();
+
+  el('scanBarcodeBtn').addEventListener('click', () => {
+    openScanner(code => { 
+      el('barcode').value = code; 
+      showNotification('success', 'Barcode berhasil diisi'); 
+    });
+  });
+  
+  el('scanStockOutBtn').addEventListener('click', () => {
+    openScanner(code => {
+      const item = state.items.find(x => x.barcode && x.barcode.toLowerCase() === code.toLowerCase());
+      if (item) {
+        const searchInput = el('stockOutSearch');
+        searchInput.value = item.name;
+        searchInput.dataset.selectedId = item.id;
+        showNotification('success', 'Barcode terdeteksi!', `${item.name} dipilih`);
+        
+        const qtyInput = el('stockOutQty');
+        if (qtyInput) {
+          qtyInput.focus();
+        }
+      } else {
+        showNotification('warning', 'Barcode tidak ditemukan', 'Barang dengan barcode ini tidak ada di inventory');
+      }
+    });
+  });
+  
+  el('editScanBarcodeBtn').addEventListener('click', () => {
+    openScanner(code => { 
+      el('editBarcode').value = code; 
+      showNotification('success', 'Barcode berhasil diisi'); 
+    });
+  });
+  
+  el('closeScanner').addEventListener('click', closeScanner);
+
+  el('scannerModal').addEventListener('click', (e) => {
+    if (e.target === el('scannerModal')) {
+      closeScanner();
+    }
+  });
+
+  const editForm = el('editForm');
+  if (editForm) {
+    editForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveEditItem();
+    });
+  }
+  
+  el('cancelEdit').addEventListener('click', closeEditModal);
+  
+  el('cancelAddStock').addEventListener('click', closeAddStockModal);
+  
+  el('addStockModal').addEventListener('click', (e) => {
+    if (e.target === el('addStockModal')) {
+      closeAddStockModal();
+    }
+  });
+  
+  el('editModal').addEventListener('click', (e) => {
+    if (e.target === el('editModal')) {
+      closeEditModal();
+    }
+  });
+  
+  el('addItemToList').addEventListener('click', addItemToStockOutList);
+  
+  el('exportPdfBtn').addEventListener('click', exportHistoryToPDF);
+  
+  el('exportPerItemBtn').addEventListener('click', exportPerItemPDF);
+
+  renderAll();
+});
+</script>
+</body>
+</html>
