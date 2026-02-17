@@ -38,7 +38,7 @@ html,body{height:100%}
 body{
   font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;
   background:var(--bg); color:var(--text);
-  font-size:15px; line-height:1.65;
+  font-size:14px; line-height:1.55;
   -webkit-font-smoothing:antialiased;
 }
 
@@ -59,8 +59,6 @@ body{
   display:flex; align-items:center; gap:12px;
   position:sticky; top:0; z-index:100;
   box-shadow:0 2px 12px rgba(3,105,161,0.22);
-  /* Kunci tinggi header agar tidak warp saat syncStatus berubah */
-  min-height:62px;
 }
 .brand{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
 .logo{
@@ -71,39 +69,22 @@ body{
   backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,0.3);
 }
-.title{font-weight:800;font-size:16px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
-.subtitle{font-size:12px;color:rgba(255,255,255,0.65);margin-top:1px}
-/* header-auth: lebar tetap, tidak reflow ke atas/bawah */
-.header-auth{
-  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
-  flex-shrink:0;
-}
-/* syncStatus: tinggi tetap, tidak geser layout saat teks muncul/hilang */
-#syncStatus{
-  font-size:11px;color:rgba(255,255,255,0.65);
-  text-align:right;
-  height:14px;          /* tetap, bukan min-height */
-  line-height:14px;
-  white-space:nowrap;
-  overflow:hidden;
-  display:block;
-}
+.title{font-weight:800;font-size:15px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
+.subtitle{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+.header-auth{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+#syncStatus{font-size:11px;color:rgba(255,255,255,0.65);text-align:right;min-height:14px;white-space:nowrap}
 /* Google Sign-In widget — no transform tricks, just clip cleanly */
 .g_id_signin{display:flex;align-items:center;justify-content:flex-end}
 .g_id_signin > div > div{box-shadow:none!important}
 #connectDriveBtn,#logoutBtn{
   font-family:inherit;cursor:pointer;border-radius:8px;
-  font-size:12px;font-weight:600;
-  /* Tinggi tombol dikunci agar tidak geser header */
-  height:32px;padding:0 12px;
+  font-size:12px;font-weight:600;padding:6px 12px;
   border:1px solid rgba(255,255,255,0.3);
-  transition:background 0.2s,transform 0.1s;
-  white-space:nowrap;line-height:1;
-  display:none;align-items:center;justify-content:center;
+  transition:background 0.2s,transform 0.1s; white-space:nowrap;
 }
-#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff}
+#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff;display:none}
 #connectDriveBtn:hover{background:rgba(255,255,255,0.3);transform:translateY(-1px)}
-#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92)}
+#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92);display:none}
 #logoutBtn:hover{background:rgba(255,255,255,0.22);transform:translateY(-1px)}
 
 /* ── Main ── */
@@ -116,11 +97,10 @@ body{
   box-shadow:var(--shadow-sm);
 }
 .tab{
-  flex:1;padding:10px 6px;border-radius:var(--radius);border:none;
-  background:transparent;font-family:inherit;font-size:13px;font-weight:600;
+  flex:1;padding:9px 6px;border-radius:var(--radius);border:none;
+  background:transparent;font-family:inherit;font-size:12px;font-weight:600;
   color:var(--text-2);cursor:pointer;text-align:center;
   transition:background 0.2s,color 0.2s,box-shadow 0.2s;white-space:nowrap;
-  min-height:44px;
 }
 .tab.active{
   background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
@@ -144,15 +124,15 @@ body{
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
 }
 .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat .n{font-size:1.75rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:6px;letter-spacing:-0.03em}
-.stat .label{font-size:12px;color:var(--text-2);font-weight:600;line-height:1.4}
+.stat .n{font-size:1.6rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:5px;letter-spacing:-0.03em}
+.stat .label{font-size:11px;color:var(--text-3);font-weight:500}
 
 /* ── Search ── */
 .search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .search input{
-  flex:1 1 100%;min-width:0;padding:12px 16px;
+  flex:1 1 100%;min-width:0;padding:10px 14px;
   border-radius:var(--radius);border:1.5px solid var(--border);
-  background:var(--surface);font-family:inherit;font-size:16px;color:var(--text);
+  background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);
   transition:border-color 0.2s,box-shadow 0.2s;
   box-shadow:var(--shadow-sm);
 }
@@ -165,7 +145,7 @@ body{
 }
 
 /* ── Global inputs ── */
-input,select,button,textarea{font-family:inherit;font-size:15px;outline:none}
+input,select,button,textarea{font-family:inherit;font-size:14px;outline:none}
 input,select,textarea{transition:border-color 0.2s,box-shadow 0.2s}
 input:focus,select:focus,textarea:focus{
   border-color:var(--blue-1);
@@ -176,10 +156,10 @@ textarea{resize:vertical;min-height:80px}
 /* ── Buttons ── */
 .btn{
   display:inline-flex;align-items:center;gap:7px;justify-content:center;
-  border-radius:var(--radius);padding:11px 18px;border:none;
-  cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;
+  border-radius:var(--radius);padding:10px 16px;border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
   transition:background 0.2s,opacity 0.15s,transform 0.1s,box-shadow 0.2s;
-  text-decoration:none;white-space:nowrap;min-height:44px;
+  text-decoration:none;white-space:nowrap;
 }
 .btn:active{opacity:0.88;transform:scale(0.98)}
 .btn.ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);box-shadow:var(--shadow-sm)}
@@ -196,10 +176,9 @@ textarea{resize:vertical;min-height:80px}
 /* ── Barcode button ── */
 .btn-barcode{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:11px 18px;border-radius:var(--radius);border:none;
-  cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;
+  padding:10px 16px;border-radius:var(--radius);border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
   background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;
-  min-height:44px;
   box-shadow:0 2px 8px rgba(99,102,241,0.3);
   transition:background 0.2s,box-shadow 0.2s,transform 0.1s;white-space:nowrap;
 }
@@ -217,15 +196,15 @@ textarea{resize:vertical;min-height:80px}
 }
 .card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
 .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
-.card h3{font-size:16px;font-weight:700;color:var(--text)}
-.meta{color:var(--text-2);font-size:14px;line-height:1.6}
+.card h3{font-size:15px;font-weight:700;color:var(--text)}
+.meta{color:var(--text-2);font-size:13px;line-height:1.5}
 .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
 /* ── Badges ── */
 .badge{
   display:inline-flex;align-items:center;gap:4px;
-  padding:5px 11px;border-radius:20px;
-  font-weight:700;font-size:12px;letter-spacing:0.03em;white-space:nowrap;
+  padding:4px 10px;border-radius:20px;
+  font-weight:700;font-size:11px;letter-spacing:0.03em;white-space:nowrap;
   flex-shrink:0;
 }
 .badge.available{
@@ -245,12 +224,12 @@ textarea{resize:vertical;min-height:80px}
 }
 
 /* ── Form ── */
-.form{display:grid;gap:16px}
-.form label{display:block;font-size:14px;color:var(--text-2);font-weight:600}
+.form{display:grid;gap:14px}
+.form label{display:block;font-size:13px;color:var(--text-2);font-weight:600}
 .form input,.form select,.form textarea{
-  padding:12px 16px;border-radius:var(--radius);
+  padding:10px 14px;border-radius:var(--radius);
   border:1.5px solid var(--border);width:100%;margin-top:6px;
-  background:var(--bg);font-family:inherit;font-size:15px;color:var(--text);
+  background:var(--bg);font-family:inherit;font-size:14px;color:var(--text);
   transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
 }
 .form input:focus,.form select:focus,.form textarea:focus{
@@ -477,7 +456,7 @@ textarea{resize:vertical;min-height:80px}
   .scanner-viewport{aspect-ratio:16/9;max-height:48vh}
 }
 
-/* ── Notifications / Toast (queue-based, no overlap) ── */
+/* ── Notifications / Toast (seragam) ── */
 @keyframes toastIn{
   from{opacity:0;transform:translateY(-12px) scale(0.96)}
   to  {opacity:1;transform:translateY(0)    scale(1)}
@@ -486,46 +465,42 @@ textarea{resize:vertical;min-height:80px}
   from{opacity:1;transform:translateY(0) scale(1)}
   to  {opacity:0;transform:translateY(-8px) scale(0.97)}
 }
-/* Container untuk semua toast — satu kolom vertikal */
-#toastContainer{
-  position:fixed;top:72px;right:16px;left:16px;
-  margin:0 auto;max-width:360px;
-  display:flex;flex-direction:column;gap:8px;
-  z-index:5000;pointer-events:none;
-}
 .notification{
-  pointer-events:auto;
-  padding:13px 16px 13px 16px;
+  position:fixed;top:72px;right:16px;left:16px;
+  margin:0 auto;max-width:340px;
+  padding:12px 14px 12px 16px;
   border-radius:14px;
   background:rgba(255,255,255,0.97);
   backdrop-filter:blur(12px);
   border:1.5px solid transparent;
-  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.08);
-  color:var(--text);
+  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.06);
+  z-index:5000;color:var(--text);
   opacity:0;
   animation:toastIn 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
 .notification.hiding{animation:toastOut 0.22s ease forwards}
+.notification.show{opacity:1}
 .notification.success{border-color:rgba(16,185,129,0.3);background:linear-gradient(135deg,rgba(236,253,245,0.97),rgba(255,255,255,0.97))}
 .notification.error  {border-color:rgba(244,63,94,0.3);background:linear-gradient(135deg,rgba(255,241,243,0.97),rgba(255,255,255,0.97))}
 .notification.warning{border-color:rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(255,251,235,0.97),rgba(255,255,255,0.97))}
 .notification.info   {border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(240,249,255,0.97),rgba(255,255,255,0.97))}
 .notification-content{display:flex;align-items:center;gap:10px}
 .notification-icon{
-  flex-shrink:0;width:24px;height:24px;
+  flex-shrink:0;width:22px;height:22px;
   display:flex;align-items:center;justify-content:center;
-  border-radius:50%;font-size:14px;
+  border-radius:50%;font-size:13px;
 }
 .notification.success .notification-icon{background:var(--success-light);color:var(--success)}
 .notification.error   .notification-icon{background:var(--danger-light);color:var(--danger)}
 .notification.warning .notification-icon{background:var(--warning-light);color:var(--warning)}
 .notification.info    .notification-icon{background:var(--blue-light);color:var(--blue-1)}
-.notification-text{flex:1;min-width:0}
-.notification-title{font-weight:700;font-size:14px;color:var(--text);line-height:1.35}
-.notification-message{font-size:13px;color:var(--text-2);margin-top:3px;line-height:1.45}
+.notification-text{flex:1}
+.notification-title{font-weight:700;font-size:13px;color:var(--text);line-height:1.3}
+.notification-message{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4}
 .notification.single-line .notification-content{align-items:center}
+.notification.single-line .notification-title{margin-bottom:0}
 @media(max-width:480px){
-  #toastContainer{right:12px;left:12px;max-width:none;top:70px}
+  .notification{right:12px;left:12px;max-width:none;top:68px}
 }
 
 /* ── Stock-out form ── */
@@ -551,9 +526,9 @@ textarea{resize:vertical;min-height:80px}
 .selected-item-actions{display:flex;gap:8px;align-items:center}
 .btn-remove{
   background:var(--danger-light);color:var(--danger);
-  border:1px solid rgba(244,63,94,0.2);padding:7px 14px;border-radius:7px;
-  font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;
-  transition:background 0.15s;min-height:38px;
+  border:1px solid rgba(244,63,94,0.2);padding:5px 11px;border-radius:7px;
+  font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;
+  transition:background 0.15s;
 }
 .btn-remove:hover{background:#fecdd3}
 
@@ -567,15 +542,15 @@ textarea{resize:vertical;min-height:80px}
   box-shadow:var(--shadow-lg);z-index:1000;display:none;
 }
 .suggestions-dropdown.show{display:block}
-.suggestion-item{padding:13px 16px;cursor:pointer;border-bottom:1px solid var(--border-2);min-height:54px;display:flex;flex-direction:column;justify-content:center}
+.suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border-2)}
 .suggestion-item:last-child{border-bottom:none}
 .suggestion-item:hover{background:var(--blue-light)}
-.suggestion-item-name{font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px}
-.suggestion-item-meta{font-size:13px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
+.suggestion-item-name{font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px}
+.suggestion-item-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
 .suggestion-item-stock{display:inline-flex;align-items:center;gap:3px}
 .suggestion-item-stock.low{color:var(--danger);font-weight:600}
 .suggestion-item-stock.available{color:var(--success);font-weight:600}
-.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:14px}
+.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:13px}
 
 /* ── Signature canvas ── */
 #signatureCanvas{
@@ -592,26 +567,10 @@ textarea{resize:vertical;min-height:80px}
 }
 
 /* ── Extra polish ── */
-.main{padding:16px;flex:1}
+.main{padding:14px;flex:1}
 .view.hidden{display:none}
 .btn-barcode,.btn-barcode *{-webkit-tap-highlight-color:transparent}
 select option{background:var(--surface);color:var(--text)}
-
-/* Override inline-style font sizes for form labels & meta texts */
-.form label > div[style*="font-size:13px"],
-.stock-out-form label > div[style*="font-size:13px"]{font-size:14px!important}
-.selected-item-name{font-weight:600;font-size:15px!important;color:var(--text);margin-bottom:3px}
-.selected-item-meta{font-size:13px!important;color:var(--text-3)}
-
-/* Stock-out title bigger */
-.stock-out-title{
-  display:flex;align-items:center;gap:8px;
-  margin-bottom:16px;font-size:16px;color:var(--blue-dark);font-weight:700;
-}
-
-/* History cards readable */
-.notification-title{font-size:14px!important}
-.notification-message{font-size:13px!important}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -639,9 +598,6 @@ select option{background:var(--surface);color:var(--text)}
     </div>
   </div>
 
-  <!-- Toast container: semua notifikasi ditumpuk di sini secara vertikal -->
-  <div id="toastContainer"></div>
-
   <div class="app">
     <header class="header">
       <div class="brand">
@@ -653,7 +609,14 @@ select option{background:var(--surface);color:var(--text)}
         </div>
       </div>
       <div class="header-auth">
-  <!-- g_id_onload dihapus: inisialisasi dilakukan via JS initGoogleSignIn() agar tidak race condition -->
+  <div id="g_id_onload"
+       data-client_id="1030288606883-712ik0rkv9jkp0meivlv80jkkaksl09f.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false"
+       data-use_fedcm_for_prompt="false"
+       data-itp_support="true"
+       data-cancel_on_tap_outside="false">
+  </div>
   <div class="g_id_signin"
        data-type="standard"
        data-size="medium"
@@ -1823,17 +1786,6 @@ function showSuccessNotification(title, message){
 
 function showNotification(type = 'info', title, message = null) {
   try {
-    // Batasi jumlah toast yang tampil sekaligus (maks 3)
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    const existing = container.querySelectorAll('.notification:not(.hiding)');
-    if (existing.length >= 3) {
-      // Hapus toast paling lama agar tidak tumpang tindih
-      const oldest = existing[0];
-      oldest.classList.add('hiding');
-      setTimeout(() => oldest.remove(), 220);
-    }
-
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
     
@@ -1868,14 +1820,15 @@ function showNotification(type = 'info', title, message = null) {
       </div>
     `;
     
-    // Masukkan ke container (bukan langsung ke body)
-    container.appendChild(notification);
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
     
     const duration = message ? 4500 : 3000;
     
     setTimeout(() => {
-      notification.classList.add('hiding');
-      setTimeout(() => notification.remove(), 250);
+      notification.classList.remove('show');
+      setTimeout(() => notification.remove(), 300);
     }, duration);
     
   } catch(e) { 
@@ -3279,7 +3232,7 @@ function handleCredentialResponse(response){
   if(newEmail) localStorage.setItem(LS_HINT, newEmail);
 
   document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
-  document.getElementById("logoutBtn").style.display="flex";
+  document.getElementById("logoutBtn").style.display="inline-flex";
   hideOverlay();
   startDrive();
 }
@@ -3306,13 +3259,8 @@ function requestTokenSilent(){
   try{
     tokenClient.requestAccessToken({prompt:'none',login_hint:hint});
   }catch(e){
-    // prompt:'none' tidak didukung browser ini — tampilkan tombol manual
-    // JANGAN panggil requestTokenWithConsent() di sini karena tidak ada user gesture
-    // sehingga popup pasti diblokir browser
-    console.warn('requestTokenSilent gagal, tampilkan tombol Hubungkan Drive:', e);
-    const cb=document.getElementById('connectDriveBtn');
-    if(cb) cb.style.display='flex';
-    setSyncStatus('offline');
+    // Fallback jika browser tidak support prompt:none
+    requestTokenWithConsent();
   }
 }
 
@@ -3326,21 +3274,12 @@ async function onTokenReceived(resp){
   if(resp.error){onTokenError({type:resp.error});return;}
   accessToken=resp.access_token;
   gapi.client.setToken({access_token:accessToken});
-
-  // Pastikan tombol Sambungkan Drive tersembunyi
   const cb=document.getElementById('connectDriveBtn');
-  if(cb) cb.style.display='none';
-
+  if(cb)cb.style.display='none';
   await pullFromDrive();
   if(syncPending){syncPending=false;await pushToDrive(state);}
-
-  // Mulai/restart polling — clear dulu jika sudah ada
   startPolling();
-  // Daftarkan focus listener jika belum ada (gunakan flag agar tidak dobel)
-  if(!onFocus._registered){
-    window.addEventListener("focus",onFocus);
-    onFocus._registered=true;
-  }
+  window.addEventListener("focus",onFocus);
   // Jadwalkan silent refresh sebelum token kedaluwarsa (±55 menit)
   scheduleTokenRefresh(resp.expires_in||3600);
 }
@@ -3354,57 +3293,33 @@ function scheduleTokenRefresh(expiresInSec){
 
 function onTokenError(err){
   console.warn("Drive token error:",err.type);
-
-  // Helper: tampilkan tombol Hubungkan Drive
-  function showConnectBtn(){
-    const cb=document.getElementById('connectDriveBtn');
-    if(cb) cb.style.display='flex';
-  }
-
   if(err.type==='interaction_required'||err.type==='consent_required'||err.type==='login_required'){
-    // Butuh interaksi user — tampilkan tombol, jangan buka popup otomatis
-    showConnectBtn();
+    // Butuh interaksi user — tampilkan tombol Hubungkan Drive, jangan buka popup otomatis
+    const cb=document.getElementById('connectDriveBtn');
+    if(cb)cb.style.display='inline-flex';
     setSyncStatus('offline');
-    showNotification('info','Hubungkan Google Drive','Klik tombol "Sambungkan Drive" di header untuk sinkronisasi');
-
+    showNotification('info','Hubungkan Google Drive','Klik tombol "Hubungkan Drive" di header untuk sinkronisasi');
   } else if(err.type==='popup_blocked_by_browser'||err.type==='popup_failed_to_open'){
-    // Popup diblokir — JANGAN coba silent lagi (akan terus gagal), tampilkan tombol
-    // Hentikan polling karena tidak ada token
-    if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
-    showConnectBtn();
+    // Popup diblokir — coba silent, lalu tampilkan tombol
+    const cb=document.getElementById('connectDriveBtn');
+    if(cb)cb.style.display='inline-flex';
     setSyncStatus('offline');
-    showNotification('warning','Pop-up diblokir browser','Izinkan pop-up untuk domain ini di browser, lalu klik "Sambungkan Drive"');
-
+    showNotification('warning','Pop-up diblokir browser','Klik tombol "Hubungkan Drive" untuk mencoba ulang');
   } else if(err.type==='access_denied'){
-    // User menolak izin Drive secara eksplisit
-    if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
-    showConnectBtn();
+    const cb=document.getElementById('connectDriveBtn');
+    if(cb)cb.style.display='inline-flex';
     setSyncStatus('offline');
-    showNotification('error','Akses Drive ditolak','Izin Google Drive diperlukan untuk sinkronisasi. Klik "Sambungkan Drive" untuk coba lagi');
-
   } else {
-    // Error jaringan / tidak dikenal — coba silent refresh sekali setelah delay
     setSyncStatus('offline');
-    setTimeout(()=>{
-      if(!accessToken && tokenClient) requestTokenSilent();
-    }, 5000);
+    // Coba silent refresh setelah beberapa detik
+    setTimeout(()=>{if(!accessToken)requestTokenSilent();},5000);
   }
 }
 
 document.getElementById('connectDriveBtn').addEventListener('click',()=>{
-  // Sembunyikan tombol segera agar tidak diklik dobel
-  const cb = document.getElementById('connectDriveBtn');
-  if(cb) cb.style.display='none';
   setSyncStatus('connecting');
-
-  if(tokenClient){
-    // tokenClient sudah ada — langsung minta consent dengan user gesture
-    requestTokenWithConsent();
-  } else {
-    // tokenClient belum ada (gapi belum load) — inisialisasi ulang dari awal
-    driveStarted = false;
-    startDrive();
-  }
+  if(tokenClient) requestTokenWithConsent();
+  else{driveStarted=false;startDrive();}
 });
 
 async function onFocus(){if(accessToken&&!isSyncing)await pullFromDrive();}
@@ -3425,15 +3340,7 @@ async function pullFromDrive(){
     }
     if(!driveFileId){isSyncing=false;await pushToDrive(state);return;}
     const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}});
-    if(resp.status===401){
-      accessToken=null;
-      isSyncing=false;
-      setSyncStatus('connecting');
-      // Hentikan polling — tidak ada token
-      if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
-      if(tokenClient) requestTokenSilent();
-      return;
-    }
+    if(resp.status===401){accessToken=null;isSyncing=false;setSyncStatus('connecting');requestTokenSilent();return;}
     if(resp.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);isSyncing=false;await pushToDrive(state);return;}
     if(!resp.ok){setSyncStatus('error');isSyncing=false;return;}
     const driveData=await resp.json();
@@ -3459,7 +3366,7 @@ async function pushToDrive(data){
     let res;
     if(driveFileId){
       res=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`,{method:"PATCH",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
-      if(res.status===401){accessToken=null;isSyncing=false;setSyncStatus('connecting');requestTokenSilent();return;}
+      if(res.status===401){accessToken=null;setSyncStatus('connecting');requestTokenSilent();return;}
       if(res.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);await pushToDrive(data);return;}
     } else {
       res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
@@ -3474,15 +3381,13 @@ function syncToDrive(data){if(!accessToken){syncPending=true;return;}pushToDrive
 // ── Logout: show overlay, keep data ──────────────────────────────────────────
 document.getElementById("logoutBtn").addEventListener("click",()=>{
   google.accounts.id.disableAutoSelect();
-  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+  if(pollTimer)clearInterval(pollTimer);
   window.removeEventListener("focus",onFocus);
-  onFocus._registered = false;
-  if(_refreshTimer){clearTimeout(_refreshTimer);_refreshTimer=null;}
   localStorage.removeItem("google_logged_in");
   localStorage.removeItem(LS_FILE_ID);
   // Sengaja TIDAK hapus LS_HINT — dipakai untuk deteksi ganti akun saat login berikutnya
   localStorage.removeItem(LS_DISMISSED);
-  accessToken=null;driveFileId=null;driveStarted=false;tokenClient=null;
+  accessToken=null;driveFileId=null;driveStarted=false;
   document.getElementById("logoutBtn").style.display="none";
   const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
   document.querySelector(".g_id_signin").style.display="block";
@@ -3506,7 +3411,7 @@ window.addEventListener("load",()=>{
   const dismissed=localStorage.getItem(LS_DISMISSED)==="1";
   if(loggedIn){
     document.querySelector(".g_id_signin").style.display="none";
-    document.getElementById("logoutBtn").style.display="flex";
+    document.getElementById("logoutBtn").style.display="inline-flex";
     startDrive();
   } else if(!dismissed){
     setTimeout(showOverlay,300);
