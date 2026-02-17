@@ -59,6 +59,8 @@ body{
   display:flex; align-items:center; gap:12px;
   position:sticky; top:0; z-index:100;
   box-shadow:0 2px 12px rgba(3,105,161,0.22);
+  /* Kunci tinggi header agar tidak warp saat syncStatus berubah */
+  min-height:62px;
 }
 .brand{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
 .logo{
@@ -71,20 +73,37 @@ body{
 }
 .title{font-weight:800;font-size:16px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
 .subtitle{font-size:12px;color:rgba(255,255,255,0.65);margin-top:1px}
-.header-auth{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-#syncStatus{font-size:11px;color:rgba(255,255,255,0.65);text-align:right;min-height:14px;white-space:nowrap}
+/* header-auth: lebar tetap, tidak reflow ke atas/bawah */
+.header-auth{
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  flex-shrink:0;
+}
+/* syncStatus: tinggi tetap, tidak geser layout saat teks muncul/hilang */
+#syncStatus{
+  font-size:11px;color:rgba(255,255,255,0.65);
+  text-align:right;
+  height:14px;          /* tetap, bukan min-height */
+  line-height:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  display:block;
+}
 /* Google Sign-In widget — no transform tricks, just clip cleanly */
 .g_id_signin{display:flex;align-items:center;justify-content:flex-end}
 .g_id_signin > div > div{box-shadow:none!important}
 #connectDriveBtn,#logoutBtn{
   font-family:inherit;cursor:pointer;border-radius:8px;
-  font-size:12px;font-weight:600;padding:6px 12px;
+  font-size:12px;font-weight:600;
+  /* Tinggi tombol dikunci agar tidak geser header */
+  height:32px;padding:0 12px;
   border:1px solid rgba(255,255,255,0.3);
-  transition:background 0.2s,transform 0.1s; white-space:nowrap;
+  transition:background 0.2s,transform 0.1s;
+  white-space:nowrap;line-height:1;
+  display:none;align-items:center;justify-content:center;
 }
-#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff;display:none}
+#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff}
 #connectDriveBtn:hover{background:rgba(255,255,255,0.3);transform:translateY(-1px)}
-#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92);display:none}
+#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92)}
 #logoutBtn:hover{background:rgba(255,255,255,0.22);transform:translateY(-1px)}
 
 /* ── Main ── */
@@ -3260,7 +3279,7 @@ function handleCredentialResponse(response){
   if(newEmail) localStorage.setItem(LS_HINT, newEmail);
 
   document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
-  document.getElementById("logoutBtn").style.display="inline-flex";
+  document.getElementById("logoutBtn").style.display="flex";
   hideOverlay();
   startDrive();
 }
@@ -3292,7 +3311,7 @@ function requestTokenSilent(){
     // sehingga popup pasti diblokir browser
     console.warn('requestTokenSilent gagal, tampilkan tombol Hubungkan Drive:', e);
     const cb=document.getElementById('connectDriveBtn');
-    if(cb) cb.style.display='inline-flex';
+    if(cb) cb.style.display='flex';
     setSyncStatus('offline');
   }
 }
@@ -3339,7 +3358,7 @@ function onTokenError(err){
   // Helper: tampilkan tombol Hubungkan Drive
   function showConnectBtn(){
     const cb=document.getElementById('connectDriveBtn');
-    if(cb) cb.style.display='inline-flex';
+    if(cb) cb.style.display='flex';
   }
 
   if(err.type==='interaction_required'||err.type==='consent_required'||err.type==='login_required'){
@@ -3487,7 +3506,7 @@ window.addEventListener("load",()=>{
   const dismissed=localStorage.getItem(LS_DISMISSED)==="1";
   if(loggedIn){
     document.querySelector(".g_id_signin").style.display="none";
-    document.getElementById("logoutBtn").style.display="inline-flex";
+    document.getElementById("logoutBtn").style.display="flex";
     startDrive();
   } else if(!dismissed){
     setTimeout(showOverlay,300);
