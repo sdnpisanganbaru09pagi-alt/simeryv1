@@ -1,638 +1,602 @@
 <!doctype html>
 <html lang="id">
 <head>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SiMERY – Aplikasi Manajemen Inventory</title>
   <style>
-:root{
-  --bg-1:#ffffff;
-  --card:#ffffff;
-  --accent-1:#2f9b4a;
-  --accent-2:#16a34a;
-  --muted:#6b7280;
-  --success:#10b981;
-  --warning:#f59e0b;
-  --danger:#ef4444;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
+
+:root {
+  /* Fresh light-blue palette */
+  --blue-1:#0ea5e9;   /* sky-500 – main accent */
+  --blue-2:#38bdf8;   /* sky-400 – hover / lighter */
+  --blue-3:#7dd3fc;   /* sky-300 – subtle accent */
+  --blue-dark:#0369a1;/* sky-700 – text on light */
+  --blue-light:#f0f9ff;/* sky-50 */
+  --blue-mid:#bae6fd; /* sky-200 */
+  --text:#0c1a2e;
+  --text-2:#4a6080;
+  --text-3:#93aec8;
+  --border:#d4e8f7;
+  --border-2:#eaf5fd;
+  --surface:#ffffff;
+  --bg:#f0f8ff;       /* very light sky tint */
+  --success:#10b981; --success-light:#ecfdf5;
+  --warning:#f59e0b; --warning-light:#fffbeb;
+  --danger:#f43f5e;  --danger-light:#fff1f3;
+  --radius:10px; --radius-lg:16px;
+  --shadow-sm:0 1px 4px rgba(14,165,233,0.08);
+  --shadow-md:0 4px 16px rgba(14,165,233,0.12);
+  --shadow-lg:0 8px 32px rgba(14,165,233,0.16);
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;padding:0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
 body{
-  background: linear-gradient(180deg,#f6f9f6 0%, #eef7ee 100%);
+  font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:14px; line-height:1.55;
   -webkit-font-smoothing:antialiased;
-  padding:0;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  font-size:15px;
-  color:#0b1220;
 }
-.app {
-  width:100%;
-  max-width:100%;
-  background: var(--card);
-  border-radius:0;
-  overflow:hidden;
-  box-shadow: none;
-  margin-bottom:0;
-  min-height:100vh;
-}
-.header {
-  padding: 16px;
-  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
-  color: white;
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-.brand{display:flex;gap:12px;align-items:center;flex:1}
-.logo{width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700}
-.title{font-weight:700;font-size:1.05rem}
-.subtitle{font-size:0.85rem;opacity:0.95}
 
-.main{padding:16px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+/* ── Shell ── */
+.app{width:100%;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Header ── */
+@keyframes gradShift{
+  0%  {background-position:0% 50%}
+  50% {background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+.header{
+  background:linear-gradient(135deg,#0369a1,#0ea5e9,#38bdf8,#0284c7);
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+  padding:12px 16px;
+  display:flex; align-items:center; gap:12px;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(3,105,161,0.22);
+}
+.brand{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
+.logo{
+  width:38px;height:38px;border-radius:10px;
+  background:rgba(255,255,255,0.22);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,0.3);
+}
+.title{font-weight:800;font-size:15px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
+.subtitle{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+.header-auth{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+#syncStatus{font-size:11px;color:rgba(255,255,255,0.65);text-align:right;min-height:14px;white-space:nowrap}
+/* Google Sign-In widget — no transform tricks, just clip cleanly */
+.g_id_signin{display:flex;align-items:center;justify-content:flex-end}
+.g_id_signin > div > div{box-shadow:none!important}
+#connectDriveBtn,#logoutBtn{
+  font-family:inherit;cursor:pointer;border-radius:8px;
+  font-size:12px;font-weight:600;padding:6px 12px;
+  border:1px solid rgba(255,255,255,0.3);
+  transition:background 0.2s,transform 0.1s; white-space:nowrap;
+}
+#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff;display:none}
+#connectDriveBtn:hover{background:rgba(255,255,255,0.3);transform:translateY(-1px)}
+#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92);display:none}
+#logoutBtn:hover{background:rgba(255,255,255,0.22);transform:translateY(-1px)}
+
+/* ── Main ── */
+
+/* ── Tabs ── */
+.tabs{
+  display:flex;gap:3px;margin-bottom:16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:4px;
+  box-shadow:var(--shadow-sm);
+}
 .tab{
-  flex:1;
-  padding:10px 14px;
-  border-radius:10px;
-  border:1px solid rgba(11,17,34,0.06);
-  font-weight:600;text-align:center;color:var(--muted);
-  cursor:pointer;user-select:none;
+  flex:1;padding:9px 6px;border-radius:var(--radius);border:none;
+  background:transparent;font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--text-2);cursor:pointer;text-align:center;
+  transition:background 0.2s,color 0.2s,box-shadow 0.2s;white-space:nowrap;
 }
-.tab.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#fff; box-shadow:0 6px 18px rgba(16,185,129,0.12); border:transparent;}
+.tab.active{
+  background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
+  color:#fff;
+  box-shadow:0 2px 8px rgba(14,165,233,0.3);
+}
+.tab:not(.active):hover{background:var(--blue-light);color:var(--blue-dark)}
 
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.stat{background:#fff;padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(11,17,34,0.04)}
-.stat .n{font-weight:800;font-size:1.25rem;color:var(--accent-1);margin-bottom:4px}
-.stat .label{font-size:12px;color:var(--muted);font-weight:500}
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px 10px;text-align:center;
+  box-shadow:var(--shadow-sm);
+  transition:transform 0.2s,box-shadow 0.2s;
+  position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue-1),var(--blue-3));
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat .n{font-size:1.6rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:5px;letter-spacing:-0.03em}
+.stat .label{font-size:11px;color:var(--text-3);font-weight:500}
 
-.search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:stretch}
+/* ── Search ── */
+.search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .search input{
-  flex:1 1 100%;
-  min-width:0;
-  padding:14px 16px;
-  border-radius:10px;
-  border:1px solid rgba(11,17,34,0.08);
-  background: #fafafa;
-  transition: all 0.2s ease;
+  flex:1 1 100%;min-width:0;padding:10px 14px;
+  border-radius:var(--radius);border:1.5px solid var(--border);
+  background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);
+  transition:border-color 0.2s,box-shadow 0.2s;
+  box-shadow:var(--shadow-sm);
 }
-.search input:focus {
-  background: #ffffff;
-  border-color: var(--accent-1);
-  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.08);
-}
-.search .btn, .search .btn-barcode{
-  flex:1 1 calc(50% - 4px); 
-  min-width:120px; 
-  padding:14px 16px; 
-  border-radius:10px; 
-  font-weight:600;
-  height: auto;
-}
-@media(min-width:700px){
+.search input:focus{outline:none;border-color:var(--blue-1);box-shadow:0 0 0 3px rgba(14,165,233,0.15)}
+.search .btn,.search .btn-barcode{flex:1 1 calc(50% - 4px);min-width:110px}
+@media(min-width:640px){
   .search{flex-wrap:nowrap}
   .search input{flex:1}
-  .search .btn, .search .btn-barcode{flex:initial}
+  .search .btn,.search .btn-barcode{flex:initial}
 }
 
-input, select, button, textarea { 
-  font-family: inherit; 
-  font-size:14px;
-  outline: none;
+/* ── Global inputs ── */
+input,select,button,textarea{font-family:inherit;font-size:14px;outline:none}
+input,select,textarea{transition:border-color 0.2s,box-shadow 0.2s}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--blue-1);
+  box-shadow:0 0 0 3px rgba(14,165,233,0.14);
 }
+textarea{resize:vertical;min-height:80px}
 
-input, select, textarea {
-  transition: all 0.2s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent-1);
-  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.1);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
+/* ── Buttons ── */
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  justify-content:center;
-  border-radius:10px;
-  padding:12px 16px;
-  border:0;
-  cursor:pointer;
-  font-weight:600;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  white-space: nowrap;
+  display:inline-flex;align-items:center;gap:7px;justify-content:center;
+  border-radius:var(--radius);padding:10px 16px;border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
+  transition:background 0.2s,opacity 0.15s,transform 0.1s,box-shadow 0.2s;
+  text-decoration:none;white-space:nowrap;
 }
+.btn:active{opacity:0.88;transform:scale(0.98)}
+.btn.ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);box-shadow:var(--shadow-sm)}
+.btn.ghost:hover{background:var(--blue-light);border-color:var(--blue-3);color:var(--blue-dark)}
+.btn.primary{background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));color:#fff;box-shadow:0 2px 8px rgba(14,165,233,0.3)}
+.btn.primary:hover{background:linear-gradient(135deg,#0284c7,#0c4a6e);box-shadow:0 4px 12px rgba(14,165,233,0.4)}
+.btn.orange{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.3)}
+.btn.orange:hover{background:linear-gradient(135deg,#ea580c,#c2410c)}
+.btn.green{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,0.3)}
+.btn.green:hover{background:linear-gradient(135deg,#059669,#047857)}
+.btn.danger{background:linear-gradient(135deg,var(--danger),#e11d48);color:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.3)}
+.btn.danger:hover{background:linear-gradient(135deg,#e11d48,#be123c)}
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* ── Barcode button ── */
+.btn-barcode{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 16px;border-radius:var(--radius);border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
+  background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;
+  box-shadow:0 2px 8px rgba(99,102,241,0.3);
+  transition:background 0.2s,box-shadow 0.2s,transform 0.1s;white-space:nowrap;
 }
+.btn-barcode:hover{background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 12px rgba(99,102,241,0.4)}
+.btn-barcode:active{opacity:0.88;transform:scale(0.98)}
 
-.btn:active {
-  transform: translateY(0);
+/* ── List & Card ── */
+.list{display:grid;gap:10px}
+.card{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-lg);padding:14px;
+  display:flex;flex-direction:column;
+  box-shadow:var(--shadow-sm);
+  transition:transform 0.2s,box-shadow 0.2s;
 }
-
-.btn.ghost{
-  background:transparent;
-  border:1px solid rgba(11,17,34,0.08);
-  color:var(--muted);
-}
-
-.btn.ghost:hover {
-  background: rgba(11,17,34,0.04);
-  border-color: rgba(11,17,34,0.12);
-}
-
-.btn.primary{
-  background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
-  color:white;
-  box-shadow:0 6px 18px rgba(16,185,129,0.08);
-}
-
-.btn.primary:hover {
-  box-shadow:0 8px 24px rgba(16,185,129,0.15);
-}
-
-.btn.orange{
-  background:linear-gradient(90deg,#f97316,#ea580c);
-  color:white;
-  box-shadow:0 6px 18px rgba(249,115,22,0.15);
-}
-
-.btn.orange:hover {
-  box-shadow:0 8px 24px rgba(249,115,22,0.25);
-}
-
-.btn.green{
-  background:linear-gradient(90deg,#22c55e,#16a34a);
-  color:white;
-  box-shadow:0 6px 18px rgba(34,197,94,0.15);
-}
-
-.btn.green:hover {
-  box-shadow:0 8px 24px rgba(34,197,94,0.25);
-}
-
-.btn-barcode {
-  background: linear-gradient(90deg, #8b5cf6, #a855f7);
-  color: white;
-  border: none;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn-barcode:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
-}
-
-.btn-barcode:active {
-  transform: translateY(0);
-}
-
-.list{display:grid;gap:12px}
-.card{display:flex;flex-direction:column;padding:14px;border-radius:10px;background:#fff;border:1px solid rgba(11,17,34,0.04);box-shadow:0 2px 8px rgba(2,6,23,0.02)}
-.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
-.card h3{margin:0;font-size:1rem;font-weight:700}
-.badge{padding:6px 12px;border-radius:20px;font-weight:700;font-size:11px}
-.badge.available{background:linear-gradient(90deg,#10b981,#34d399);color:white}
-.badge.empty{background:linear-gradient(90deg,#ef4444,#dc2626);color:white}
-.meta{color:var(--muted);font-size:13px;line-height:1.4}
+.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.card h3{font-size:15px;font-weight:700;color:var(--text)}
+.meta{color:var(--text-2);font-size:13px;line-height:1.5}
 .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
-.form{display:grid;gap:16px}
-.form label{
-  display:block;
-  font-size:13px;
-  color:var(--muted);
-  font-weight:600;
-  margin-bottom: 6px;
+/* ── Badges ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:20px;
+  font-weight:700;font-size:11px;letter-spacing:0.03em;white-space:nowrap;
+  flex-shrink:0;
 }
-.form input, .form select, .form textarea { 
-  padding:14px 16px;
-  border-radius:10px;
-  border:1px solid rgba(11,17,34,0.08);
-  width: 100%;
-  margin-top: 6px;
-  background: #fafafa;
+.badge.available{
+  background:#dcfce7;color:#15803d;
+  border:1.5px solid #86efac;
+  box-shadow:0 1px 3px rgba(22,163,74,0.15);
 }
-
-.form input:focus, .form select:focus, .form textarea:focus {
-  background: #ffffff;
-  border-color: var(--accent-1);
-  box-shadow: 0 0 0 3px rgba(47, 155, 74, 0.08);
+.badge.low{
+  background:#fef9c3;color:#a16207;
+  border:1.5px solid #fde047;
+  box-shadow:0 1px 3px rgba(234,179,8,0.2);
 }
-
-.barcode-input-group {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-  margin-top: 6px;
+.badge.empty{
+  background:#fee2e2;color:#b91c1c;
+  border:1.5px solid #fca5a5;
+  box-shadow:0 1px 3px rgba(220,38,38,0.15);
 }
 
-.barcode-input-group input {
-  flex: 1;
-  margin-top: 0;
+/* ── Form ── */
+.form{display:grid;gap:14px}
+.form label{display:block;font-size:13px;color:var(--text-2);font-weight:600}
+.form input,.form select,.form textarea{
+  padding:10px 14px;border-radius:var(--radius);
+  border:1.5px solid var(--border);width:100%;margin-top:6px;
+  background:var(--bg);font-family:inherit;font-size:14px;color:var(--text);
+  transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
+}
+.form input:focus,.form select:focus,.form textarea:focus{
+  background:var(--surface);outline:none;
+  border-color:var(--blue-1);box-shadow:0 0 0 3px rgba(14,165,233,0.14);
 }
 
-.barcode-input-group .btn-barcode {
-  flex-shrink: 0;
-  padding: 14px 16px;
-  min-width: auto;
+/* ── Barcode input group ── */
+.barcode-input-group{display:flex;gap:8px;align-items:stretch;margin-top:6px}
+.barcode-input-group input{flex:1;margin-top:0}
+.barcode-input-group .btn-barcode{flex-shrink:0;padding:10px 14px}
+
+/* ── View toggle ── */
+
+/* ── Scanner modal ── */
+@keyframes scanLine{
+  0%  {top:15%; opacity:0.9}
+  50% {opacity:1}
+  100%{top:85%; opacity:0.9}
+}
+@keyframes cornerPulse{
+  0%,100%{opacity:1}
+  50%{opacity:0.5}
+}
+#scannerModal{
+  position:fixed;inset:0;display:none;
+  align-items:flex-end;justify-content:center;
+  background:rgba(2,32,58,0.82);z-index:3000;
+  backdrop-filter:blur(6px);
+}
+#scannerModal .modal-card{
+  width:100%;max-width:440px;
+  padding:0;
+  border-radius:24px 24px 0 0;
+  background:#0a1628;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 -8px 40px rgba(14,165,233,0.25);
+  animation:slideUp 0.32s cubic-bezier(0.34,1.2,0.64,1) both;
+}
+@keyframes slideUp{
+  from{transform:translateY(100%);opacity:0}
+  to  {transform:translateY(0);opacity:1}
 }
 
+/* drag handle */
+#scannerModal .modal-card::before{
+  content:'';display:block;width:40px;height:4px;
+  background:rgba(255,255,255,0.18);border-radius:2px;
+  margin:12px auto 0;flex-shrink:0;
+}
+
+/* header */
+.scanner-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px 10px;
+}
+.scanner-title{
+  display:flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:700;color:#fff;
+}
+.scanner-title-icon{
+  width:32px;height:32px;border-radius:9px;
+  background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.scanner-close-btn{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.1);border:none;
+  color:rgba(255,255,255,0.7);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;font-family:inherit;font-size:18px;line-height:1;
+}
+.scanner-close-btn:hover{background:rgba(255,255,255,0.18)}
+
+/* hint text */
+.scanner-hint{
+  text-align:center;font-size:12px;color:rgba(255,255,255,0.45);
+  padding:0 20px 10px;line-height:1.5;
+}
+
+/* viewport wrapper */
+.scanner-viewport{
+  position:relative;
+  margin:0 16px 16px;
+  border-radius:16px;overflow:hidden;
+  background:#000;
+  aspect-ratio:1/1;
+  max-height:58vw;
+}
+
+/* ── Aggressive suppression of html5-qrcode injected UI ── */
+/* Hide ALL injected html5-qrcode interface elements */
+#reader{
+  width:100%!important;height:100%!important;
+  border:none!important;padding:0!important;
+  background:transparent;position:relative;
+}
+/* Kill the default shaded overlay that html5-qrcode draws */
+#reader > div[style]{
+  /* The library injects inline-style divs for borders/shading */
+}
+/* Hide select camera dropdown and its label */
+#reader select,
+#reader #html5-qrcode-select-camera,
+#reader span[id*="select-camera"],
+#reader > div:not([id]) > span,
+#reader > span,
+#reader label,
+#reader p,
+#reader img[alt="Info icon"],
+#reader img[alt="Camera based scan"],
+#reader img[alt="File based scan"],
+#reader button[id*="html5"],
+#reader #html5-qrcode-button-camera-start,
+#reader #html5-qrcode-button-camera-stop,
+#reader #html5-qrcode-button-file-selection,
+#reader #html5-qrcode-anchor-scan-type-change,
+#reader #html5-qrcode-header,
+#reader > div:has(> select),
+#reader > div:has(> button),
+#reader > section > div:first-child,
+#reader div[id*="permission"],
+#reader div[id*="header"] {
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+}
+/* Ensure video fills the viewport cleanly */
+#reader video{
+  width:100%!important;height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+  border:none!important;
+}
+/* Kill any canvas overlays the lib draws (scan lines etc) */
+#reader canvas{
+  position:absolute!important;
+  top:0!important;left:0!important;
+  width:100%!important;height:100%!important;
+  opacity:0!important;    /* hide lib-drawn canvas; we use our own overlay */
+  pointer-events:none!important;
+}
+/* Make the inner section fill container */
+#reader > section,
+#reader > div{
+  width:100%!important;height:100%!important;
+  border:none!important;padding:0!important;margin:0!important;
+}
+
+/* ── Our custom scan frame overlay (inside .scanner-viewport, ABOVE #reader) ── */
+.scan-frame-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:10;
+}
+/* dark vignette outside scan zone */
+.scan-frame-overlay::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(
+    ellipse 54% 54% at 50% 50%,
+    transparent 52%,
+    rgba(0,0,0,0.58) 100%
+  );
+}
+/* animated scan line */
+.scan-line{
+  position:absolute;left:22%;right:22%;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(14,165,233,0.9),transparent);
+  border-radius:1px;
+  animation:scanLine 2s ease-in-out infinite;
+  z-index:12;
+}
+/* four corner brackets */
+.scan-corners{
+  position:absolute;
+  top:50%;left:50%;
+  width:52%;height:52%;
+  transform:translate(-50%,-50%);
+  z-index:11;
+}
+.scan-corners span{
+  position:absolute;width:22px;height:22px;
+  border-color:var(--blue-1);border-style:solid;
+  border-width:0;
+  animation:cornerPulse 2s ease-in-out infinite;
+}
+.scan-corners span:nth-child(1){top:0;left:0;    border-top-width:3px;border-left-width:3px;  border-radius:4px 0 0 0}
+.scan-corners span:nth-child(2){top:0;right:0;   border-top-width:3px;border-right-width:3px; border-radius:0 4px 0 0}
+.scan-corners span:nth-child(3){bottom:0;left:0; border-bottom-width:3px;border-left-width:3px;  border-radius:0 0 0 4px}
+.scan-corners span:nth-child(4){bottom:0;right:0;border-bottom-width:3px;border-right-width:3px; border-radius:0 0 4px 0}
+
+/* status chip */
+.scanner-status{
+  display:flex;align-items:center;gap:7px;justify-content:center;
+  padding:8px 20px 18px;
+}
+.scanner-status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--blue-1);
+  animation:pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(14,165,233,0.5)}
+  50%{box-shadow:0 0 0 5px rgba(14,165,233,0)}
+}
+.scanner-status-text{
+  font-size:12px;font-weight:600;
+  color:rgba(255,255,255,0.6);letter-spacing:0.02em;
+}
+
+/* hide old .modal-actions inside scanner */
+#scannerModal .modal-actions{display:none!important}
+
+@media(min-width:480px){
+  #scannerModal{align-items:center}
+  #scannerModal .modal-card{
+    border-radius:24px;
+    max-width:380px;
+  }
+  .scanner-viewport{max-height:none;aspect-ratio:1/1}
+}
+@media(max-height:500px) and (orientation:landscape){
+  .scanner-viewport{aspect-ratio:16/9;max-height:48vh}
+}
+
+/* ── Notifications / Toast (seragam) ── */
+@keyframes toastIn{
+  from{opacity:0;transform:translateY(-12px) scale(0.96)}
+  to  {opacity:1;transform:translateY(0)    scale(1)}
+}
+@keyframes toastOut{
+  from{opacity:1;transform:translateY(0) scale(1)}
+  to  {opacity:0;transform:translateY(-8px) scale(0.97)}
+}
+.notification{
+  position:fixed;top:72px;right:16px;left:16px;
+  margin:0 auto;max-width:340px;
+  padding:12px 14px 12px 16px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(12px);
+  border:1.5px solid transparent;
+  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.06);
+  z-index:5000;color:var(--text);
+  opacity:0;
+  animation:toastIn 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.notification.hiding{animation:toastOut 0.22s ease forwards}
+.notification.show{opacity:1}
+.notification.success{border-color:rgba(16,185,129,0.3);background:linear-gradient(135deg,rgba(236,253,245,0.97),rgba(255,255,255,0.97))}
+.notification.error  {border-color:rgba(244,63,94,0.3);background:linear-gradient(135deg,rgba(255,241,243,0.97),rgba(255,255,255,0.97))}
+.notification.warning{border-color:rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(255,251,235,0.97),rgba(255,255,255,0.97))}
+.notification.info   {border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(240,249,255,0.97),rgba(255,255,255,0.97))}
+.notification-content{display:flex;align-items:center;gap:10px}
+.notification-icon{
+  flex-shrink:0;width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;font-size:13px;
+}
+.notification.success .notification-icon{background:var(--success-light);color:var(--success)}
+.notification.error   .notification-icon{background:var(--danger-light);color:var(--danger)}
+.notification.warning .notification-icon{background:var(--warning-light);color:var(--warning)}
+.notification.info    .notification-icon{background:var(--blue-light);color:var(--blue-1)}
+.notification-text{flex:1}
+.notification-title{font-weight:700;font-size:13px;color:var(--text);line-height:1.3}
+.notification-message{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4}
+.notification.single-line .notification-content{align-items:center}
+.notification.single-line .notification-title{margin-bottom:0}
+@media(max-width:480px){
+  .notification{right:12px;left:12px;max-width:none;top:68px}
+}
+
+/* ── Stock-out form ── */
+.stock-out-form{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px;
+  box-shadow:var(--shadow-sm);
+}
+.stock-out-title{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;font-size:15px;color:var(--blue-dark);font-weight:700;
+}
+
+/* ── Selected item card ── */
+.selected-item-card{
+  background:var(--blue-light);border:1.5px solid var(--blue-mid);
+  border-radius:var(--radius);padding:11px 14px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.selected-item-info{flex:1;min-width:0}
+.selected-item-name{font-weight:600;font-size:14px;color:var(--text);margin-bottom:2px}
+.selected-item-meta{font-size:12px;color:var(--text-3)}
+.selected-item-actions{display:flex;gap:8px;align-items:center}
+.btn-remove{
+  background:var(--danger-light);color:var(--danger);
+  border:1px solid rgba(244,63,94,0.2);padding:5px 11px;border-radius:7px;
+  font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;
+  transition:background 0.15s;
+}
+.btn-remove:hover{background:#fecdd3}
+
+/* ── Suggestions dropdown ── */
+.stock-out-search-wrapper{position:relative}
+.suggestions-dropdown{
+  position:absolute;top:100%;left:0;right:0;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius);margin-top:4px;
+  max-height:260px;overflow-y:auto;
+  box-shadow:var(--shadow-lg);z-index:1000;display:none;
+}
+.suggestions-dropdown.show{display:block}
+.suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border-2)}
+.suggestion-item:last-child{border-bottom:none}
+.suggestion-item:hover{background:var(--blue-light)}
+.suggestion-item-name{font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px}
+.suggestion-item-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
+.suggestion-item-stock{display:inline-flex;align-items:center;gap:3px}
+.suggestion-item-stock.low{color:var(--danger);font-weight:600}
+.suggestion-item-stock.available{color:var(--success);font-weight:600}
+.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:13px}
+
+/* ── Signature canvas ── */
+#signatureCanvas{
+  background:var(--blue-light);border:1.5px dashed var(--blue-3);
+  display:block;width:100%;height:auto;
+  cursor:crosshair;touch-action:none;transition:border-color 0.2s;
+}
+#signatureCanvas:hover{border-color:var(--blue-1)}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .modal-actions{flex-direction:column}
+  .modal-actions button{width:100%}
+}
+
+/* ── Extra polish ── */
+.main{padding:14px;flex:1}
 .view.hidden{display:none}
-
-#scannerModal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.85);
-  z-index: 3000;
-  padding: 16px;
-}
-
-#scannerModal .modal-card {
-  width: 100%;
-  max-width: 400px;
-  max-height: 90vh;
-  padding: 20px;
-  border-radius: 16px;
-  background: #fff;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-#scannerModal h3 {
-  margin: 0 0 16px 0;
-  text-align: center;
-  font-size: 1.1rem;
-  color: var(--accent-1);
-}
-
-#reader {
-  width: 100%;
-  max-width: 100%;
-  height: 250px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  position: relative;
-  margin-bottom: 16px;
-}
-
-#reader video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  border-radius: 12px;
-}
-
-#reader canvas {
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  border-radius: 12px;
-}
-
-#reader > div {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-#reader::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 200px;
-  height: 200px;
-  border: 2px solid var(--accent-1);
-  border-radius: 12px;
-  background: transparent;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.modal-actions button {
-  min-width: 100px;
-}
-
-.notification {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  margin: 0 auto;
-  max-width: 400px;
-  transform: translateY(-100px);
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  z-index: 5000;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  opacity: 0;
-  color: white;
-}
-
-.notification.show {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.notification.success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
-}
-
-.notification.error {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
-}
-
-.notification.warning {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
-}
-
-.notification.info {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
-}
-
-.notification-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.notification-icon {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-}
-
-.notification-text {
-  flex: 1;
-}
-
-.notification-title {
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 4px;
-  line-height: 1.2;
-}
-
-.notification-message {
-  font-size: 13px;
-  opacity: 0.9;
-  line-height: 1.3;
-}
-
-.notification.single-line .notification-content {
-  align-items: center;
-}
-
-.notification.single-line .notification-title {
-  margin-bottom: 0;
-}
-
-.stock-out-form {
-  background: #ffffff;
-  border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.stock-out-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 1.1em;
-  color: var(--accent-1);
-  font-weight: bold;
-}
-
-.selected-item-card {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.selected-item-info {
-  flex: 1;
-}
-
-.selected-item-name {
-  font-weight: 600;
-  color: #0b1220;
-  margin-bottom: 4px;
-}
-
-.selected-item-meta {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.selected-item-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn-remove {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-remove:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
-}
-
-.suggestions-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid rgba(11,17,34,0.08);
-  border-radius: 10px;
-  margin-top: 4px;
-  max-height: 280px;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  z-index: 1000;
-  display: none;
-}
-
-.suggestions-dropdown.show {
-  display: block;
-}
-
-.suggestion-item {
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  border-bottom: 1px solid rgba(11,17,34,0.04);
-}
-
-.suggestion-item:last-child {
-  border-bottom: none;
-}
-
-.suggestion-item:hover {
-  background: #f9fafb;
-}
-
-.suggestion-item-name {
-  font-weight: 600;
-  color: #0b1220;
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-
-.suggestion-item-meta {
-  font-size: 12px;
-  color: var(--muted);
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.suggestion-item-stock {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.suggestion-item-stock.low {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.suggestion-item-stock.available {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.suggestion-no-results {
-  padding: 16px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.stock-out-search-wrapper {
-  position: relative;
-}
-
-#signatureCanvas {
-  background: #ffffff;
-  border: 2px dashed #d1d5db;
-  transition: border-color 0.2s ease;
-}
-
-#signatureCanvas:hover {
-  border-color: var(--accent-1);
-}
-
-@media (max-width: 480px) {
-  .notification {
-    right: 12px;
-    left: 12px;
-    max-width: none;
-  }
-  
-  #scannerModal .modal-card {
-    margin: 0;
-    padding: 16px;
-    max-width: calc(100vw - 32px);
-  }
-  
-  #reader {
-    height: 220px;
-  }
-  
-  #reader::after {
-    width: 160px;
-    height: 160px;
-  }
-  
-  .modal-actions {
-    flex-direction: column;
-  }
-  
-  .modal-actions button {
-    width: 100%;
-  }
-}
-
-@media (max-height: 500px) and (orientation: landscape) {
-  #scannerModal .modal-card {
-    max-height: 95vh;
-  }
-  
-  #reader {
-    height: 180px;
-  }
-}
-  </style>
+.btn-barcode,.btn-barcode *{-webkit-tap-highlight-color:transparent}
+select option{background:var(--surface);color:var(--text)}
+</style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
+  <!-- Login overlay: shows when not authenticated. Data stays intact (offline-first). -->
+  <div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:linear-gradient(145deg,#075985 0%,#0ea5e9 55%,#38bdf8 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#fff;border-radius:24px;padding:36px 28px;max-width:340px;width:100%;box-shadow:0 24px 64px rgba(3,105,161,0.3);">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:44px;margin-bottom:10px;">📦</div>
+        <div style="font-weight:800;font-size:1.3rem;color:#0c1a2e;letter-spacing:-0.02em;">SiMERY</div>
+        <div style="font-size:12px;color:#93aec8;margin-top:4px;">Manajemen Inventory · Twin Insani, S.Kom</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:14px;padding:13px 15px;margin-bottom:22px;">
+        <div style="font-size:13px;font-weight:700;color:#0369a1;margin-bottom:3px;">📱 Mode Offline Tersedia</div>
+        <div style="font-size:12px;color:#0284c7;line-height:1.5;">Data tersimpan di perangkat ini. Login untuk mengaktifkan sinkronisasi Google Drive.</div>
+      </div>
+      <div id="overlaySigninBtn" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
+      <div id="overlayOfflineBtn" style="display:none;text-align:center;">
+        <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">atau</div>
+        <button onclick="dismissOverlay()" style="width:100%;padding:11px 16px;border-radius:12px;border:1.5px solid #d4e8f7;background:#f0f9ff;font-family:inherit;font-size:13px;font-weight:600;color:#0369a1;cursor:pointer;transition:background 0.2s;">Mode Offline</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <header class="header">
       <div class="brand">
@@ -643,6 +607,24 @@ textarea {
 		  <div class="subtitle">Dikembangkan Oleh Twin Insani, S.Kom</div>
         </div>
       </div>
+      <div class="header-auth">
+  <div id="g_id_onload"
+       data-client_id="1030288606883-712ik0rkv9jkp0meivlv80jkkaksl09f.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin"
+       data-type="standard"
+       data-size="medium"
+       data-theme="outline"
+       data-text="signin"
+       data-shape="pill">
+  </div>
+  <button id="connectDriveBtn">☁️ Sambungkan Drive</button>
+  <button id="logoutBtn">Keluar</button>
+  <div id="syncStatus"></div>
+</div>
+
     </header>
 
     <main class="main">
@@ -671,11 +653,11 @@ textarea {
 
       <!-- Manage -->
       <section class="view hidden" id="manage">
-        <div class="meta" style="font-weight:bold;margin-bottom:8px;font-size:1.1em;color:#22c55e;">📦 Tambah Barang Baru</div>
-        <div style="background:#ffffff;border:1px solid #ddd;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:16px;">
+        <div class="meta" style="font-weight:bold;margin-bottom:8px;font-size:1.1em;color:var(--blue-dark);">📦 Tambah Barang Baru</div>
+        <div style="background:#ffffff;border:1.5px solid var(--border);padding:16px;border-radius:16px;box-shadow:var(--shadow-sm);margin-bottom:16px;">
           <form id="addForm" class="form">
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
                 </svg>
@@ -685,7 +667,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5"/>
                 </svg>
@@ -703,7 +685,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M7 4V2C7 1.45 7.45 1 8 1S9 1.45 9 2V4H15V2C15 1.45 15.45 1 16 1S17 1.45 17 2V4H20C21.11 4 22 4.89 22 6V20C22 21.11 21.11 22 20 22H4C2.89 22 2 21.11 2 20V6C2 4.89 2.89 4 4 4H7M4 8V20H20V8H4M6 10H8V12H6V10M10 10H12V12H10V10M14 10H16V12H14V10M6 14H8V16H6V14M10 14H12V16H10V14M14 14H16V16H14V14"/>
                 </svg>
@@ -713,7 +695,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
                 </svg>
@@ -762,11 +744,11 @@ textarea {
         </div>
         
         <div class="stock-out-form">
-          <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:2px dashed #e5e7eb;">
-            <div style="font-weight:600;margin-bottom:12px;color:var(--accent-1);">Tambah Barang ke Daftar</div>
+          <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:2px dashed var(--border);">
+            <div style="font-weight:600;margin-bottom:12px;color:var(--blue-dark);">Tambah Barang ke Daftar</div>
             <div class="form" style="gap:12px;">
               <label>
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
                   </svg>
@@ -788,7 +770,7 @@ textarea {
               </label>
               
               <label>
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 7H5V5H19V7ZM19 11H5V9H19V11ZM19 15H5V13H19V15ZM19 19H5V17H19V19Z"/>
                   </svg>
@@ -807,16 +789,16 @@ textarea {
           </div>
           
           <div id="selectedItemsList" style="margin-bottom:20px;display:none;">
-            <div style="font-weight:600;margin-bottom:12px;color:var(--accent-1);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:600;margin-bottom:12px;color:var(--blue-dark);display:flex;justify-content:space-between;align-items:center;">
               <span>Daftar Barang yang Akan Dikeluarkan</span>
-              <span style="font-size:12px;color:var(--muted);font-weight:500;" id="totalItemsCount">0 item</span>
+              <span style="font-size:12px;color:var(--text-2);font-weight:500;" id="totalItemsCount">0 item</span>
             </div>
             <div id="selectedItemsContainer" style="display:grid;gap:8px;margin-bottom:16px;"></div>
           </div>
           
           <form id="stockOutForm" class="form">
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
                 </svg>
@@ -826,7 +808,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M14,10H12V8H14M14,16H12V12H14M20,8H17.19C16.74,7.22 16.12,6.55 15.37,6.04L17,4.41L15.59,3L13.42,5.17C12.96,5.06 12.5,5 12,5C11.5,5 11.04,5.06 10.59,5.17L8.41,3L7,4.41L8.62,6.04C7.88,6.55 7.26,7.22 6.81,8H4V10H6.09C6.04,10.33 6,10.66 6,11V12H4V14H6V15C6,15.34 6.04,15.67 6.09,16H4V18H6.81C7.85,19.79 9.78,21 12,21C14.22,21 16.15,19.79 17.19,18H20V16H17.91C17.96,15.67 18,15.34 18,15V14H20V12H18V11C18,10.66 17.96,10.33 17.91,10H20V8Z"/>
                 </svg>
@@ -837,7 +819,7 @@ textarea {
             
             <label>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);font-weight:600;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                   </svg>
@@ -850,10 +832,10 @@ textarea {
                   Hapus
                 </button>
               </div>
-              <div style="border:2px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fafafa;">
+              <div style="border:2px solid var(--border);border-radius:12px;overflow:hidden;background:var(--blue-light);">
                 <canvas id="signatureCanvas" width="600" height="200" style="display:block;width:100%;height:auto;cursor:crosshair;touch-action:none;"></canvas>
               </div>
-              <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;">
+              <div style="font-size:11px;color:var(--text-2);margin-top:6px;font-style:italic;">
                 ✍️ Tanda tangani di area kotak di atas
               </div>
             </label>
@@ -869,7 +851,7 @@ textarea {
       <section class="view hidden" id="history">
         <div style="margin-bottom:16px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-            <div style="font-weight:600;color:var(--accent-1);">Filter Riwayat</div>
+            <div style="font-weight:600;color:var(--blue-dark);">Filter Riwayat</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn primary" id="exportPdfBtn" style="padding:10px 16px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -890,7 +872,7 @@ textarea {
             <button class="btn ghost" data-history-filter="in" type="button">Stok Masuk</button>
             <button class="btn ghost" data-history-filter="out" type="button">Stok Keluar</button>
           </div>
-          <select id="historyCategoryFilter" style="padding:12px 16px;border-radius:10px;border:1px solid rgba(11,17,34,0.08);width:100%;background:#fafafa;">
+          <select id="historyCategoryFilter" style="padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);width:100%;background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);">
             <option value="">Semua Kategori</option>
           </select>
         </div>
@@ -898,9 +880,9 @@ textarea {
       </section>
 
 <!-- Edit Item Modal -->
-      <div id="editModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3000;padding:16px;">
-        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:16px;background:#fff;overflow:hidden;">
-          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--accent-1);">Edit Barang</h3>
+      <div id="editModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.5);z-index:3000;padding:16px;backdrop-filter:blur(4px);">
+        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 16px 48px rgba(14,165,233,0.2);">
+          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--blue-dark);">Edit Barang</h3>
           
           <form id="editForm" class="form">
             <label>Nama Barang
@@ -933,9 +915,9 @@ textarea {
       </div>
 
       <!-- Add Stock Modal -->
-      <div id="addStockModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3000;padding:16px;">
-        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:16px;background:#fff;overflow:hidden;">
-          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--accent-1);display:flex;align-items:center;justify-content:center;gap:8px;">
+      <div id="addStockModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.5);z-index:3000;padding:16px;backdrop-filter:blur(4px);">
+        <div style="width:100%;max-width:400px;max-height:90vh;padding:20px;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 16px 48px rgba(14,165,233,0.2);">
+          <h3 style="margin:0 0 16px 0;text-align:center;font-size:1.1rem;color:var(--blue-dark);display:flex;align-items:center;justify-content:center;gap:8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
             </svg>
@@ -944,7 +926,7 @@ textarea {
           
           <form id="addStockForm" class="form">
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C13.1 2 14 2.9 14 4V6H20C20.6 6 21 6.4 21 7S20.6 8 20 8H14V10C14 11.1 13.1 12 12 12S10 11.1 10 10V8H4C3.4 8 3 7.6 3 7S3.4 6 4 6H10V4C10 2.9 10.9 2 12 2M12 14C13.1 14 14 14.9 14 16V18H20C20.6 18 21 18.4 21 19S20.6 20 20 20H14V22C14 23.1 13.1 24 12 24S10 23.1 10 22V20H4C3.4 20 3 19.6 3 19S3.4 18 4 18H10V16C10 14.9 10.9 14 12 14Z"/>
                 </svg>
@@ -954,7 +936,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5"/>
                 </svg>
@@ -964,7 +946,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M7 4V2C7 1.45 7.45 1 8 1S9 1.45 9 2V4H15V2C15 1.45 15.45 1 16 1S17 1.45 17 2V4H20C21.11 4 22 4.89 22 6V20C22 21.11 21.11 22 20 22H4C2.89 22 2 21.11 2 20V6C2 4.89 2.89 4 4 4H7M4 8V20H20V8H4M6 10H8V12H6V10M10 10H12V12H10V10M14 10H16V12H14V10M6 14H8V16H6V14M10 14H12V16H10V14M14 14H16V16H14V14"/>
                 </svg>
@@ -974,7 +956,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                 </svg>
@@ -984,7 +966,7 @@ textarea {
             </label>
             
             <label>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text-2);font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M14,10H12V8H14M14,16H12V12H14M20,8H17.19C16.74,7.22 16.12,6.55 15.37,6.04L17,4.41L15.59,3L13.42,5.17C12.96,5.06 12.5,5 12,5C11.5,5 11.04,5.06 10.59,5.17L8.41,3L7,4.41L8.62,6.04C7.88,6.55 7.26,7.22 6.81,8H4V10H6.09C6.04,10.33 6,10.66 6,11V12H4V14H6V15C6,15.34 6.04,15.67 6.09,16H4V18H6.81C7.85,19.79 9.78,21 12,21C14.22,21 16.15,19.79 17.19,18H20V16H17.91C17.96,15.67 18,15.34 18,15V14H20V12H18V11C18,10.66 17.96,10.33 17.91,10H20V8Z"/>
                 </svg>
@@ -1004,15 +986,39 @@ textarea {
       <!-- Enhanced Scanner Modal -->
       <div id="scannerModal">
         <div class="modal-card">
-          <h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: text-top;">
-              <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
-            </svg>
-            Scan Barcode
-          </h3>
-          <div id="reader"></div>
-          <div class="modal-actions">
-            <button id="closeScanner" class="btn ghost">Tutup</button>
+          <!-- drag handle rendered by ::before -->
+          <div class="scanner-header">
+            <div class="scanner-title">
+              <div class="scanner-title-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
+                </svg>
+              </div>
+              Scan Barcode
+            </div>
+            <button class="scanner-close-btn" id="closeScanner" aria-label="Tutup">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="scanner-hint">Arahkan kamera ke barcode produk</div>
+
+          <div class="scanner-viewport">
+            <div id="reader"></div>
+            <!-- custom overlay: scan line + corner brackets -->
+            <div class="scan-frame-overlay">
+              <div class="scan-line"></div>
+              <div class="scan-corners">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="scanner-status">
+            <div class="scanner-status-dot"></div>
+            <div class="scanner-status-text">Menunggu barcode…</div>
           </div>
         </div>
       </div>
@@ -1203,13 +1209,29 @@ function load(){
 }
 
 function save(){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){ console.error('save error', e); }
+  try {
+    state.lastModified = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (typeof syncToDrive === 'function') syncToDrive(state);
+  } catch(e){ console.error('save error', e); }
 }
 
 function renderCounts(){
   el('totalN').textContent = state.items.length;
   el('stockN').textContent = state.items.reduce((a,b)=>a+(+b.stock||0),0);
-  el('lowN').textContent = state.items.filter(i => (+i.stock) <= 5).length;
+  el('lowN').textContent = state.items.filter(i => (+i.stock) > 0 && (+i.stock) <= 5).length;
+}
+
+function stockPriority(item){
+  if(item.stock <= 0) return 0;       // kosong → paling atas
+  if(item.stock <= 5) return 1;       // hampir habis → kedua
+  return 2;                           // tersedia → bawah
+}
+
+function stockBadge(stock){
+  if(stock <= 0)  return { cls:'empty', text:'Kosong',        icon:'✕' };
+  if(stock <= 5)  return { cls:'low',   text:'Hampir Habis',  icon:'⚠' };
+  return              { cls:'available', text:'Tersedia',     icon:'✓' };
 }
 
 function renderItems(query=''){
@@ -1217,7 +1239,7 @@ function renderItems(query=''){
   container.innerHTML = '';
   const q = (query||'').toString().trim().toLowerCase();
 
-  const filtered = state.items.filter(item => {
+  let filtered = state.items.filter(item => {
     if(!q) return true;
     return (item.name||'').toLowerCase().includes(q) ||
            (item.category||'').toLowerCase().includes(q) ||
@@ -1225,23 +1247,24 @@ function renderItems(query=''){
   });
 
   if(filtered.length === 0){
-    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada barang.</div>';
+    container.innerHTML = '<div style="padding:12px;color:var(--text-2)">Tidak ada barang.</div>';
     return;
   }
+
+  // Urutan: kosong → hampir habis → tersedia, lalu alphabetical
+  filtered.sort((a, b) => stockPriority(a) - stockPriority(b) || (a.name||'').localeCompare(b.name||''));
 
   filtered.forEach(item => {
     const card = document.createElement('div');
     card.className = 'card';
-
-    const badgeClass = item.stock > 0 ? 'available' : 'empty';
-    const badgeText = item.stock > 0 ? 'Tersedia' : 'Kosong';
+    const { cls, text, icon } = stockBadge(item.stock);
 
     card.innerHTML = `
       <div class="top">
         <h3>${escapeHtml(item.name)}</h3>
-        <div class="badge ${badgeClass}">${badgeText}</div>
+        <div class="badge ${cls}">${icon} ${text}</div>
       </div>
-      <div class="meta">${escapeHtml(item.category || '-')} | Stok: ${item.stock}${item.barcode ? '<br/>🏷️ ' + escapeHtml(item.barcode) : ''}</div>
+      <div class="meta">${escapeHtml(item.category || '-')} | Stok: <strong>${item.stock}</strong>${item.barcode ? '<br/>🏷️ ' + escapeHtml(item.barcode) : ''}</div>
     `;
 
     const actions = document.createElement('div');
@@ -1283,7 +1306,7 @@ function renderManageList(query = '', filter = 'all'){
   const container = el('manageList');
   container.innerHTML = '';
   if(state.items.length === 0){ 
-    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Belum ada barang.</div>'; 
+    container.innerHTML = '<div style="padding:12px;color:var(--text-2)">Belum ada barang.</div>'; 
     return; 
   }
 
@@ -1306,17 +1329,21 @@ function renderManageList(query = '', filter = 'all'){
   });
 
   if(filtered.length === 0){
-    container.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada barang yang sesuai.</div>';
+    container.innerHTML = '<div style="padding:12px;color:var(--text-2)">Tidak ada barang yang sesuai.</div>';
     return;
   }
+
+  // Urutan: kosong → hampir habis → tersedia, lalu alphabetical
+  filtered.sort((a, b) => stockPriority(a) - stockPriority(b) || (a.name||'').localeCompare(b.name||''));
 
   filtered.forEach(item => {
     const card = document.createElement('div');
     card.className = 'card';
+    const { cls, text, icon } = stockBadge(item.stock);
     card.innerHTML = `
       <div class="top">
         <h3>${escapeHtml(item.name)}</h3>
-        <div class="badge ${item.stock>0 ? 'available' : 'empty'}">${item.stock}</div>
+        <div class="badge ${cls}">${icon} ${item.stock} — ${text}</div>
       </div>
       <div class="meta">Kategori: ${escapeHtml(item.category || '-')} ${item.barcode ? '<br/>🏷️ ' + escapeHtml(item.barcode) : ''}</div>
     `;
@@ -1360,15 +1387,62 @@ function renderSelects() {
   }
 }
 
+function groupHistoryByTransaction(historyArr) {
+  const transactions = {};
+  
+  historyArr.forEach(h => {
+    const item = state.items.find(x => x.id === h.itemId);
+    
+    // Gunakan transactionId jika ada, fallback ke grouping by recipient+time
+    let txKey;
+    if (h.transactionId) {
+      txKey = h.transactionId;
+    } else if (h.type === 'out') {
+      // Legacy: group by recipient + time within 5 seconds
+      let foundKey = null;
+      for (const k in transactions) {
+        const tx = transactions[k];
+        const timeDiff = Math.abs(new Date(h.date) - new Date(tx.date));
+        if (tx.recipient === (h.recipient || '') && tx.type === h.type && tx.note === (h.note || '') && timeDiff < 5000) {
+          foundKey = k;
+          break;
+        }
+      }
+      txKey = foundKey || ('tx_' + h.id);
+    } else {
+      txKey = 'tx_' + h.id; // stok masuk tetap per-item
+    }
+    
+    if (!transactions[txKey]) {
+      transactions[txKey] = {
+        txKey,
+        type: h.type,
+        date: h.date,
+        recipient: h.recipient || '-',
+        note: h.note || '',
+        items: [],
+      };
+    }
+    transactions[txKey].items.push({
+      historyId: h.id,
+      itemName: item?.name || '[dihapus]',
+      category: item?.category || '-',
+      qty: h.qty,
+    });
+  });
+  
+  return Object.values(transactions).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
 function renderHistory(){
   const c = el('historyList');
   c.innerHTML = '';
   if(!state.history || state.history.length === 0){ 
-    c.innerHTML = '<div style="padding:12px;color:var(--muted)">Belum ada riwayat.</div>'; 
+    c.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3)">Belum ada riwayat transaksi.</div>'; 
     return; 
   }
   
-  let filtered = state.history.slice().reverse();
+  let filtered = state.history.slice();
   
   if (_currentHistoryFilter !== 'all') {
     filtered = filtered.filter(h => h.type === _currentHistoryFilter);
@@ -1382,36 +1456,91 @@ function renderHistory(){
   }
   
   if (filtered.length === 0) {
-    c.innerHTML = '<div style="padding:12px;color:var(--muted)">Tidak ada riwayat yang sesuai dengan filter.</div>';
+    c.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3)">Tidak ada riwayat yang sesuai.</div>';
     return;
   }
   
-  filtered.forEach(h => {
-    const item = state.items.find(x => x.id === h.itemId);
-    const card = document.createElement('div');
-    card.className = 'card';
+  const transactions = groupHistoryByTransaction(filtered);
+  
+  transactions.forEach(tx => {
+    const isOut = tx.type === 'out';
+    const dateStr = fmtDate(tx.date);
+    const totalQty = tx.items.reduce((s, i) => s + i.qty, 0);
     
-    let metaInfo = `${h.qty} — ${fmtDate(h.date)}`;
-    if (item && item.category) {
-      metaInfo += `<br/>📦 Kategori: ${escapeHtml(item.category)}`;
+    const card = document.createElement('div');
+    card.className = 'card tx-card';
+    card.style.cssText = 'gap:0;padding:0;overflow:hidden;';
+    
+    // Header bar
+    const headerBg = isOut
+      ? 'linear-gradient(135deg,#fff1f3,#fff5f7)'
+      : 'linear-gradient(135deg,#ecfdf5,#f0fff8)';
+    const badgeColor = isOut ? 'empty' : 'available';
+    const badgeLabel = isOut ? '↑ Stok Keluar' : '↓ Stok Masuk';
+    const accentColor = isOut ? 'var(--danger)' : 'var(--success)';
+    const borderColor = isOut ? 'rgba(244,63,94,0.18)' : 'rgba(16,185,129,0.18)';
+    
+    // Build items preview (first 2 then "...+N lagi")
+    const previewItems = tx.items.slice(0, 2);
+    const extra = tx.items.length - 2;
+    let itemsHtml = previewItems.map(it =>
+      `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(14,165,233,0.07);border:1px solid rgba(14,165,233,0.15);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--text-2);">
+        ${escapeHtml(it.itemName)} <strong style="color:var(--text)">${it.qty}</strong>
+      </span>`
+    ).join('');
+    if (extra > 0) {
+      itemsHtml += `<span style="font-size:11px;color:var(--text-3);padding:2px 4px;">+${extra} lainnya</span>`;
     }
-    if (h.recipient) {
-      metaInfo += `<br/>👤 Penerima: ${escapeHtml(h.recipient)}`;
-    }
-    if (h.note && h.note.trim()) {
-      metaInfo += `<br/>📝 ${escapeHtml(h.note)}`;
-    }
-    if (h.type === 'out' && h.signatureId) {
-      metaInfo += `<br/>✍️ Tanda tangan tersimpan`;
-    }
+    
+    const printBtnHtml = isOut ? `
+      <button onclick="printTransactionPDF('${tx.txKey}')" style="
+        display:inline-flex;align-items:center;gap:5px;
+        padding:7px 13px;border-radius:8px;border:1.5px solid rgba(14,165,233,0.3);
+        background:var(--blue-light);color:var(--blue-dark);
+        font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;
+        transition:background 0.15s;white-space:nowrap;flex-shrink:0;
+      " onmouseover="this.style.background='var(--blue-mid)'" onmouseout="this.style.background='var(--blue-light)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/></svg>
+        Cetak PDF
+      </button>` : '';
     
     card.innerHTML = `
-      <div class="top">
-        <h3>${escapeHtml(item?.name || '[deleted]')}</h3>
-        <div class="badge ${h.type === 'in' ? 'available' : 'empty'}">${h.type === 'in' ? 'Masuk' : 'Keluar'}</div>
+      <div style="padding:13px 14px 11px;background:${headerBg};border-bottom:1px solid ${borderColor};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px;">
+              <span class="badge ${badgeColor}" style="border:1px solid ${borderColor};">${badgeLabel}</span>
+              <span style="font-size:12px;font-weight:700;color:var(--text);">${escapeHtml(tx.recipient)}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);">
+              🕐 ${dateStr} &nbsp;·&nbsp; 📦 ${tx.items.length} jenis · ${totalQty} unit
+              ${tx.note ? `&nbsp;·&nbsp; 📝 ${escapeHtml(tx.note)}` : ''}
+            </div>
+          </div>
+          ${printBtnHtml}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">
+          ${itemsHtml}
+        </div>
       </div>
-      <div class="meta">${metaInfo}</div>
+      ${tx.items.length > 2 ? `
+        <div style="padding:10px 14px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:7px;">Semua Barang (${tx.items.length} item):</div>
+          <div style="display:grid;gap:5px;">
+            ${tx.items.map((it, idx) => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+                <div>
+                  <span style="font-size:13px;font-weight:600;color:var(--text);">${idx+1}. ${escapeHtml(it.itemName)}</span>
+                  <span style="font-size:11px;color:var(--text-3);margin-left:6px;">${escapeHtml(it.category)}</span>
+                </div>
+                <span style="font-size:13px;font-weight:700;color:${accentColor};">${it.qty} unit</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
     `;
+    
     c.appendChild(card);
   });
 }
@@ -1758,6 +1887,8 @@ function initForms(){
     }
     
     const processedItems = [];
+    const transactionId = uid(); // ID transaksi yang sama untuk semua item dalam 1 pengiriman
+    const transactionDate = new Date().toISOString();
     
     for (let selectedItem of _selectedItems) {
       const item = state.items.find(x => x.id === selectedItem.itemId);
@@ -1772,10 +1903,11 @@ function initForms(){
           itemId: item.id, 
           type: 'out', 
           qty: selectedItem.qty, 
-          date: new Date().toISOString(), 
+          date: transactionDate, 
           recipient: recipient,
           note: notes,
-          signatureId: historyId
+          signatureId: historyId,
+          transactionId: transactionId  // group key
         });
         
         // Simpan signature ke IndexedDB
@@ -2074,6 +2206,244 @@ function isSignatureValid() {
   }
   
   return false;
+}
+
+// ── Cetak PDF per Transaksi (tanda tangan basah) ─────────────────────────────
+function printTransactionPDF(txKey) {
+  const { jsPDF } = window.jspdf;
+  
+  // Kumpulkan semua history entry yang masuk transaksi ini
+  const entries = (state.history || []).filter(h => {
+    if (h.transactionId === txKey) return true;
+    if (!h.transactionId && 'tx_' + h.id === txKey) return true;
+    return false;
+  });
+  
+  if (!entries.length) {
+    showNotification('error', 'Data transaksi tidak ditemukan');
+    return;
+  }
+  
+  const firstEntry = entries[0];
+  const recipient  = firstEntry.recipient || '-';
+  const txDate     = new Date(firstEntry.date);
+  const txNote     = firstEntry.note || '';
+  
+  const dateStr = txDate.toLocaleDateString('id-ID', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+  const timeStr = txDate.toLocaleTimeString('id-ID', {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+  
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210;
+  const marginL = 15;
+  const marginR = 15;
+  const contentW = pageW - marginL - marginR;
+  
+  // ── Kop / Header ──────────────────────────────────────────────────────────
+  // Background header
+  doc.setFillColor(3, 105, 161);   // sky-700
+  doc.rect(0, 0, pageW, 38, 'F');
+  doc.setFillColor(14, 165, 233);  // sky-500 strip bawah
+  doc.rect(0, 33, pageW, 5, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont(undefined, 'bold');
+  doc.text('SiMERY', marginL, 14);
+  
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.text('Aplikasi Manajemen Inventory', marginL, 20);
+  doc.text('Twin Insani, S.Kom', marginL, 25);
+  
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text('BUKTI PENGELUARAN BARANG', pageW - marginR, 14, { align: 'right' });
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'normal');
+  
+  const noDoc = `TRX/${txDate.getFullYear()}/${String(txDate.getMonth()+1).padStart(2,'0')}/${txKey.slice(-6).toUpperCase()}`;
+  doc.text(`No: ${noDoc}`, pageW - marginR, 20, { align: 'right' });
+  doc.text(`Tanggal: ${dateStr}`, pageW - marginR, 25, { align: 'right' });
+  doc.text(`Waktu  : ${timeStr} WIB`, pageW - marginR, 30, { align: 'right' });
+  
+  doc.setTextColor(0, 0, 0);
+  
+  let y = 46;
+  
+  // ── Info Penerima ──────────────────────────────────────────────────────────
+  doc.setFillColor(240, 249, 255);   // sky-50
+  doc.setDrawColor(186, 230, 253);   // sky-200
+  doc.roundedRect(marginL, y, contentW, 22, 2, 2, 'FD');
+  
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 120);
+  doc.text('DISERAHKAN KEPADA', marginL + 4, y + 5);
+  doc.setFontSize(13);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(3, 105, 161);
+  doc.text(recipient, marginL + 4, y + 13);
+  
+  if (txNote) {
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(100, 100, 120);
+    doc.text(`Keterangan: ${txNote}`, marginL + 4, y + 19);
+  }
+  
+  doc.setTextColor(0, 0, 0);
+  y += 28;
+  
+  // ── Tabel Barang ──────────────────────────────────────────────────────────
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(3, 105, 161);
+  doc.text('DAFTAR BARANG YANG DITERIMA', marginL, y);
+  doc.setTextColor(0, 0, 0);
+  y += 4;
+  
+  const tableItems = entries.map((h, idx) => {
+    const item = state.items.find(x => x.id === h.itemId);
+    return [
+      (idx + 1).toString(),
+      item?.name || '[dihapus]',
+      item?.category || '-',
+      h.qty.toString(),
+      'unit',
+      ''   // kolom paraf
+    ];
+  });
+  
+  const totalQty = entries.reduce((s, h) => s + h.qty, 0);
+  tableItems.push([
+    '', 'TOTAL', '', totalQty.toString(), 'unit', ''
+  ]);
+  
+  doc.autoTable({
+    startY: y,
+    head: [['No', 'Nama Barang', 'Kategori / Jenis', 'Jml', 'Satuan', 'Paraf']],
+    body: tableItems,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [3, 105, 161],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 9,
+      halign: 'center',
+    },
+    bodyStyles: {
+      fontSize: 9,
+      valign: 'middle',
+      minCellHeight: 9,
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center' },
+      1: { cellWidth: 60 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 14, halign: 'center' },
+      4: { cellWidth: 16, halign: 'center' },
+      5: { cellWidth: 22, halign: 'center' },
+    },
+    didDrawRow: (data) => {
+      // Baris total → bold dan background terang
+      if (data.row.index === tableItems.length - 1) {
+        doc.setFillColor(224, 242, 254);
+      }
+    },
+    margin: { left: marginL, right: marginR },
+  });
+  
+  y = doc.lastAutoTable.finalY + 8;
+  
+  // ── Catatan ────────────────────────────────────────────────────────────────
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'italic');
+  doc.setTextColor(140, 140, 160);
+  doc.text('* Barang di atas telah diterima dalam kondisi baik.', marginL, y);
+  doc.text('* Dokumen ini berlaku sebagai bukti serah terima barang yang sah.', marginL, y + 4);
+  doc.setTextColor(0, 0, 0);
+  y += 14;
+  
+  // ── Area Tanda Tangan ─────────────────────────────────────────────────────
+  // Pastikan cukup ruang, jika tidak buat halaman baru
+  if (y > 230) {
+    doc.addPage();
+    y = 20;
+  }
+  
+  // Dua kolom: Penyerah (kiri) | Penerima (kanan)
+  const colW   = (contentW - 10) / 2;
+  const leftX  = marginL;
+  const rightX = marginL + colW + 10;
+  
+  const boxH   = 50;
+  
+  // Box kiri — Diserahkan oleh
+  doc.setDrawColor(186, 230, 253);
+  doc.setFillColor(248, 253, 255);
+  doc.roundedRect(leftX, y, colW, boxH, 2, 2, 'FD');
+  
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(3, 105, 161);
+  doc.text('DISERAHKAN OLEH', leftX + colW/2, y + 6, { align: 'center' });
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(120, 120, 140);
+  doc.text('(Petugas Gudang)', leftX + colW/2, y + 11, { align: 'center' });
+  
+  // Garis tanda tangan kiri
+  doc.setDrawColor(140, 140, 160);
+  doc.setLineWidth(0.4);
+  doc.line(leftX + 8, y + boxH - 12, leftX + colW - 8, y + boxH - 12);
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 120);
+  doc.text('( _________________________ )', leftX + colW/2, y + boxH - 6, { align: 'center' });
+  
+  // Box kanan — Diterima oleh
+  doc.setDrawColor(186, 230, 253);
+  doc.setFillColor(240, 253, 244);
+  doc.roundedRect(rightX, y, colW, boxH, 2, 2, 'FD');
+  
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(5, 150, 105);
+  doc.text('DITERIMA OLEH', rightX + colW/2, y + 6, { align: 'center' });
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(120, 120, 140);
+  doc.text(`(${recipient})`, rightX + colW/2, y + 11, { align: 'center' });
+  
+  // Garis tanda tangan kanan
+  doc.setDrawColor(140, 140, 160);
+  doc.line(rightX + 8, y + boxH - 12, rightX + colW - 8, y + boxH - 12);
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 120);
+  doc.text('( _________________________ )', rightX + colW/2, y + boxH - 6, { align: 'center' });
+  
+  y += boxH + 10;
+  
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  doc.setDrawColor(186, 230, 253);
+  doc.setLineWidth(0.5);
+  doc.line(marginL, y, pageW - marginR, y);
+  
+  doc.setFontSize(7.5);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(160, 160, 180);
+  const printedAt = new Date().toLocaleString('id-ID', {
+    day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+  doc.text(`Dicetak melalui SiMERY pada ${printedAt} WIB`, pageW/2, y + 5, { align: 'center' });
+  doc.text(`No. Dokumen: ${noDoc}`, pageW/2, y + 9, { align: 'center' });
+  
+  // ── Save ───────────────────────────────────────────────────────────────────
+  const safeName = recipient.replace(/[^a-zA-Z0-9]/g, '_');
+  const dateTag  = txDate.toISOString().split('T')[0];
+  doc.save(`Bukti_Serah_Terima_${safeName}_${dateTag}.pdf`);
+  
+  showNotification('success', 'PDF berhasil dibuat!', `Bukti serah terima untuk ${recipient}`);
 }
 
 async function exportHistoryToPDF() {
@@ -2525,6 +2895,12 @@ function exportPerItemPDF() {
 function openScanner(onScan){
   el('scannerModal').style.display = 'flex';
   
+  // Reset status
+  const statusText = document.querySelector('.scanner-status-text');
+  const statusDot  = document.querySelector('.scanner-status-dot');
+  if (statusText) statusText.textContent = 'Memulai kamera…';
+  if (statusDot)  statusDot.style.background = 'rgba(255,255,255,0.4)';
+  
   if(_scanner){
     try{ _scanner.stop().then(()=> _scanner.clear()); } catch(e){ console.warn('Scanner cleanup error:', e); }
     _scanner = null;
@@ -2533,26 +2909,28 @@ function openScanner(onScan){
   const reader = el('reader');
   reader.innerHTML = '';
   
-  const html5QrCode = new Html5Qrcode("reader");
+  // Disable verbose logging & camera-select UI from the library
+  Html5Qrcode.LOGGERS = [];
+  const html5QrCode = new Html5Qrcode("reader", { verbose: false });
   _scanner = html5QrCode;
   
   const config = {
-    fps: 10,
+    fps: 12,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
       const minDimension = Math.min(viewfinderWidth, viewfinderHeight);
-      const qrboxSize = Math.floor(minDimension * 0.7);
-      return {
-        width: qrboxSize,
-        height: qrboxSize
-      };
+      return { width: Math.floor(minDimension * 0.65), height: Math.floor(minDimension * 0.65) };
     },
-    aspectRatio: 1.0
+    aspectRatio: 1.0,
+    disableFlip: false,
   };
   
   html5QrCode.start(
     { facingMode: "environment" },
     config,
     (decodedText) => {
+      // Success — flash status green
+      if (statusText) statusText.textContent = '✓ Barcode terdeteksi!';
+      if (statusDot)  statusDot.style.background = '#10b981';
       try {
         if(typeof onScan === 'function') {
           onScan(decodedText);
@@ -2567,28 +2945,51 @@ function openScanner(onScan){
       }
       closeScanner();
     },
-    (error) => {
-    }
-  ).catch(err => {
+    (_error) => { /* silent scan errors are normal */ }
+  ).then(() => {
+    // Camera started OK
+    if (statusText) statusText.textContent = 'Menunggu barcode…';
+    if (statusDot)  statusDot.style.background = 'var(--blue-1)';
+    // Nuke any injected UI elements from the lib after it renders
+    setTimeout(() => {
+      reader.querySelectorAll('select, button, img[alt], span:not([class]), p, label, #html5-qrcode-header, [id*="html5-qrcode-button"], [id*="html5-qrcode-anchor"]').forEach(node => {
+        node.style.cssText = 'display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;';
+      });
+    }, 80);
+  }).catch(err => {
     console.error('Scanner start error:', err);
-    showNotification('error', 'Gagal mengakses kamera', err.toString());
-    closeScanner();
+    _scanner = null; // scanner never started, clear the ref
+    if (statusText) statusText.textContent = 'Gagal mengakses kamera — Tutup & coba lagi';
+    if (statusDot)  statusDot.style.background = 'var(--danger)';
+    showNotification('error', 'Gagal mengakses kamera', 'Pastikan izin kamera sudah diberikan');
+    // Don't auto-close — let the user tap close themselves
   });
 }
 
 function closeScanner(){
-  if(_scanner){
-    _scanner.stop().then(()=> {
-      try{ _scanner.clear(); } catch(e){ console.warn('Scanner clear error:', e); }
-      _scanner = null;
-      el('scannerModal').style.display = 'none';
-    }).catch((err)=> {
-      console.warn('Scanner stop error:', err);
-      _scanner = null;
-      el('scannerModal').style.display = 'none';
-    });
-  } else {
-    el('scannerModal').style.display = 'none';
+  // Always hide the modal immediately — never block on scanner cleanup
+  el('scannerModal').style.display = 'none';
+
+  // Reset status UI for next open
+  const statusText = document.querySelector('.scanner-status-text');
+  const statusDot  = document.querySelector('.scanner-status-dot');
+  if (statusText) statusText.textContent = 'Menunggu barcode…';
+  if (statusDot)  { statusDot.style.background = 'var(--blue-1)'; }
+
+  // Clean up scanner in background — errors are silently swallowed
+  if (_scanner) {
+    const scannerRef = _scanner;
+    _scanner = null;
+    try {
+      const stopPromise = scannerRef.stop();
+      if (stopPromise && typeof stopPromise.then === 'function') {
+        stopPromise
+          .then(() => { try { scannerRef.clear(); } catch(e){} })
+          .catch(() => { try { scannerRef.clear(); } catch(e){} });
+      }
+    } catch(e) {
+      try { scannerRef.clear(); } catch(e2) {}
+    }
   }
 }
 
@@ -2689,5 +3090,195 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAll();
 });
 </script>
+<script>
+// ─── Google Drive Sync + Offline-First Overlay ────────────────────────────────
+const CLIENT_ID      = "1030288606883-712ik0rkv9jkp0meivlv80jkkaksl09f.apps.googleusercontent.com";
+const API_KEY        = "AIzaSyD5GK3ox9KGeyLBfed1P9ScqPA9aSNsW4Q";
+const DISCOVERY_DOC  = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
+const SCOPES         = "https://www.googleapis.com/auth/drive.file";
+const DRIVE_FILENAME = "simery_backup.json";
+const LS_FILE_ID     = "simery_drive_file_id";
+const LS_HINT        = "simery_user_hint";
+const LS_DISMISSED   = "simery_overlay_dismissed";
+const POLL_MS        = 30000;
+
+let accessToken = null, tokenClient = null;
+let driveFileId = localStorage.getItem(LS_FILE_ID) || null;
+let driveStarted = false, isSyncing = false, syncPending = false, pollTimer = null;
+
+function decodeJwt(t){
+  try{return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}catch(e){return{}}
+}
+
+function setSyncStatus(s){
+  const el=document.getElementById('syncStatus');
+  if(!el)return;
+  const m={syncing:'⏳ Menyinkron…',ok:'☁️ Tersinkron',error:'⚠️ Gagal sinkron',offline:'📴 Tidak tersambung',connecting:'🔄 Menghubungkan…'};
+  el.textContent=m[s]||'';
+}
+
+// ── Overlay ──────────────────────────────────────────────────────────────────
+function showOverlay(){
+  const ov=document.getElementById('loginOverlay');
+  if(!ov)return;
+  ov.style.display='flex';
+  const c=document.getElementById('overlaySigninBtn');
+  if(c&&c.children.length===0){
+    google.accounts.id.renderButton(c,{type:'standard',size:'large',theme:'outline',text:'sign_in_with',shape:'rectangular',width:280});
+  }
+  const ob=document.getElementById('overlayOfflineBtn');
+  if(ob) ob.style.display=localStorage.getItem('simery_inventory_v2')?'block':'none';
+}
+function hideOverlay(){const ov=document.getElementById('loginOverlay');if(ov)ov.style.display='none';}
+function dismissOverlay(){localStorage.setItem(LS_DISMISSED,'1');hideOverlay();}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function handleCredentialResponse(response){
+  localStorage.setItem("google_logged_in","true");
+  localStorage.removeItem(LS_DISMISSED);
+  document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
+  document.getElementById("logoutBtn").style.display="inline-flex";
+  const p=decodeJwt(response.credential);
+  if(p.email) localStorage.setItem(LS_HINT,p.email);
+  hideOverlay();
+  startDrive();
+}
+
+function startDrive(){
+  if(driveStarted)return;
+  driveStarted=true;
+  setSyncStatus('connecting');
+  gapi.load("client",async()=>{
+    await gapi.client.init({apiKey:API_KEY,discoveryDocs:[DISCOVERY_DOC]});
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,scope:SCOPES,
+      callback:onTokenReceived,error_callback:onTokenError,
+    });
+    requestTokenWithHint();
+  });
+}
+
+function requestTokenWithHint(){
+  const hint=localStorage.getItem(LS_HINT)||'';
+  tokenClient.requestAccessToken({prompt:'',login_hint:hint});
+}
+
+async function onTokenReceived(resp){
+  if(resp.error){onTokenError({type:resp.error});return;}
+  accessToken=resp.access_token;
+  gapi.client.setToken({access_token:accessToken});
+  const cb=document.getElementById('connectDriveBtn');
+  if(cb)cb.style.display='none';
+  await pullFromDrive();
+  if(syncPending){syncPending=false;await pushToDrive(state);}
+  startPolling();
+  window.addEventListener("focus",onFocus);
+}
+
+function onTokenError(err){
+  console.warn("Drive token error:",err.type);
+  if(err.type==='access_denied'){
+    const cb=document.getElementById('connectDriveBtn');
+    if(cb)cb.style.display='inline-flex';
+    setSyncStatus('offline');
+  } else {
+    setSyncStatus('offline');
+    setTimeout(()=>{if(!accessToken)requestTokenWithHint();},3000);
+  }
+}
+
+document.getElementById('connectDriveBtn').addEventListener('click',()=>{
+  setSyncStatus('connecting');
+  if(tokenClient) tokenClient.requestAccessToken({prompt:'select_account'});
+  else{driveStarted=false;startDrive();}
+});
+
+async function onFocus(){if(accessToken&&!isSyncing)await pullFromDrive();}
+
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{if(accessToken&&!isSyncing)pullFromDrive();},POLL_MS);
+}
+
+// ── Pull ─────────────────────────────────────────────────────────────────────
+async function pullFromDrive(){
+  if(isSyncing)return;
+  isSyncing=true;setSyncStatus('syncing');
+  try{
+    if(!driveFileId){
+      const res=await gapi.client.drive.files.list({q:`name='${DRIVE_FILENAME}' and trashed=false`,spaces:"drive",fields:"files(id)",pageSize:1});
+      if(res.result.files.length>0){driveFileId=res.result.files[0].id;localStorage.setItem(LS_FILE_ID,driveFileId);}
+    }
+    if(!driveFileId){isSyncing=false;await pushToDrive(state);return;}
+    const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}});
+    if(resp.status===401){accessToken=null;isSyncing=false;setSyncStatus('connecting');requestTokenWithHint();return;}
+    if(resp.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);isSyncing=false;await pushToDrive(state);return;}
+    if(!resp.ok){setSyncStatus('error');isSyncing=false;return;}
+    const driveData=await resp.json();
+    if((driveData.lastModified||0)>(state.lastModified||0)){
+      state=driveData;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      if(typeof renderAll==='function')renderAll();
+      showNotification("info","Data diperbarui dari perangkat lain");
+    }
+    setSyncStatus('ok');
+  }catch(err){console.error("pullFromDrive:",err);setSyncStatus('error');}
+  finally{isSyncing=false;}
+}
+
+// ── Push ─────────────────────────────────────────────────────────────────────
+async function pushToDrive(data){
+  if(!accessToken)return;
+  setSyncStatus('syncing');
+  const body=JSON.stringify(data);
+  const meta=JSON.stringify({name:DRIVE_FILENAME,mimeType:"application/json"});
+  const makeForm=()=>{const f=new FormData();f.append("metadata",new Blob([meta],{type:"application/json"}));f.append("file",new Blob([body],{type:"application/json"}));return f;};
+  try{
+    let res;
+    if(driveFileId){
+      res=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`,{method:"PATCH",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
+      if(res.status===401){accessToken=null;setSyncStatus('connecting');requestTokenWithHint();return;}
+      if(res.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);await pushToDrive(data);return;}
+    } else {
+      res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
+      if(res.ok){const j=await res.json();driveFileId=j.id;localStorage.setItem(LS_FILE_ID,driveFileId);}
+    }
+    setSyncStatus(res&&res.ok?'ok':'error');
+  }catch(err){console.error("pushToDrive:",err);setSyncStatus('error');}
+}
+
+function syncToDrive(data){if(!accessToken){syncPending=true;return;}pushToDrive(data);}
+
+// ── Logout: show overlay, keep data ──────────────────────────────────────────
+document.getElementById("logoutBtn").addEventListener("click",()=>{
+  google.accounts.id.disableAutoSelect();
+  if(pollTimer)clearInterval(pollTimer);
+  window.removeEventListener("focus",onFocus);
+  localStorage.removeItem("google_logged_in");
+  localStorage.removeItem(LS_FILE_ID);
+  localStorage.removeItem(LS_HINT);
+  localStorage.removeItem(LS_DISMISSED);
+  accessToken=null;driveFileId=null;driveStarted=false;
+  document.getElementById("logoutBtn").style.display="none";
+  const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
+  document.querySelector(".g_id_signin").style.display="block";
+  setSyncStatus('');
+  showOverlay();
+});
+
+// ── Page load ─────────────────────────────────────────────────────────────────
+window.addEventListener("load",()=>{
+  const loggedIn=localStorage.getItem("google_logged_in")==="true";
+  const dismissed=localStorage.getItem(LS_DISMISSED)==="1";
+  if(loggedIn){
+    document.querySelector(".g_id_signin").style.display="none";
+    document.getElementById("logoutBtn").style.display="inline-flex";
+    startDrive();
+  } else if(!dismissed){
+    setTimeout(showOverlay,300);
+  }
+});
+</script>
+
 </body>
 </html>
