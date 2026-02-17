@@ -6,6 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SiMERY – Aplikasi Manajemen Inventory</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>" type="image/svg+xml">
   <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
@@ -37,7 +38,7 @@ html,body{height:100%}
 body{
   font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;
   background:var(--bg); color:var(--text);
-  font-size:14px; line-height:1.55;
+  font-size:15px; line-height:1.65;
   -webkit-font-smoothing:antialiased;
 }
 
@@ -68,8 +69,8 @@ body{
   backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,0.3);
 }
-.title{font-weight:800;font-size:15px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
-.subtitle{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+.title{font-weight:800;font-size:16px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
+.subtitle{font-size:12px;color:rgba(255,255,255,0.65);margin-top:1px}
 .header-auth{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 #syncStatus{font-size:11px;color:rgba(255,255,255,0.65);text-align:right;min-height:14px;white-space:nowrap}
 /* Google Sign-In widget — no transform tricks, just clip cleanly */
@@ -96,10 +97,11 @@ body{
   box-shadow:var(--shadow-sm);
 }
 .tab{
-  flex:1;padding:9px 6px;border-radius:var(--radius);border:none;
-  background:transparent;font-family:inherit;font-size:12px;font-weight:600;
+  flex:1;padding:10px 6px;border-radius:var(--radius);border:none;
+  background:transparent;font-family:inherit;font-size:13px;font-weight:600;
   color:var(--text-2);cursor:pointer;text-align:center;
   transition:background 0.2s,color 0.2s,box-shadow 0.2s;white-space:nowrap;
+  min-height:44px;
 }
 .tab.active{
   background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
@@ -123,15 +125,15 @@ body{
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
 }
 .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat .n{font-size:1.6rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:5px;letter-spacing:-0.03em}
-.stat .label{font-size:11px;color:var(--text-3);font-weight:500}
+.stat .n{font-size:1.75rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:6px;letter-spacing:-0.03em}
+.stat .label{font-size:12px;color:var(--text-2);font-weight:600;line-height:1.4}
 
 /* ── Search ── */
 .search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .search input{
-  flex:1 1 100%;min-width:0;padding:10px 14px;
+  flex:1 1 100%;min-width:0;padding:12px 16px;
   border-radius:var(--radius);border:1.5px solid var(--border);
-  background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);
+  background:var(--surface);font-family:inherit;font-size:16px;color:var(--text);
   transition:border-color 0.2s,box-shadow 0.2s;
   box-shadow:var(--shadow-sm);
 }
@@ -144,7 +146,7 @@ body{
 }
 
 /* ── Global inputs ── */
-input,select,button,textarea{font-family:inherit;font-size:14px;outline:none}
+input,select,button,textarea{font-family:inherit;font-size:15px;outline:none}
 input,select,textarea{transition:border-color 0.2s,box-shadow 0.2s}
 input:focus,select:focus,textarea:focus{
   border-color:var(--blue-1);
@@ -155,10 +157,10 @@ textarea{resize:vertical;min-height:80px}
 /* ── Buttons ── */
 .btn{
   display:inline-flex;align-items:center;gap:7px;justify-content:center;
-  border-radius:var(--radius);padding:10px 16px;border:none;
-  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
+  border-radius:var(--radius);padding:11px 18px;border:none;
+  cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;
   transition:background 0.2s,opacity 0.15s,transform 0.1s,box-shadow 0.2s;
-  text-decoration:none;white-space:nowrap;
+  text-decoration:none;white-space:nowrap;min-height:44px;
 }
 .btn:active{opacity:0.88;transform:scale(0.98)}
 .btn.ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);box-shadow:var(--shadow-sm)}
@@ -175,9 +177,10 @@ textarea{resize:vertical;min-height:80px}
 /* ── Barcode button ── */
 .btn-barcode{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:10px 16px;border-radius:var(--radius);border:none;
-  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
+  padding:11px 18px;border-radius:var(--radius);border:none;
+  cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;
   background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;
+  min-height:44px;
   box-shadow:0 2px 8px rgba(99,102,241,0.3);
   transition:background 0.2s,box-shadow 0.2s,transform 0.1s;white-space:nowrap;
 }
@@ -195,15 +198,15 @@ textarea{resize:vertical;min-height:80px}
 }
 .card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
 .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
-.card h3{font-size:15px;font-weight:700;color:var(--text)}
-.meta{color:var(--text-2);font-size:13px;line-height:1.5}
+.card h3{font-size:16px;font-weight:700;color:var(--text)}
+.meta{color:var(--text-2);font-size:14px;line-height:1.6}
 .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
 /* ── Badges ── */
 .badge{
   display:inline-flex;align-items:center;gap:4px;
-  padding:4px 10px;border-radius:20px;
-  font-weight:700;font-size:11px;letter-spacing:0.03em;white-space:nowrap;
+  padding:5px 11px;border-radius:20px;
+  font-weight:700;font-size:12px;letter-spacing:0.03em;white-space:nowrap;
   flex-shrink:0;
 }
 .badge.available{
@@ -223,12 +226,12 @@ textarea{resize:vertical;min-height:80px}
 }
 
 /* ── Form ── */
-.form{display:grid;gap:14px}
-.form label{display:block;font-size:13px;color:var(--text-2);font-weight:600}
+.form{display:grid;gap:16px}
+.form label{display:block;font-size:14px;color:var(--text-2);font-weight:600}
 .form input,.form select,.form textarea{
-  padding:10px 14px;border-radius:var(--radius);
+  padding:12px 16px;border-radius:var(--radius);
   border:1.5px solid var(--border);width:100%;margin-top:6px;
-  background:var(--bg);font-family:inherit;font-size:14px;color:var(--text);
+  background:var(--bg);font-family:inherit;font-size:15px;color:var(--text);
   transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
 }
 .form input:focus,.form select:focus,.form textarea:focus{
@@ -455,7 +458,7 @@ textarea{resize:vertical;min-height:80px}
   .scanner-viewport{aspect-ratio:16/9;max-height:48vh}
 }
 
-/* ── Notifications / Toast (seragam) ── */
+/* ── Notifications / Toast (queue-based, no overlap) ── */
 @keyframes toastIn{
   from{opacity:0;transform:translateY(-12px) scale(0.96)}
   to  {opacity:1;transform:translateY(0)    scale(1)}
@@ -464,42 +467,46 @@ textarea{resize:vertical;min-height:80px}
   from{opacity:1;transform:translateY(0) scale(1)}
   to  {opacity:0;transform:translateY(-8px) scale(0.97)}
 }
-.notification{
+/* Container untuk semua toast — satu kolom vertikal */
+#toastContainer{
   position:fixed;top:72px;right:16px;left:16px;
-  margin:0 auto;max-width:340px;
-  padding:12px 14px 12px 16px;
+  margin:0 auto;max-width:360px;
+  display:flex;flex-direction:column;gap:8px;
+  z-index:5000;pointer-events:none;
+}
+.notification{
+  pointer-events:auto;
+  padding:13px 16px 13px 16px;
   border-radius:14px;
   background:rgba(255,255,255,0.97);
   backdrop-filter:blur(12px);
   border:1.5px solid transparent;
-  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.06);
-  z-index:5000;color:var(--text);
+  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.08);
+  color:var(--text);
   opacity:0;
   animation:toastIn 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
 .notification.hiding{animation:toastOut 0.22s ease forwards}
-.notification.show{opacity:1}
 .notification.success{border-color:rgba(16,185,129,0.3);background:linear-gradient(135deg,rgba(236,253,245,0.97),rgba(255,255,255,0.97))}
 .notification.error  {border-color:rgba(244,63,94,0.3);background:linear-gradient(135deg,rgba(255,241,243,0.97),rgba(255,255,255,0.97))}
 .notification.warning{border-color:rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(255,251,235,0.97),rgba(255,255,255,0.97))}
 .notification.info   {border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(240,249,255,0.97),rgba(255,255,255,0.97))}
 .notification-content{display:flex;align-items:center;gap:10px}
 .notification-icon{
-  flex-shrink:0;width:22px;height:22px;
+  flex-shrink:0;width:24px;height:24px;
   display:flex;align-items:center;justify-content:center;
-  border-radius:50%;font-size:13px;
+  border-radius:50%;font-size:14px;
 }
 .notification.success .notification-icon{background:var(--success-light);color:var(--success)}
 .notification.error   .notification-icon{background:var(--danger-light);color:var(--danger)}
 .notification.warning .notification-icon{background:var(--warning-light);color:var(--warning)}
 .notification.info    .notification-icon{background:var(--blue-light);color:var(--blue-1)}
-.notification-text{flex:1}
-.notification-title{font-weight:700;font-size:13px;color:var(--text);line-height:1.3}
-.notification-message{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4}
+.notification-text{flex:1;min-width:0}
+.notification-title{font-weight:700;font-size:14px;color:var(--text);line-height:1.35}
+.notification-message{font-size:13px;color:var(--text-2);margin-top:3px;line-height:1.45}
 .notification.single-line .notification-content{align-items:center}
-.notification.single-line .notification-title{margin-bottom:0}
 @media(max-width:480px){
-  .notification{right:12px;left:12px;max-width:none;top:68px}
+  #toastContainer{right:12px;left:12px;max-width:none;top:70px}
 }
 
 /* ── Stock-out form ── */
@@ -525,9 +532,9 @@ textarea{resize:vertical;min-height:80px}
 .selected-item-actions{display:flex;gap:8px;align-items:center}
 .btn-remove{
   background:var(--danger-light);color:var(--danger);
-  border:1px solid rgba(244,63,94,0.2);padding:5px 11px;border-radius:7px;
-  font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;
-  transition:background 0.15s;
+  border:1px solid rgba(244,63,94,0.2);padding:7px 14px;border-radius:7px;
+  font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;
+  transition:background 0.15s;min-height:38px;
 }
 .btn-remove:hover{background:#fecdd3}
 
@@ -541,15 +548,15 @@ textarea{resize:vertical;min-height:80px}
   box-shadow:var(--shadow-lg);z-index:1000;display:none;
 }
 .suggestions-dropdown.show{display:block}
-.suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border-2)}
+.suggestion-item{padding:13px 16px;cursor:pointer;border-bottom:1px solid var(--border-2);min-height:54px;display:flex;flex-direction:column;justify-content:center}
 .suggestion-item:last-child{border-bottom:none}
 .suggestion-item:hover{background:var(--blue-light)}
-.suggestion-item-name{font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px}
-.suggestion-item-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
+.suggestion-item-name{font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px}
+.suggestion-item-meta{font-size:13px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
 .suggestion-item-stock{display:inline-flex;align-items:center;gap:3px}
 .suggestion-item-stock.low{color:var(--danger);font-weight:600}
 .suggestion-item-stock.available{color:var(--success);font-weight:600}
-.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:13px}
+.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:14px}
 
 /* ── Signature canvas ── */
 #signatureCanvas{
@@ -566,10 +573,26 @@ textarea{resize:vertical;min-height:80px}
 }
 
 /* ── Extra polish ── */
-.main{padding:14px;flex:1}
+.main{padding:16px;flex:1}
 .view.hidden{display:none}
 .btn-barcode,.btn-barcode *{-webkit-tap-highlight-color:transparent}
 select option{background:var(--surface);color:var(--text)}
+
+/* Override inline-style font sizes for form labels & meta texts */
+.form label > div[style*="font-size:13px"],
+.stock-out-form label > div[style*="font-size:13px"]{font-size:14px!important}
+.selected-item-name{font-weight:600;font-size:15px!important;color:var(--text);margin-bottom:3px}
+.selected-item-meta{font-size:13px!important;color:var(--text-3)}
+
+/* Stock-out title bigger */
+.stock-out-title{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;font-size:16px;color:var(--blue-dark);font-weight:700;
+}
+
+/* History cards readable */
+.notification-title{font-size:14px!important}
+.notification-message{font-size:13px!important}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -597,6 +620,9 @@ select option{background:var(--surface);color:var(--text)}
     </div>
   </div>
 
+  <!-- Toast container: semua notifikasi ditumpuk di sini secara vertikal -->
+  <div id="toastContainer"></div>
+
   <div class="app">
     <header class="header">
       <div class="brand">
@@ -608,11 +634,7 @@ select option{background:var(--surface);color:var(--text)}
         </div>
       </div>
       <div class="header-auth">
-  <div id="g_id_onload"
-       data-client_id="1030288606883-712ik0rkv9jkp0meivlv80jkkaksl09f.apps.googleusercontent.com"
-       data-callback="handleCredentialResponse"
-       data-auto_prompt="false">
-  </div>
+  <!-- g_id_onload dihapus: inisialisasi dilakukan via JS initGoogleSignIn() agar tidak race condition -->
   <div class="g_id_signin"
        data-type="standard"
        data-size="medium"
@@ -1782,6 +1804,17 @@ function showSuccessNotification(title, message){
 
 function showNotification(type = 'info', title, message = null) {
   try {
+    // Batasi jumlah toast yang tampil sekaligus (maks 3)
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const existing = container.querySelectorAll('.notification:not(.hiding)');
+    if (existing.length >= 3) {
+      // Hapus toast paling lama agar tidak tumpang tindih
+      const oldest = existing[0];
+      oldest.classList.add('hiding');
+      setTimeout(() => oldest.remove(), 220);
+    }
+
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
     
@@ -1816,15 +1849,14 @@ function showNotification(type = 'info', title, message = null) {
       </div>
     `;
     
-    document.body.appendChild(notification);
-    
-    setTimeout(() => notification.classList.add('show'), 100);
+    // Masukkan ke container (bukan langsung ke body)
+    container.appendChild(notification);
     
     const duration = message ? 4500 : 3000;
     
     setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => notification.remove(), 300);
+      notification.classList.add('hiding');
+      setTimeout(() => notification.remove(), 250);
     }, duration);
     
   } catch(e) { 
@@ -2242,41 +2274,46 @@ function printTransactionPDF(txKey) {
   const marginR = 15;
   const contentW = pageW - marginL - marginR;
   
-  // ── Kop / Header ──────────────────────────────────────────────────────────
-  // Background header
-  doc.setFillColor(3, 105, 161);   // sky-700
-  doc.rect(0, 0, pageW, 38, 'F');
-  doc.setFillColor(14, 165, 233);  // sky-500 strip bawah
-  doc.rect(0, 33, pageW, 5, 'F');
-  
-  doc.setTextColor(255, 255, 255);
+  // ── Kop / Header (ink-saving: no solid fill, border only) ────────────────
+  // Garis border atas tebal (hemat tinta)
+  doc.setDrawColor(3, 105, 161);
+  doc.setLineWidth(1.2);
+  doc.line(0, 0, pageW, 0);
+  doc.setLineWidth(0.4);
+  doc.line(marginL, 34, pageW - marginR, 34);  // garis pemisah bawah header
+
+  // Teks hitam / biru gelap (hemat tinta)
+  doc.setTextColor(3, 105, 161);
   doc.setFontSize(20);
   doc.setFont(undefined, 'bold');
-  doc.text('SiMERY', marginL, 14);
-  
+  doc.text('SiMERY', marginL, 13);
+
   doc.setFontSize(9);
   doc.setFont(undefined, 'normal');
-  doc.text('Aplikasi Manajemen Inventory', marginL, 20);
-  doc.text('Twin Insani, S.Kom', marginL, 25);
-  
+  doc.setTextColor(60, 80, 100);
+  doc.text('Aplikasi Manajemen Inventory', marginL, 19);
+  doc.text('Twin Insani, S.Kom', marginL, 24);
+
   doc.setFontSize(11);
   doc.setFont(undefined, 'bold');
-  doc.text('BUKTI PENGELUARAN BARANG', pageW - marginR, 14, { align: 'right' });
+  doc.setTextColor(20, 20, 20);
+  doc.text('BUKTI PENGELUARAN BARANG', pageW - marginR, 13, { align: 'right' });
   doc.setFontSize(8);
   doc.setFont(undefined, 'normal');
-  
+  doc.setTextColor(60, 80, 100);
+
   const noDoc = `TRX/${txDate.getFullYear()}/${String(txDate.getMonth()+1).padStart(2,'0')}/${txKey.slice(-6).toUpperCase()}`;
-  doc.text(`No: ${noDoc}`, pageW - marginR, 20, { align: 'right' });
-  doc.text(`Tanggal: ${dateStr}`, pageW - marginR, 25, { align: 'right' });
-  doc.text(`Waktu  : ${timeStr} WIB`, pageW - marginR, 30, { align: 'right' });
-  
+  doc.text(`No: ${noDoc}`, pageW - marginR, 19, { align: 'right' });
+  doc.text(`Tanggal: ${dateStr}`, pageW - marginR, 24, { align: 'right' });
+  doc.text(`Waktu  : ${timeStr} WIB`, pageW - marginR, 29, { align: 'right' });
+
   doc.setTextColor(0, 0, 0);
   
-  let y = 46;
+  let y = 42;
   
   // ── Info Penerima ──────────────────────────────────────────────────────────
-  doc.setFillColor(240, 249, 255);   // sky-50
-  doc.setDrawColor(186, 230, 253);   // sky-200
+  doc.setFillColor(248, 250, 252);   // hampir putih, hemat tinta
+  doc.setDrawColor(180, 200, 220);
   doc.roundedRect(marginL, y, contentW, 22, 2, 2, 'FD');
   
   doc.setFontSize(8);
@@ -2328,11 +2365,13 @@ function printTransactionPDF(txKey) {
     body: tableItems,
     theme: 'grid',
     headStyles: {
-      fillColor: [3, 105, 161],
-      textColor: [255, 255, 255],
+      fillColor: [220, 235, 245],   // biru sangat muda, hemat tinta
+      textColor: [3, 105, 161],     // teks biru gelap (bukan putih)
       fontStyle: 'bold',
       fontSize: 9,
       halign: 'center',
+      lineColor: [180, 210, 230],
+      lineWidth: 0.4,
     },
     bodyStyles: {
       fontSize: 9,
@@ -2341,7 +2380,7 @@ function printTransactionPDF(txKey) {
     },
     columnStyles: {
       0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 60 },
+      1: { cellWidth: 78 },            // diperlebar agar total = 180mm
       2: { cellWidth: 40 },
       3: { cellWidth: 14, halign: 'center' },
       4: { cellWidth: 16, halign: 'center' },
@@ -2354,6 +2393,7 @@ function printTransactionPDF(txKey) {
       }
     },
     margin: { left: marginL, right: marginR },
+    tableWidth: contentW,
   });
   
   y = doc.lastAutoTable.finalY + 8;
@@ -2382,8 +2422,9 @@ function printTransactionPDF(txKey) {
   const boxH   = 50;
   
   // Box kiri — Diserahkan oleh
-  doc.setDrawColor(186, 230, 253);
-  doc.setFillColor(248, 253, 255);
+  doc.setDrawColor(180, 200, 220);
+  doc.setLineWidth(0.5);
+  doc.setFillColor(255, 255, 255);   // putih bersih, hemat tinta
   doc.roundedRect(leftX, y, colW, boxH, 2, 2, 'FD');
   
   doc.setFontSize(8);
@@ -2392,7 +2433,7 @@ function printTransactionPDF(txKey) {
   doc.text('DISERAHKAN OLEH', leftX + colW/2, y + 6, { align: 'center' });
   doc.setFont(undefined, 'normal');
   doc.setTextColor(120, 120, 140);
-  doc.text('(Petugas Gudang)', leftX + colW/2, y + 11, { align: 'center' });
+  doc.text('(Pengurus Barang)', leftX + colW/2, y + 11, { align: 'center' });
   
   // Garis tanda tangan kiri
   doc.setDrawColor(140, 140, 160);
@@ -2403,8 +2444,9 @@ function printTransactionPDF(txKey) {
   doc.text('( _________________________ )', leftX + colW/2, y + boxH - 6, { align: 'center' });
   
   // Box kanan — Diterima oleh
-  doc.setDrawColor(186, 230, 253);
-  doc.setFillColor(240, 253, 244);
+  doc.setDrawColor(180, 200, 220);
+  doc.setLineWidth(0.5);
+  doc.setFillColor(255, 255, 255);   // putih bersih, hemat tinta
   doc.roundedRect(rightX, y, colW, boxH, 2, 2, 'FD');
   
   doc.setFontSize(8);
@@ -2438,10 +2480,28 @@ function printTransactionPDF(txKey) {
   doc.text(`Dicetak melalui SiMERY pada ${printedAt} WIB`, pageW/2, y + 5, { align: 'center' });
   doc.text(`No. Dokumen: ${noDoc}`, pageW/2, y + 9, { align: 'center' });
   
-  // ── Save ───────────────────────────────────────────────────────────────────
+  // ── Save / Open ────────────────────────────────────────────────────────────
   const safeName = recipient.replace(/[^a-zA-Z0-9]/g, '_');
   const dateTag  = txDate.toISOString().split('T')[0];
-  doc.save(`Bukti_Serah_Terima_${safeName}_${dateTag}.pdf`);
+  const fileName = `Bukti_Serah_Terima_${safeName}_${dateTag}.pdf`;
+  
+  // Deteksi mobile: buka di tab baru (lebih baik di smartphone)
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isMobile) {
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+  } else {
+    doc.save(fileName);
+  }
   
   showNotification('success', 'PDF berhasil dibuat!', `Bukti serah terima untuk ${recipient}`);
 }
@@ -3106,6 +3166,51 @@ let accessToken = null, tokenClient = null;
 let driveFileId = localStorage.getItem(LS_FILE_ID) || null;
 let driveStarted = false, isSyncing = false, syncPending = false, pollTimer = null;
 
+// Inisialisasi Google Sign-In secara eksplisit (lebih aman dari deklarasi HTML-only)
+// Dijalankan setelah GSI library siap
+function initGoogleSignIn(){
+  try {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: handleCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: false,
+      // Matikan FedCM prompt otomatis — penyebab COOP window.closed error di Edge
+      use_fedcm_for_prompt: false,
+      itp_support: true,
+    });
+  } catch(e) {
+    console.warn('GSI initialize error (origin mungkin belum terdaftar di Google Console):', e.message);
+  }
+}
+
+// Render tombol Sign-In dengan error handling (403 jika origin belum terdaftar)
+function renderSignInButton(container, opts){
+  if(!container) return;
+  try {
+    google.accounts.id.renderButton(container, opts);
+  } catch(e) {
+    // Origin belum terdaftar — tampilkan tombol fallback manual
+    container.innerHTML = `
+      <button onclick="manualGoogleSignIn()" style="
+        display:flex;align-items:center;gap:8px;padding:10px 20px;
+        border:1.5px solid #dadce0;border-radius:8px;background:#fff;
+        font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;
+        color:#3c4043;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="G">
+        Masuk dengan Google
+      </button>`;
+    console.warn('GSI renderButton gagal (origin belum terdaftar):', e.message);
+  }
+}
+
+function manualGoogleSignIn(){
+  // Popup manual sebagai fallback jika renderButton gagal
+  if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
+    google.accounts.id.prompt();
+  }
+}
+
 function decodeJwt(t){
   try{return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}catch(e){return{}}
 }
@@ -3124,7 +3229,7 @@ function showOverlay(){
   ov.style.display='flex';
   const c=document.getElementById('overlaySigninBtn');
   if(c&&c.children.length===0){
-    google.accounts.id.renderButton(c,{type:'standard',size:'large',theme:'outline',text:'sign_in_with',shape:'rectangular',width:280});
+    renderSignInButton(c,{type:'standard',size:'large',theme:'outline',text:'sign_in_with',shape:'rectangular',width:280});
   }
   const ob=document.getElementById('overlayOfflineBtn');
   if(ob) ob.style.display=localStorage.getItem('simery_inventory_v2')?'block':'none';
@@ -3134,12 +3239,28 @@ function dismissOverlay(){localStorage.setItem(LS_DISMISSED,'1');hideOverlay();}
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 function handleCredentialResponse(response){
+  const p = decodeJwt(response.credential);
+  const newEmail = p.email || '';
+
+  // Deteksi ganti akun — hapus data lokal milik user sebelumnya
+  const prevEmail = localStorage.getItem(LS_HINT) || '';
+  if(prevEmail && newEmail && prevEmail !== newEmail){
+    // Bersihkan data inventori & Drive file ID milik akun lama
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LS_FILE_ID);
+    driveFileId = null;
+    // Reset state in-memory
+    state = { items: [], history: [] };
+    renderAll();
+    showNotification('info', 'Akun berbeda terdeteksi', 'Data lokal akun sebelumnya dihapus, memuat data akun baru…');
+  }
+
   localStorage.setItem("google_logged_in","true");
   localStorage.removeItem(LS_DISMISSED);
+  if(newEmail) localStorage.setItem(LS_HINT, newEmail);
+
   document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
   document.getElementById("logoutBtn").style.display="inline-flex";
-  const p=decodeJwt(response.credential);
-  if(p.email) localStorage.setItem(LS_HINT,p.email);
   hideOverlay();
   startDrive();
 }
@@ -3152,13 +3273,32 @@ function startDrive(){
     await gapi.client.init({apiKey:API_KEY,discoveryDocs:[DISCOVERY_DOC]});
     tokenClient=google.accounts.oauth2.initTokenClient({
       client_id:CLIENT_ID,scope:SCOPES,
-      callback:onTokenReceived,error_callback:onTokenError,
+      callback:onTokenReceived,
+      error_callback:onTokenError,
     });
-    requestTokenWithHint();
+    // Coba silent refresh dulu (prompt:'none') — tidak buka popup/tab
+    requestTokenSilent();
   });
 }
 
-function requestTokenWithHint(){
+// Silent: tidak buka popup sama sekali, berhasil jika user sudah pernah grant
+function requestTokenSilent(){
+  const hint=localStorage.getItem(LS_HINT)||'';
+  try{
+    tokenClient.requestAccessToken({prompt:'none',login_hint:hint});
+  }catch(e){
+    // prompt:'none' tidak didukung browser ini — tampilkan tombol manual
+    // JANGAN panggil requestTokenWithConsent() di sini karena tidak ada user gesture
+    // sehingga popup pasti diblokir browser
+    console.warn('requestTokenSilent gagal, tampilkan tombol Hubungkan Drive:', e);
+    const cb=document.getElementById('connectDriveBtn');
+    if(cb) cb.style.display='inline-flex';
+    setSyncStatus('offline');
+  }
+}
+
+// Consent popup (hanya dipanggil saat tombol "Hubungkan Drive" diklik user)
+function requestTokenWithConsent(){
   const hint=localStorage.getItem(LS_HINT)||'';
   tokenClient.requestAccessToken({prompt:'',login_hint:hint});
 }
@@ -3167,30 +3307,85 @@ async function onTokenReceived(resp){
   if(resp.error){onTokenError({type:resp.error});return;}
   accessToken=resp.access_token;
   gapi.client.setToken({access_token:accessToken});
+
+  // Pastikan tombol Sambungkan Drive tersembunyi
   const cb=document.getElementById('connectDriveBtn');
-  if(cb)cb.style.display='none';
+  if(cb) cb.style.display='none';
+
   await pullFromDrive();
   if(syncPending){syncPending=false;await pushToDrive(state);}
+
+  // Mulai/restart polling — clear dulu jika sudah ada
   startPolling();
-  window.addEventListener("focus",onFocus);
+  // Daftarkan focus listener jika belum ada (gunakan flag agar tidak dobel)
+  if(!onFocus._registered){
+    window.addEventListener("focus",onFocus);
+    onFocus._registered=true;
+  }
+  // Jadwalkan silent refresh sebelum token kedaluwarsa (±55 menit)
+  scheduleTokenRefresh(resp.expires_in||3600);
+}
+
+let _refreshTimer=null;
+function scheduleTokenRefresh(expiresInSec){
+  if(_refreshTimer)clearTimeout(_refreshTimer);
+  const refreshAt=Math.max((expiresInSec-300),60)*1000; // 5 menit sebelum expire
+  _refreshTimer=setTimeout(()=>{if(accessToken)requestTokenSilent();},refreshAt);
 }
 
 function onTokenError(err){
   console.warn("Drive token error:",err.type);
-  if(err.type==='access_denied'){
+
+  // Helper: tampilkan tombol Hubungkan Drive
+  function showConnectBtn(){
     const cb=document.getElementById('connectDriveBtn');
-    if(cb)cb.style.display='inline-flex';
+    if(cb) cb.style.display='inline-flex';
+  }
+
+  if(err.type==='interaction_required'||err.type==='consent_required'||err.type==='login_required'){
+    // Butuh interaksi user — tampilkan tombol, jangan buka popup otomatis
+    showConnectBtn();
     setSyncStatus('offline');
+    showNotification('info','Hubungkan Google Drive','Klik tombol "Sambungkan Drive" di header untuk sinkronisasi');
+
+  } else if(err.type==='popup_blocked_by_browser'||err.type==='popup_failed_to_open'){
+    // Popup diblokir — JANGAN coba silent lagi (akan terus gagal), tampilkan tombol
+    // Hentikan polling karena tidak ada token
+    if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+    showConnectBtn();
+    setSyncStatus('offline');
+    showNotification('warning','Pop-up diblokir browser','Izinkan pop-up untuk domain ini di browser, lalu klik "Sambungkan Drive"');
+
+  } else if(err.type==='access_denied'){
+    // User menolak izin Drive secara eksplisit
+    if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+    showConnectBtn();
+    setSyncStatus('offline');
+    showNotification('error','Akses Drive ditolak','Izin Google Drive diperlukan untuk sinkronisasi. Klik "Sambungkan Drive" untuk coba lagi');
+
   } else {
+    // Error jaringan / tidak dikenal — coba silent refresh sekali setelah delay
     setSyncStatus('offline');
-    setTimeout(()=>{if(!accessToken)requestTokenWithHint();},3000);
+    setTimeout(()=>{
+      if(!accessToken && tokenClient) requestTokenSilent();
+    }, 5000);
   }
 }
 
 document.getElementById('connectDriveBtn').addEventListener('click',()=>{
+  // Sembunyikan tombol segera agar tidak diklik dobel
+  const cb = document.getElementById('connectDriveBtn');
+  if(cb) cb.style.display='none';
   setSyncStatus('connecting');
-  if(tokenClient) tokenClient.requestAccessToken({prompt:'select_account'});
-  else{driveStarted=false;startDrive();}
+
+  if(tokenClient){
+    // tokenClient sudah ada — langsung minta consent dengan user gesture
+    requestTokenWithConsent();
+  } else {
+    // tokenClient belum ada (gapi belum load) — inisialisasi ulang dari awal
+    driveStarted = false;
+    startDrive();
+  }
 });
 
 async function onFocus(){if(accessToken&&!isSyncing)await pullFromDrive();}
@@ -3211,7 +3406,15 @@ async function pullFromDrive(){
     }
     if(!driveFileId){isSyncing=false;await pushToDrive(state);return;}
     const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}});
-    if(resp.status===401){accessToken=null;isSyncing=false;setSyncStatus('connecting');requestTokenWithHint();return;}
+    if(resp.status===401){
+      accessToken=null;
+      isSyncing=false;
+      setSyncStatus('connecting');
+      // Hentikan polling — tidak ada token
+      if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+      if(tokenClient) requestTokenSilent();
+      return;
+    }
     if(resp.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);isSyncing=false;await pushToDrive(state);return;}
     if(!resp.ok){setSyncStatus('error');isSyncing=false;return;}
     const driveData=await resp.json();
@@ -3237,7 +3440,7 @@ async function pushToDrive(data){
     let res;
     if(driveFileId){
       res=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`,{method:"PATCH",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
-      if(res.status===401){accessToken=null;setSyncStatus('connecting');requestTokenWithHint();return;}
+      if(res.status===401){accessToken=null;isSyncing=false;setSyncStatus('connecting');requestTokenSilent();return;}
       if(res.status===404){driveFileId=null;localStorage.removeItem(LS_FILE_ID);await pushToDrive(data);return;}
     } else {
       res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{Authorization:"Bearer "+accessToken},body:makeForm()});
@@ -3252,13 +3455,15 @@ function syncToDrive(data){if(!accessToken){syncPending=true;return;}pushToDrive
 // ── Logout: show overlay, keep data ──────────────────────────────────────────
 document.getElementById("logoutBtn").addEventListener("click",()=>{
   google.accounts.id.disableAutoSelect();
-  if(pollTimer)clearInterval(pollTimer);
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
   window.removeEventListener("focus",onFocus);
+  onFocus._registered = false;
+  if(_refreshTimer){clearTimeout(_refreshTimer);_refreshTimer=null;}
   localStorage.removeItem("google_logged_in");
   localStorage.removeItem(LS_FILE_ID);
-  localStorage.removeItem(LS_HINT);
+  // Sengaja TIDAK hapus LS_HINT — dipakai untuk deteksi ganti akun saat login berikutnya
   localStorage.removeItem(LS_DISMISSED);
-  accessToken=null;driveFileId=null;driveStarted=false;
+  accessToken=null;driveFileId=null;driveStarted=false;tokenClient=null;
   document.getElementById("logoutBtn").style.display="none";
   const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
   document.querySelector(".g_id_signin").style.display="block";
@@ -3268,6 +3473,16 @@ document.getElementById("logoutBtn").addEventListener("click",()=>{
 
 // ── Page load ─────────────────────────────────────────────────────────────────
 window.addEventListener("load",()=>{
+  // Inisialisasi GSI setelah library siap
+  if(typeof google !== 'undefined' && google.accounts){
+    initGoogleSignIn();
+  } else {
+    // Library belum siap (async), tunggu sebentar
+    setTimeout(()=>{
+      if(typeof google !== 'undefined' && google.accounts) initGoogleSignIn();
+    }, 500);
+  }
+
   const loggedIn=localStorage.getItem("google_logged_in")==="true";
   const dismissed=localStorage.getItem(LS_DISMISSED)==="1";
   if(loggedIn){
