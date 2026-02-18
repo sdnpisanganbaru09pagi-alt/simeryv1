@@ -100,9 +100,12 @@ body{
   flex:1;min-width:0;padding:7px 2px;border-radius:var(--radius);border:none;
   background:transparent;font-family:inherit;
   color:var(--text-2);cursor:pointer;text-align:center;
-  transition:background 0.2s,color 0.2s,box-shadow 0.2s;
+  transition:background 0.2s,color 0.2s,box-shadow 0.2s,transform 0.1s;
   display:flex;flex-direction:column;align-items:center;gap:3px;
+  overflow:hidden;position:relative;
+  -webkit-tap-highlight-color:transparent;
 }
+.tab:active{transform:scale(0.95);opacity:0.85;}
 .tab-icon{width:18px;height:18px;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .tab-label{
   font-size:9.5px;font-weight:600;line-height:1.25;
@@ -504,6 +507,14 @@ textarea{resize:vertical;min-height:80px}
 .notification-text{flex:1}
 .notification-title{font-weight:700;font-size:13px;color:var(--text);line-height:1.3}
 .notification-message{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4}
+.notification-close{
+  flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;
+  background:rgba(0,0,0,0.06);color:var(--text-3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;line-height:1;
+  transition:background 0.15s,color 0.15s;padding:0;font-family:inherit;
+}
+.notification-close:hover{background:rgba(0,0,0,0.12);color:var(--text)}
 .notification.single-line .notification-content{align-items:center}
 .notification.single-line .notification-title{margin-bottom:0}
 @media(max-width:480px){
@@ -614,7 +625,6 @@ select option{background:var(--surface);color:var(--text)}
         <div>
           <div class="title">SiMERY</div>
           <div class="subtitle">Aplikasi Manajemen Inventory</div>
-		  <div class="subtitle">Dikembangkan Oleh Twin Insani, S.Kom</div>
         </div>
       </div>
       <div class="header-auth">
@@ -1209,39 +1219,48 @@ select option{background:var(--surface);color:var(--text)}
         </div>
       </div>
     </main>
+    <footer style="text-align:center;padding:14px 16px;font-size:11px;color:var(--text-3);border-top:1px solid var(--border-2);background:var(--surface);">
+      Dikembangkan Oleh <strong style="color:var(--text-2);">Twin Insani, S.Kom</strong>
+    </footer>
   </div>
 
 <script>
 // IndexedDB Configuration
-const DB_NAME = 'SimeryDB';
-const DB_VERSION = 1;
+const DB_NAME    = 'SimeryDB';
+const DB_VERSION = 2;                 // bumped: added appState store
 const SIGNATURE_STORE = 'signatures';
+const STATE_STORE     = 'appState';
 let _db = null;
 
 // Initialize IndexedDB
 function initIndexedDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    
+
     request.onerror = () => {
       console.error('IndexedDB error:', request.error);
       reject(request.error);
     };
-    
+
     request.onsuccess = () => {
       _db = request.result;
-      console.log('IndexedDB initialized successfully');
+      console.log('IndexedDB initialized (v' + DB_VERSION + ')');
       resolve(_db);
     };
-    
+
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
-      
-      // Create signatures object store if it doesn't exist
+
+      // signatures store (existed in v1)
       if (!db.objectStoreNames.contains(SIGNATURE_STORE)) {
-        const objectStore = db.createObjectStore(SIGNATURE_STORE, { keyPath: 'historyId' });
-        objectStore.createIndex('historyId', 'historyId', { unique: true });
-        console.log('Signatures object store created');
+        const sigStore = db.createObjectStore(SIGNATURE_STORE, { keyPath: 'historyId' });
+        sigStore.createIndex('historyId', 'historyId', { unique: true });
+      }
+
+      // appState store (new in v2)
+      if (!db.objectStoreNames.contains(STATE_STORE)) {
+        db.createObjectStore(STATE_STORE, { keyPath: 'key' });
+        console.log('appState object store created');
       }
     };
   });
@@ -1357,7 +1376,7 @@ function deleteSignatureFromIndexedDB(historyId) {
 }
 
 // App State and Variables
-const STORAGE_KEY = 'simery_inventory_v2';
+const STORAGE_KEY = 'simery_inventory_v2'; // kept for legacy migration only
 const el = id => document.getElementById(id);
 const uid = () => 'id-' + Math.random().toString(36).slice(2,9);
 const escapeHtml = s => (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
@@ -1377,31 +1396,70 @@ let _signatureCtx = null;
 let _isDrawing = false;
 let _signatureData = null;
 
-function load(){
+// ── IDB helpers: read/write appState ────────────────────────────────────────
+function idbGetState() {
+  return new Promise((resolve) => {
+    if (!_db) return resolve(null);
+    const tx  = _db.transaction([STATE_STORE], 'readonly');
+    const req = tx.objectStore(STATE_STORE).get('main');
+    req.onsuccess = () => resolve(req.result ? req.result.data : null);
+    req.onerror   = () => resolve(null);
+  });
+}
+
+function idbPutState(data) {
+  return new Promise((resolve) => {
+    if (!_db) return resolve(false);
+    const tx = _db.transaction([STATE_STORE], 'readwrite');
+    tx.objectStore(STATE_STORE).put({ key: 'main', data });
+    tx.oncomplete = () => resolve(true);
+    tx.onerror    = () => resolve(false);
+    tx.onabort    = () => resolve(false);
+  });
+}
+
+// ── Load: IDB-first, fallback + migrate from localStorage ───────────────────
+async function load() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      state = JSON.parse(raw);
+    let saved = await idbGetState();
+
+    // Migrate from localStorage if IDB is empty
+    if (!saved) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        saved = JSON.parse(raw);
+        await idbPutState(saved);
+        localStorage.removeItem(STORAGE_KEY);   // clean up old storage
+        console.log('Migrated state from localStorage → IndexedDB');
+      }
+    }
+
+    if (saved) {
+      state = saved;
+      state.items   = state.items   || [];
     } else {
+      // Fresh install: seed demo data
       state.items = [
         { id: 'itm-1', name: 'Pulpen', category: 'Alat Tulis Kantor', stock: 25, barcode: '123456789' },
         { id: 'itm-2', name: 'Kertas A4', category: 'Alat Tulis Kantor', stock: 15, barcode: '987654321' }
       ];
-      save();
+      await save();
     }
-  } catch(e){
+  } catch(e) {
     console.error('load error', e);
     state = { items: [], history: [] };
   }
 }
 
-function save(){
+// ── Save: write to IDB (fire-and-forget from sync callers) ──────────────────
+async function save() {
   try {
     state.lastModified = Date.now();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    await idbPutState(state);
     if (typeof syncToDrive === 'function') syncToDrive(state);
-  } catch(e){ console.error('save error', e); }
+  } catch(e) { console.error('save error', e); }
 }
+
 
 function renderCounts(){
   el('totalN').textContent = state.items.length;
@@ -1553,7 +1611,6 @@ function renderManageList(query = '', filter = 'all'){
         itemCategory: item.category,
         itemStock: item.stock,
         onConfirm: () => {
-          state.history = state.history || [];
           state.history.push({
             id: uid(),
             itemId: item.id,
@@ -1813,12 +1870,19 @@ function renderHistory(){
   });
 }
 
+function getActiveTab() {
+  const t = document.querySelector('.tab.active');
+  return t ? t.dataset.tab : 'dashboard';
+}
+
 function renderAll(){
   renderCounts();
-  renderItems(el('q')?.value || '');
-  renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
   renderSelects();
-  renderHistory();
+  const tab = getActiveTab();
+  if (tab === 'dashboard')       renderItems(el('q')?.value || '');
+  else if (tab === 'manage')     renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
+  else if (tab === 'history')    renderHistory();
+  // stockOut & dataManagement have no dynamic list renders
 }
 
 function switchTab(tabName){
@@ -1965,7 +2029,6 @@ function saveAddStock() {
   
   if (addQuantity <= 0) {
     showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Jumlah Tidak Valid',desc:'Jumlah stok yang ditambahkan harus lebih dari 0.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-    return;
   }
   
   const itemName = _currentAddStockItem.name;
@@ -1986,7 +2049,6 @@ function saveAddStock() {
     onConfirm: () => {
       if (addStockTarget) {
         addStockTarget.stock = newStock;
-        state.history = state.history || [];
         state.history.push({
           id: uid(),
           itemId: addStockTarget.id,
@@ -1999,7 +2061,7 @@ function saveAddStock() {
       }
       save();
       renderAll();
-      showSuccessNotification('Stok berhasil ditambahkan!', itemName + ': ' + oldStock + ' -> ' + newStock + ' (+' + addQuantity + ')');
+      showNotification('success', 'Stok berhasil ditambahkan!', itemName + ': ' + oldStock + ' → ' + newStock + ' (+' + addQuantity + ')');
     }
   });
 }
@@ -2035,7 +2097,6 @@ function saveEditItem() {
   
   if (!newName) {
     showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Nama Kosong',desc:'Nama barang tidak boleh kosong.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-    return;
   }
   
   const oldName     = _currentEditItem.name;
@@ -2065,7 +2126,6 @@ function saveEditItem() {
       editTarget.category = newCategory;
       editTarget.stock    = newStock;
       editTarget.barcode  = newBarcode;
-      state.history = state.history || [];
       state.history.push({
         id: uid(),
         itemId: editTarget.id,
@@ -2082,35 +2142,18 @@ function saveEditItem() {
   });
 }
 
-function showToast(text){
-  showNotification('info', text);
-}
-
-function showSuccessNotification(title, message){
-  showNotification('success', title, message);
-}
+const NOTIF_ICONS = {
+  success: '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z"/>',
+  error:   '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>',
+  warning: '<path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>',
+  info:    '<path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>',
+};
 
 function showNotification(type = 'info', title, message = null) {
   try {
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
-    
-    let iconSvg = '';
-    switch(type) {
-      case 'success':
-        iconSvg = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z"/>';
-        break;
-      case 'error':
-        iconSvg = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>';
-        break;
-      case 'warning':
-        iconSvg = '<path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>';
-        break;
-      case 'info':
-      default:
-        iconSvg = '<path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>';
-        break;
-    }
+    const iconSvg = NOTIF_ICONS[type] || NOTIF_ICONS.info;
     
     notification.innerHTML = `
       <div class="notification-content">
@@ -2123,19 +2166,26 @@ function showNotification(type = 'info', title, message = null) {
           <div class="notification-title">${escapeHtml(title)}</div>
           ${message ? `<div class="notification-message">${escapeHtml(message)}</div>` : ''}
         </div>
+        <button class="notification-close" aria-label="Tutup">✕</button>
       </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
+    const dismissNotification = () => {
+      notification.classList.add('hiding');
+      setTimeout(() => notification.remove(), 250);
+    };
+
+    notification.querySelector('.notification-close').addEventListener('click', dismissNotification);
+
     setTimeout(() => notification.classList.add('show'), 100);
-    
+
     const duration = message ? 4500 : 3000;
-    
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => notification.remove(), 300);
-    }, duration);
+    const autoRemove = setTimeout(dismissNotification, duration);
+
+    // Cancel auto-remove if user manually closes
+    notification.querySelector('.notification-close').addEventListener('click', () => clearTimeout(autoRemove), { once: true });
     
   } catch(e) { 
     console.log(`${type.toUpperCase()}: ${title}${message ? ' - ' + message : ''}`); 
@@ -2225,6 +2275,13 @@ el('deleteItemConfirmBtn').addEventListener('click', () => {
 el('deleteItemCancelBtn').addEventListener('click', closeDeleteItemModal);
 el('deleteItemModal').addEventListener('click', e => { if (e.target === el('deleteItemModal')) closeDeleteItemModal(); });
 
+
+// ── Utility: debounce ────────────────────────────────────────────────────────
+function debounce(fn, delay = 200) {
+  let timer;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+}
+
 function initForms(){
   const addForm = el('addForm');
   addForm.addEventListener('submit', e => {
@@ -2246,7 +2303,6 @@ function initForms(){
       okClass: 'green',
       onConfirm: () => {
         state.items.push(item);
-        state.history = state.history || [];
         state.history.push({
           id: uid(),
           itemId: item.id,
@@ -2269,7 +2325,6 @@ function initForms(){
     
     if (_selectedItems.length === 0) {
       showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Daftar Barang Kosong',desc:'Tambahkan minimal 1 barang ke daftar sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-      return;
     }
     
     const recipient = (el('stockOutRecipient').value || '').trim();
@@ -2282,7 +2337,6 @@ function initForms(){
     // Validasi tanda tangan
     if (!isSignatureValid()) {
       showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Tanda Tangan Diperlukan',desc:'Tanda tangan penerima harus diisi sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-      return;
     }
     
     // Dapatkan signature data
@@ -2330,7 +2384,6 @@ function initForms(){
       if (item) {
         item.stock -= selectedItem.qty;
         const historyId = uid();
-        state.history = state.history || [];
         state.history.push({
           id: historyId,
           itemId: item.id,
@@ -2371,45 +2424,15 @@ function initTabs(){
 
 function initSearch(){
   const q = el('q');
-  let isScrolling = false;
-  
-  q.addEventListener('input', e => {
-    if (!isScrolling) {
-      renderItems(e.target.value);
-    }
-  });
-  
-  q.addEventListener('focus', () => {
-    isScrolling = true;
-    setTimeout(() => {
-      q.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(() => {
-        isScrolling = false;
-      }, 500);
-    }, 300);
-  });
+  q.addEventListener('input', debounce(e => renderItems(e.target.value), 180));
+  q.addEventListener('focus', () => setTimeout(() => q.scrollIntoView({ behavior:'smooth', block:'start' }), 300));
   
   el('clearSearch').addEventListener('click', () => { q.value = ''; renderItems(); });
   
   const manageSearch = el('manageSearch');
-  let isManageScrolling = false;
-  
   if (manageSearch) {
-    manageSearch.addEventListener('input', e => {
-      if (!isManageScrolling) {
-        renderManageList(e.target.value, _currentManageFilter);
-      }
-    });
-    
-    manageSearch.addEventListener('focus', () => {
-      isManageScrolling = true;
-      setTimeout(() => {
-        manageSearch.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(() => {
-          isManageScrolling = false;
-        }, 500);
-      }, 300);
-    });
+    manageSearch.addEventListener('input', debounce(e => renderManageList(e.target.value, _currentManageFilter), 180));
+    manageSearch.addEventListener('focus', () => setTimeout(() => manageSearch.scrollIntoView({ behavior:'smooth', block:'start' }), 300));
   }
   
   const clearManageSearch = el('clearManageSearch');
@@ -2551,47 +2574,26 @@ function initSignatureCanvas() {
   
   setContextStyle();
   
+  const getPos = (e) => {
+    const rect   = _signatureCanvas.getBoundingClientRect();
+    const scaleX = _signatureCanvas.width  / rect.width;
+    const scaleY = _signatureCanvas.height / rect.height;
+    const src    = e.type.startsWith('touch') ? e.touches[0] : e;
+    if (e.type.startsWith('touch')) e.preventDefault();
+    return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+  };
+
   const startDrawing = (e) => {
     _isDrawing = true;
-    
-    // Set ulang style setiap kali mulai menggambar
     setContextStyle();
-    
-    const rect = _signatureCanvas.getBoundingClientRect();
-    const scaleX = _signatureCanvas.width / rect.width;
-    const scaleY = _signatureCanvas.height / rect.height;
-    
-    let x, y;
-    if (e.type.startsWith('touch')) {
-      e.preventDefault();
-      x = (e.touches[0].clientX - rect.left) * scaleX;
-      y = (e.touches[0].clientY - rect.top) * scaleY;
-    } else {
-      x = (e.clientX - rect.left) * scaleX;
-      y = (e.clientY - rect.top) * scaleY;
-    }
-    
+    const { x, y } = getPos(e);
     _signatureCtx.beginPath();
     _signatureCtx.moveTo(x, y);
   };
-  
+
   const draw = (e) => {
     if (!_isDrawing) return;
-    
-    const rect = _signatureCanvas.getBoundingClientRect();
-    const scaleX = _signatureCanvas.width / rect.width;
-    const scaleY = _signatureCanvas.height / rect.height;
-    
-    let x, y;
-    if (e.type.startsWith('touch')) {
-      e.preventDefault();
-      x = (e.touches[0].clientX - rect.left) * scaleX;
-      y = (e.touches[0].clientY - rect.top) * scaleY;
-    } else {
-      x = (e.clientX - rect.left) * scaleX;
-      y = (e.clientY - rect.top) * scaleY;
-    }
-    
+    const { x, y } = getPos(e);
     _signatureCtx.lineTo(x, y);
     _signatureCtx.stroke();
     _signatureCtx.beginPath();
@@ -2925,7 +2927,6 @@ async function exportHistoryToPDF() {
   
   if (filtered.length === 0) {
     showConfirmModal({icon:'ℹ️',iconBg:'var(--blue-light)',iconBorder:'var(--blue-mid)',title:'Tidak Ada Data',desc:'Tidak ada data riwayat untuk di-export.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-    return;
   }
   
   filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -3231,7 +3232,6 @@ function exportPerItemPDF() {
 
   if (state.items.length === 0) {
     showConfirmModal({icon:'ℹ️',iconBg:'var(--blue-light)',iconBorder:'var(--blue-mid)',title:'Tidak Ada Data',desc:'Tidak ada data barang untuk di-export.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
-    return;
   }
 
   const sanitize = (v) => (v === null || v === undefined || v === '' ? '-' : String(v).replace(/&/g, 'dan'));
@@ -3463,7 +3463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Peringatan',desc:'Penyimpanan tanda tangan mungkin tidak berfungsi dengan baik di browser ini.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
   }
   
-  load();
+  await load();
   initTabs();
   initForms();
   initSearch();
@@ -3641,11 +3641,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       desc: 'Data saat ini akan <strong>digantikan sepenuhnya</strong> oleh:<br><span style="font-size:12px;color:var(--text-3);">📦 ' + itemCount + ' barang &nbsp;·&nbsp; 📋 ' + historyCount + ' riwayat &nbsp;·&nbsp; 🕐 Backup: ' + exportedAt + '</span><br><br><strong>Pastikan Anda sudah backup data saat ini.</strong>',
       okLabel: 'Ya, Restore Sekarang',
       okClass: 'primary',
-      onConfirm: () => {
+      onConfirm: async () => {
         state.items        = _restoreData.items   || [];
         state.history      = _restoreData.history || [];
         state.lastModified = Date.now();
-        save();
+        await idbPutState(state);
+        if (typeof syncToDrive === 'function') syncToDrive(state);
         renderAll();
         // Reset file input UI
         _restoreData = null;
@@ -3695,13 +3696,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  confirmDeleteBtn.addEventListener('click', () => {
+  confirmDeleteBtn.addEventListener('click', async () => {
     if(deleteConfirmInput.value.trim() !== 'HAPUS') return;
     // Reset semua data
     state.items = [];
     state.history = [];
     state.lastModified = Date.now();
-    save();
+    await idbPutState(state);
     renderAll();
     deleteAllModal.style.display = 'none';
     deleteConfirmInput.value = '';
@@ -3793,13 +3794,13 @@ function showOverlay(){
     renderSignInButton(c,{type:'standard',size:'large',theme:'outline',text:'sign_in_with',shape:'rectangular',width:280});
   }
   const ob=document.getElementById('overlayOfflineBtn');
-  if(ob) ob.style.display=localStorage.getItem('simery_inventory_v2')?'block':'none';
+  if(ob) ob.style.display='block';
 }
 function hideOverlay(){const ov=document.getElementById('loginOverlay');if(ov)ov.style.display='none';}
 function dismissOverlay(){localStorage.setItem(LS_DISMISSED,'1');hideOverlay();}
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
-function handleCredentialResponse(response){
+async function handleCredentialResponse(response){
   const p = decodeJwt(response.credential);
   const newEmail = p.email || '';
 
@@ -3807,7 +3808,7 @@ function handleCredentialResponse(response){
   const prevEmail = localStorage.getItem(LS_HINT) || '';
   if(prevEmail && newEmail && prevEmail !== newEmail){
     // Bersihkan data inventori & Drive file ID milik akun lama
-    localStorage.removeItem(STORAGE_KEY);
+    await idbPutState({ items: [], history: [] });
     localStorage.removeItem(LS_FILE_ID);
     driveFileId = null;
     // Reset state in-memory
@@ -3935,7 +3936,7 @@ async function pullFromDrive(){
     const driveData=await resp.json();
     if((driveData.lastModified||0)>(state.lastModified||0)){
       state=driveData;
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      await idbPutState(state);
       if(typeof renderAll==='function')renderAll();
       showNotification("info","Data diperbarui dari perangkat lain");
     }
@@ -4009,4 +4010,4 @@ window.addEventListener("load",()=>{
 </script>
 
 </body>
-</html>
+</html>0
