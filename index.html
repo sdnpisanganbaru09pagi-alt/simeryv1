@@ -8,42 +8,115 @@
   <title>SiMERY – Aplikasi Manajemen Inventory</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>" type="image/svg+xml">
   <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 :root {
-  /* Fresh light-blue palette */
-  --blue-1:#0ea5e9;   /* sky-500 – main accent */
-  --blue-2:#38bdf8;   /* sky-400 – hover / lighter */
-  --blue-3:#7dd3fc;   /* sky-300 – subtle accent */
-  --blue-dark:#0369a1;/* sky-700 – text on light */
-  --blue-light:#f0f9ff;/* sky-50 */
-  --blue-mid:#bae6fd; /* sky-200 */
-  --text:#0c1a2e;
-  --text-2:#4a6080;
-  --text-3:#93aec8;
-  --border:#d4e8f7;
-  --border-2:#eaf5fd;
+  --accent-1:#0ea5e9;
+  --accent-2:#06b6d4;
+  --accent-3:#8b5cf6;
+  --blue-1:#0ea5e9;
+  --blue-2:#38bdf8;
+  --blue-3:#7dd3fc;
+  --blue-dark:#0369a1;
+  --blue-light:#f0f9ff;
+  --blue-mid:#bae6fd;
+  --text:#0f172a;
+  --text-2:#475569;
+  --text-3:#94a3b8;
+  --muted:#64748b;
+  --border:rgba(14,165,233,0.15);
+  --border-2:rgba(14,165,233,0.08);
   --surface:#ffffff;
-  --bg:#f0f8ff;       /* very light sky tint */
+  --bg-start:#f0f9ff;
+  --bg-end:#e0f2fe;
   --success:#10b981; --success-light:#ecfdf5;
   --warning:#f59e0b; --warning-light:#fffbeb;
-  --danger:#f43f5e;  --danger-light:#fff1f3;
-  --radius:10px; --radius-lg:16px;
-  --shadow-sm:0 1px 4px rgba(14,165,233,0.08);
-  --shadow-md:0 4px 16px rgba(14,165,233,0.12);
-  --shadow-lg:0 8px 32px rgba(14,165,233,0.16);
+  --danger:#ef4444;  --danger-light:#fef2f2;
+  --radius:12px; --radius-lg:16px;
+  --shadow-sm:0 1px 4px rgba(14,165,233,0.06);
+  --shadow-md:0 8px 20px rgba(14,165,233,0.12);
+  --shadow-lg:0 16px 40px rgba(14,165,233,0.18);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
-  font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;
-  background:var(--bg); color:var(--text);
-  font-size:14px; line-height:1.55;
+  font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--bg-start) 0%,var(--bg-end) 100%);
+  background-attachment:fixed;
+  color:var(--text);
+  font-size:14px; line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* ── Desktop frame wrapper ── */
+/* Di mobile: tidak ada perubahan. Di desktop: tampil seperti smartphone di tengah layar */
+@media(min-width:768px){
+  body{
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding:32px 0 48px;
+    /* Background dekoratif desktop: grid dots */
+    background:
+      radial-gradient(circle at 20% 20%, rgba(14,165,233,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(139,92,246,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 70%),
+      linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 50%,#ede9fe 100%);
+    background-attachment:fixed;
+  }
+  /* Label "Mobile App" di atas frame — selalu di atas semua elemen termasuk modal */
+  body::before{
+    content:'📱 SiMERY — Mobile App Preview';
+    position:fixed;top:0;left:0;right:0;
+    height:32px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;
+    font-size:11px;font-weight:700;letter-spacing:0.04em;
+    color:rgba(3,105,161,0.6);
+    background:rgba(240,249,255,0.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(14,165,233,0.12);
+    z-index:99999;
+    pointer-events:none;
+  }
 }
 
 /* ── Shell ── */
-.app{width:100%;min-height:100vh;display:flex;flex-direction:column}
+.app{width:100%;min-height:100vh;display:flex;flex-direction:column;background:#fff}
+
+@media(min-width:768px){
+  .app{
+    /* Lebar 560px — nyaman di desktop, tetap proporsional untuk konten mobile.
+       Lebih intuitif dari 16:10 murni karena mengikuti bentuk HP nyata. */
+    width:560px;
+    min-height:100vh;
+    max-height:none;
+    border-radius:0;
+    box-shadow:
+      0 0 0 1px rgba(14,165,233,0.15),
+      0 8px 32px rgba(14,165,233,0.15),
+      0 32px 80px rgba(3,105,161,0.12),
+      0 0 0 8px rgba(255,255,255,0.6);
+    position:relative;
+    overflow:hidden;
+    /* isolation:isolate membuat stacking context baru sehingga
+       z-index elemen di dalam .app (header, modal, dll) tidak
+       bisa menembus keluar dan menimpa body::before */
+    isolation:isolate;
+    height:auto;
+  }
+  /* Notch-style bar tipis di atas frame untuk estetika */
+  .app::before{
+    content:'';
+    display:block;
+    height:3px;
+    background:linear-gradient(90deg,var(--accent-1),var(--accent-2),var(--accent-3));
+    flex-shrink:0;
+  }
+}
 
 /* ── Header ── */
 @keyframes gradShift{
@@ -52,102 +125,120 @@ body{
   100%{background-position:0% 50%}
 }
 .header{
-  background:linear-gradient(135deg,#0369a1,#0ea5e9,#38bdf8,#0284c7);
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2),var(--accent-3),var(--accent-1));
   background-size:300% 300%;
   animation:gradShift 8s ease infinite;
-  padding:12px 16px;
+  padding:16px;
   display:flex; align-items:center; gap:12px;
   position:sticky; top:0; z-index:100;
-  box-shadow:0 2px 12px rgba(3,105,161,0.22);
+  box-shadow:0 4px 20px rgba(14,165,233,0.2);
+  will-change:background-position;
 }
-.brand{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
+
+.brand{display:flex;gap:12px;align-items:center;flex:1;min-width:0;position:relative;z-index:1}
 .logo{
-  width:38px;height:38px;border-radius:10px;
-  background:rgba(255,255,255,0.22);
+  width:48px;height:48px;border-radius:14px;
+  background:rgba(255,255,255,0.2);
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;
-  backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,0.3);
+  font-size:22px;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  border:1px solid rgba(255,255,255,0.25);
 }
-.title{font-weight:800;font-size:15px;color:#fff;line-height:1.2;letter-spacing:-0.01em}
-.subtitle{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+.title{font-weight:800;font-size:1.1rem;color:#fff;line-height:1.2;letter-spacing:-0.02em;cursor:pointer;user-select:none;}
+.subtitle{font-size:0.78rem;color:rgba(255,255,255,0.85);margin-top:1px;font-weight:500}
 .header-auth{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-#syncStatus{font-size:11px;color:rgba(255,255,255,0.65);text-align:right;min-height:14px;white-space:nowrap}
-/* Google Sign-In widget — no transform tricks, just clip cleanly */
+#syncStatus{font-size:11px;color:rgba(255,255,255,0.7);text-align:right;min-height:14px;white-space:nowrap}
 .g_id_signin{display:flex;align-items:center;justify-content:flex-end}
 .g_id_signin > div > div{box-shadow:none!important}
 #connectDriveBtn,#logoutBtn{
-  font-family:inherit;cursor:pointer;border-radius:8px;
-  font-size:12px;font-weight:600;padding:6px 12px;
-  border:1px solid rgba(255,255,255,0.3);
-  transition:background 0.2s,transform 0.1s; white-space:nowrap;
+  font-family:inherit;cursor:pointer;border-radius:10px;
+  font-size:12px;font-weight:700;padding:7px 14px;
+  border:1.5px solid rgba(255,255,255,0.35);
+  transition:background 0.2s,transform 0.15s,box-shadow 0.2s; white-space:nowrap;
+  letter-spacing:0.01em;
 }
-#connectDriveBtn{background:rgba(255,255,255,0.18);color:#fff;display:none}
-#connectDriveBtn:hover{background:rgba(255,255,255,0.3);transform:translateY(-1px)}
-#logoutBtn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.92);display:none}
-#logoutBtn:hover{background:rgba(255,255,255,0.22);transform:translateY(-1px)}
+#connectDriveBtn{background:rgba(255,255,255,0.2);color:#fff;display:none}
+#connectDriveBtn:hover{background:rgba(255,255,255,0.32);transform:translateY(-1px)}
+#logoutBtn{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.95);display:none}
+#logoutBtn:hover{background:rgba(255,255,255,0.25);transform:translateY(-1px)}
 
-/* ── Main ── */
+/* ── Login overlay animated gradient ── */
+#loginOverlay{
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2),var(--accent-3),var(--accent-1));
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+}
 
 /* ── Tabs ── */
 .tabs{
-  display:flex;gap:3px;margin-bottom:16px;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius-lg);padding:4px;
-  box-shadow:var(--shadow-sm);
+  display:flex;gap:6px;margin-bottom:20px;
+  background:#ffffff;
+  border:2px solid rgba(14,165,233,0.1);
+  border-radius:var(--radius-lg);padding:5px;
+  box-shadow:0 2px 12px rgba(14,165,233,0.08);
 }
 .tab{
   flex:1;min-width:0;padding:7px 2px;border-radius:var(--radius);border:none;
   background:transparent;font-family:inherit;
-  color:var(--text-2);cursor:pointer;text-align:center;
-  transition:background 0.2s,color 0.2s,box-shadow 0.2s,transform 0.1s;
+  color:var(--muted);cursor:pointer;text-align:center;
+  transition:all 0.2s ease;
   display:flex;flex-direction:column;align-items:center;gap:3px;
   overflow:hidden;position:relative;
   -webkit-tap-highlight-color:transparent;
 }
-.tab:active{transform:scale(0.95);opacity:0.85;}
+.tab:active{transform:scale(0.95)}
 .tab-icon{width:18px;height:18px;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .tab-label{
-  font-size:9.5px;font-weight:600;line-height:1.25;
-  white-space:normal;word-break:break-word;
-  overflow-wrap:break-word;width:100%;
+  font-size:9px;font-weight:700;line-height:1.3;
+  white-space:normal;word-break:keep-all;overflow-wrap:normal;
+  width:100%;text-align:center;
+  text-transform:uppercase;letter-spacing:0.01em;
 }
 .tab.active{
-  background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
   color:#fff;
-  box-shadow:0 2px 8px rgba(14,165,233,0.3);
+  box-shadow:0 4px 12px rgba(14,165,233,0.3);
+  transform:translateY(-1px);
 }
-.tab:not(.active):hover{background:var(--blue-light);color:var(--blue-dark)}
+.tab:not(.active):hover{
+  background:var(--blue-light);
+  color:var(--blue-dark);
+  border-color:rgba(14,165,233,0.2);
+}
 
 /* ── Stats ── */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
 .stat{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius-lg);padding:16px 10px;text-align:center;
-  box-shadow:var(--shadow-sm);
-  transition:transform 0.2s,box-shadow 0.2s;
+  background:#ffffff;
+  border:2px solid rgba(14,165,233,0.1);
+  border-radius:var(--radius-lg);padding:18px 10px;text-align:center;
+  transition:all 0.2s ease;
   position:relative;overflow:hidden;
 }
-.stat::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--blue-1),var(--blue-3));
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+.stat:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(14,165,233,0.12);
+  border-color:rgba(14,165,233,0.25);
 }
-.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat .n{font-size:1.6rem;font-weight:800;color:var(--blue-1);line-height:1;margin-bottom:5px;letter-spacing:-0.03em}
-.stat .label{font-size:11px;color:var(--text-3);font-weight:500}
+.stat .n{
+  font-size:1.75rem;font-weight:800;line-height:1;margin-bottom:6px;letter-spacing:-0.03em;
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.stat .label{font-size:0.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
 
 /* ── Search ── */
-.search{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.search{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:stretch}
 .search input{
-  flex:1 1 100%;min-width:0;padding:10px 14px;
-  border-radius:var(--radius);border:1.5px solid var(--border);
-  background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);
-  transition:border-color 0.2s,box-shadow 0.2s;
-  box-shadow:var(--shadow-sm);
+  flex:1 1 100%;min-width:0;padding:12px 16px;
+  border-radius:var(--radius);border:2px solid rgba(14,165,233,0.12);
+  background:#ffffff;font-family:inherit;font-size:14px;color:var(--text);
+  transition:all 0.2s ease;
 }
-.search input:focus{outline:none;border-color:var(--blue-1);box-shadow:0 0 0 3px rgba(14,165,233,0.15)}
-.search .btn,.search .btn-barcode{flex:1 1 calc(50% - 4px);min-width:110px}
+.search input::placeholder{color:var(--muted);opacity:0.7}
+.search input:focus{outline:none;border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(14,165,233,0.1);background:#fff}
+.search .btn,.search .btn-barcode{flex:1 1 calc(50% - 5px);min-width:110px}
 @media(min-width:640px){
   .search{flex-wrap:nowrap}
   .search input{flex:1}
@@ -156,103 +247,127 @@ body{
 
 /* ── Global inputs ── */
 input,select,button,textarea{font-family:inherit;font-size:14px;outline:none}
-input,select,textarea{transition:border-color 0.2s,box-shadow 0.2s}
+input,select,textarea{transition:all 0.2s ease}
 input:focus,select:focus,textarea:focus{
-  border-color:var(--blue-1);
-  box-shadow:0 0 0 3px rgba(14,165,233,0.14);
+  border-color:var(--accent-1);
+  box-shadow:0 0 0 3px rgba(14,165,233,0.1);
 }
 textarea{resize:vertical;min-height:80px}
 
 /* ── Buttons ── */
 .btn{
-  display:inline-flex;align-items:center;gap:7px;justify-content:center;
-  border-radius:var(--radius);padding:10px 16px;border:none;
-  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
-  transition:background 0.2s,opacity 0.15s,transform 0.1s,box-shadow 0.2s;
-  text-decoration:none;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+  border-radius:var(--radius);padding:11px 18px;border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;
+  transition:all 0.2s ease;
+  text-decoration:none;white-space:nowrap;letter-spacing:0.01em;
 }
-.btn:active{opacity:0.88;transform:scale(0.98)}
-.btn.ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);box-shadow:var(--shadow-sm)}
-.btn.ghost:hover{background:var(--blue-light);border-color:var(--blue-3);color:var(--blue-dark)}
-.btn.primary{background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));color:#fff;box-shadow:0 2px 8px rgba(14,165,233,0.3)}
-.btn.primary:hover{background:linear-gradient(135deg,#0284c7,#0c4a6e);box-shadow:0 4px 12px rgba(14,165,233,0.4)}
-.btn.orange{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.3)}
-.btn.orange:hover{background:linear-gradient(135deg,#ea580c,#c2410c)}
-.btn.green{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,0.3)}
-.btn.green:hover{background:linear-gradient(135deg,#059669,#047857)}
-.btn.danger{background:linear-gradient(135deg,var(--danger),#e11d48);color:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.3)}
-.btn.danger:hover{background:linear-gradient(135deg,#e11d48,#be123c)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.12)}
+.btn:active{transform:translateY(0);opacity:0.9}
+.btn.ghost{
+  background:#ffffff;border:2px solid rgba(14,165,233,0.15);
+  color:var(--muted);
+}
+.btn.ghost:hover{background:#ffffff;border-color:rgba(14,165,233,0.3);color:var(--text)}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+  color:#fff;box-shadow:0 2px 8px rgba(14,165,233,0.25);
+}
+.btn.primary:hover{box-shadow:0 6px 18px rgba(14,165,233,0.35)}
+.btn.orange{
+  background:linear-gradient(135deg,#f97316,#fb923c);
+  color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.25);
+}
+.btn.orange:hover{box-shadow:0 6px 18px rgba(249,115,22,0.35)}
+.btn.green{
+  background:linear-gradient(135deg,#10b981,#34d399);
+  color:#fff;box-shadow:0 2px 8px rgba(16,185,129,0.25);
+}
+.btn.green:hover{box-shadow:0 6px 18px rgba(16,185,129,0.35)}
+.btn.danger{
+  background:linear-gradient(135deg,var(--danger),#f87171);
+  color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.25);
+}
+.btn.danger:hover{box-shadow:0 6px 18px rgba(239,68,68,0.35)}
 
 /* ── Barcode button ── */
 .btn-barcode{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:10px 16px;border-radius:var(--radius);border:none;
-  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;
-  background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;
-  box-shadow:0 2px 8px rgba(99,102,241,0.3);
-  transition:background 0.2s,box-shadow 0.2s,transform 0.1s;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 18px;border-radius:var(--radius);border:none;
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;
+  background:linear-gradient(135deg,#8b5cf6,#a78bfa);color:#fff;
+  box-shadow:0 2px 8px rgba(139,92,246,0.3);
+  transition:all 0.2s ease;white-space:nowrap;letter-spacing:0.01em;
 }
-.btn-barcode:hover{background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 12px rgba(99,102,241,0.4)}
-.btn-barcode:active{opacity:0.88;transform:scale(0.98)}
+.btn-barcode:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(139,92,246,0.38)}
+.btn-barcode:active{transform:translateY(0);opacity:0.9}
+.btn-barcode .btn-barcode-text{
+  display:flex;flex-direction:column;align-items:flex-start;
+  line-height:1.15;gap:0;
+}
+.btn-barcode .btn-barcode-text span{display:block;}
 
 /* ── List & Card ── */
-.list{display:grid;gap:10px}
+.list{display:grid;gap:14px}
 .card{
-  background:var(--surface);border:1.5px solid var(--border);
-  border-radius:var(--radius-lg);padding:14px;
+  background:#ffffff;
+  border:2px solid rgba(14,165,233,0.1);
+  border-radius:var(--radius-lg);padding:18px;
   display:flex;flex-direction:column;
-  box-shadow:var(--shadow-sm);
-  transition:transform 0.2s,box-shadow 0.2s;
+  transition:all 0.2s ease;
 }
-.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
-.card h3{font-size:15px;font-weight:700;color:var(--text)}
-.meta{color:var(--text-2);font-size:13px;line-height:1.5}
-.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(14,165,233,0.12);
+  border-color:rgba(14,165,233,0.22);
+}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.card h3{font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:-0.01em}
+.meta{color:var(--text-2);font-size:0.875rem;line-height:1.6;font-weight:500}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 
 /* ── Badges ── */
 .badge{
   display:inline-flex;align-items:center;gap:4px;
-  padding:4px 10px;border-radius:20px;
-  font-weight:700;font-size:11px;letter-spacing:0.03em;white-space:nowrap;
-  flex-shrink:0;
+  padding:5px 12px;border-radius:20px;
+  font-weight:700;font-size:0.7rem;letter-spacing:0.05em;
+  text-transform:uppercase;white-space:nowrap;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 .badge.available{
-  background:#dcfce7;color:#15803d;
-  border:1.5px solid #86efac;
-  box-shadow:0 1px 3px rgba(22,163,74,0.15);
+  background:linear-gradient(135deg,#10b981,#34d399);
+  color:#fff;
 }
 .badge.low{
-  background:#fef9c3;color:#a16207;
-  border:1.5px solid #fde047;
-  box-shadow:0 1px 3px rgba(234,179,8,0.2);
+  background:linear-gradient(135deg,#f59e0b,#fbbf24);
+  color:#fff;
 }
 .badge.empty{
-  background:#fee2e2;color:#b91c1c;
-  border:1.5px solid #fca5a5;
-  box-shadow:0 1px 3px rgba(220,38,38,0.15);
+  background:linear-gradient(135deg,#ef4444,#f87171);
+  color:#fff;
 }
 
 /* ── Form ── */
-.form{display:grid;gap:14px}
-.form label{display:block;font-size:13px;color:var(--text-2);font-weight:600}
+.form{display:grid;gap:18px}
+.form label{
+  display:block;font-size:0.82rem;color:var(--muted);
+  font-weight:700;letter-spacing:0.02em;
+}
 .form input,.form select,.form textarea{
-  padding:10px 14px;border-radius:var(--radius);
-  border:1.5px solid var(--border);width:100%;margin-top:6px;
-  background:var(--bg);font-family:inherit;font-size:14px;color:var(--text);
-  transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
+  padding:12px 16px;border-radius:var(--radius);
+  border:2px solid rgba(14,165,233,0.12);width:100%;margin-top:6px;
+  background:#ffffff;font-family:inherit;font-size:14px;color:var(--text);
+  transition:all 0.2s ease;
 }
 .form input:focus,.form select:focus,.form textarea:focus{
-  background:var(--surface);outline:none;
-  border-color:var(--blue-1);box-shadow:0 0 0 3px rgba(14,165,233,0.14);
+  background:#ffffff;outline:none;
+  border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(14,165,233,0.1);
 }
 
 /* ── Barcode input group ── */
-.barcode-input-group{display:flex;gap:8px;align-items:stretch;margin-top:6px}
+.barcode-input-group{display:flex;gap:10px;align-items:stretch;margin-top:6px}
 .barcode-input-group input{flex:1;margin-top:0}
-.barcode-input-group .btn-barcode{flex-shrink:0;padding:10px 14px}
-
-/* ── View toggle ── */
+.barcode-input-group .btn-barcode{flex-shrink:0;padding:12px 16px}
 
 /* ── Scanner modal ── */
 @keyframes scanLine{
@@ -267,8 +382,8 @@ textarea{resize:vertical;min-height:80px}
 #scannerModal{
   position:fixed;inset:0;display:none;
   align-items:flex-end;justify-content:center;
-  background:rgba(2,32,58,0.82);z-index:3000;
-  backdrop-filter:blur(6px);
+  background:rgba(2,32,58,0.85);z-index:3000;
+  backdrop-filter:blur(8px);
 }
 #scannerModal .modal-card{
   width:100%;max-width:440px;
@@ -276,22 +391,18 @@ textarea{resize:vertical;min-height:80px}
   border-radius:24px 24px 0 0;
   background:#0a1628;
   overflow:hidden;display:flex;flex-direction:column;
-  box-shadow:0 -8px 40px rgba(14,165,233,0.25);
+  box-shadow:0 -8px 40px rgba(14,165,233,0.3);
   animation:slideUp 0.32s cubic-bezier(0.34,1.2,0.64,1) both;
 }
 @keyframes slideUp{
   from{transform:translateY(100%);opacity:0}
   to  {transform:translateY(0);opacity:1}
 }
-
-/* drag handle */
 #scannerModal .modal-card::before{
   content:'';display:block;width:40px;height:4px;
   background:rgba(255,255,255,0.18);border-radius:2px;
   margin:12px auto 0;flex-shrink:0;
 }
-
-/* header */
 .scanner-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:12px 20px 10px;
@@ -302,7 +413,7 @@ textarea{resize:vertical;min-height:80px}
 }
 .scanner-title-icon{
   width:32px;height:32px;border-radius:9px;
-  background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-3));
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
@@ -313,15 +424,11 @@ textarea{resize:vertical;min-height:80px}
   display:flex;align-items:center;justify-content:center;
   transition:background 0.15s;font-family:inherit;font-size:18px;line-height:1;
 }
-.scanner-close-btn:hover{background:rgba(255,255,255,0.18)}
-
-/* hint text */
+.scanner-close-btn:hover{background:rgba(255,255,255,0.2)}
 .scanner-hint{
   text-align:center;font-size:12px;color:rgba(255,255,255,0.45);
   padding:0 20px 10px;line-height:1.5;
 }
-
-/* viewport wrapper */
 .scanner-viewport{
   position:relative;
   margin:0 16px 16px;
@@ -331,18 +438,12 @@ textarea{resize:vertical;min-height:80px}
   max-height:58vw;
 }
 
-/* ── Aggressive suppression of html5-qrcode injected UI ── */
-/* Hide ALL injected html5-qrcode interface elements */
+/* ── html5-qrcode suppression ── */
 #reader{
   width:100%!important;height:100%!important;
   border:none!important;padding:0!important;
   background:transparent;position:relative;
 }
-/* Kill the default shaded overlay that html5-qrcode draws */
-#reader > div[style]{
-  /* The library injects inline-style divs for borders/shading */
-}
-/* Hide select camera dropdown and its label */
 #reader select,
 #reader #html5-qrcode-select-camera,
 #reader span[id*="select-camera"],
@@ -370,19 +471,17 @@ textarea{resize:vertical;min-height:80px}
   overflow:hidden!important;
   pointer-events:none!important;
 }
-/* Ensure video fills the viewport cleanly */
 #reader video{
   width:100%!important;height:100%!important;
   object-fit:cover!important;
   display:block!important;
   border:none!important;
 }
-/* Kill any canvas overlays the lib draws (scan lines etc) */
 #reader canvas{
   position:absolute!important;
   top:0!important;left:0!important;
   width:100%!important;height:100%!important;
-  opacity:0!important;    /* hide lib-drawn canvas; we use our own overlay */
+  opacity:0!important;
   pointer-events:none!important;
 }
 /* Make the inner section fill container */
@@ -392,11 +491,10 @@ textarea{resize:vertical;min-height:80px}
   border:none!important;padding:0!important;margin:0!important;
 }
 
-/* ── Our custom scan frame overlay (inside .scanner-viewport, ABOVE #reader) ── */
+/* ── Our custom scan frame overlay ── */
 .scan-frame-overlay{
   position:absolute;inset:0;pointer-events:none;z-index:10;
 }
-/* dark vignette outside scan zone */
 .scan-frame-overlay::before{
   content:'';position:absolute;inset:0;
   background:radial-gradient(
@@ -405,7 +503,6 @@ textarea{resize:vertical;min-height:80px}
     rgba(0,0,0,0.58) 100%
   );
 }
-/* animated scan line */
 .scan-line{
   position:absolute;left:22%;right:22%;height:2px;
   background:linear-gradient(90deg,transparent,rgba(14,165,233,0.9),transparent);
@@ -413,7 +510,6 @@ textarea{resize:vertical;min-height:80px}
   animation:scanLine 2s ease-in-out infinite;
   z-index:12;
 }
-/* four corner brackets */
 .scan-corners{
   position:absolute;
   top:50%;left:50%;
@@ -423,7 +519,7 @@ textarea{resize:vertical;min-height:80px}
 }
 .scan-corners span{
   position:absolute;width:22px;height:22px;
-  border-color:var(--blue-1);border-style:solid;
+  border-color:var(--accent-1);border-style:solid;
   border-width:0;
   animation:cornerPulse 2s ease-in-out infinite;
 }
@@ -432,14 +528,13 @@ textarea{resize:vertical;min-height:80px}
 .scan-corners span:nth-child(3){bottom:0;left:0; border-bottom-width:3px;border-left-width:3px;  border-radius:0 0 0 4px}
 .scan-corners span:nth-child(4){bottom:0;right:0;border-bottom-width:3px;border-right-width:3px; border-radius:0 0 4px 0}
 
-/* status chip */
 .scanner-status{
   display:flex;align-items:center;gap:7px;justify-content:center;
   padding:8px 20px 18px;
 }
 .scanner-status-dot{
   width:7px;height:7px;border-radius:50%;
-  background:var(--blue-1);
+  background:var(--accent-1);
   animation:pulse 1.4s ease-in-out infinite;
 }
 @keyframes pulse{
@@ -450,23 +545,18 @@ textarea{resize:vertical;min-height:80px}
   font-size:12px;font-weight:600;
   color:rgba(255,255,255,0.6);letter-spacing:0.02em;
 }
-
-/* hide old .modal-actions inside scanner */
 #scannerModal .modal-actions{display:none!important}
 
 @media(min-width:480px){
   #scannerModal{align-items:center}
-  #scannerModal .modal-card{
-    border-radius:24px;
-    max-width:380px;
-  }
+  #scannerModal .modal-card{border-radius:24px;max-width:380px;}
   .scanner-viewport{max-height:none;aspect-ratio:1/1}
 }
 @media(max-height:500px) and (orientation:landscape){
   .scanner-viewport{aspect-ratio:16/9;max-height:48vh}
 }
 
-/* ── Notifications / Toast (seragam) ── */
+/* ── Notifications / Toast ── */
 @keyframes toastIn{
   from{opacity:0;transform:translateY(-12px) scale(0.96)}
   to  {opacity:1;transform:translateY(0)    scale(1)}
@@ -476,107 +566,124 @@ textarea{resize:vertical;min-height:80px}
   to  {opacity:0;transform:translateY(-8px) scale(0.97)}
 }
 .notification{
-  position:fixed;top:72px;right:16px;left:16px;
-  margin:0 auto;max-width:340px;
-  padding:12px 14px 12px 16px;
+  position:fixed;top:76px;right:16px;left:16px;
+  margin:0 auto;max-width:360px;
+  padding:14px 16px;
   border-radius:14px;
-  background:rgba(255,255,255,0.97);
-  backdrop-filter:blur(12px);
-  border:1.5px solid transparent;
-  box-shadow:0 8px 24px rgba(14,165,233,0.15),0 2px 8px rgba(0,0,0,0.06);
-  z-index:5000;color:var(--text);
+  background:#ffffff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  z-index:5000;color:#fff;
   opacity:0;
-  animation:toastIn 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  animation:toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+/* Pada desktop, pastikan notifikasi muncul di dalam frame 560px */
+@media(min-width:768px){
+  .notification{
+    left:50%;right:auto;
+    transform:translateX(-50%);
+    width:calc(560px - 32px);
+    max-width:calc(560px - 32px);
+  }
+  .notification.hiding{
+    transform:translateX(-50%) translateY(-8px) scale(0.97);
+  }
 }
 .notification.hiding{animation:toastOut 0.22s ease forwards}
 .notification.show{opacity:1}
-.notification.success{border-color:rgba(16,185,129,0.3);background:linear-gradient(135deg,rgba(236,253,245,0.97),rgba(255,255,255,0.97))}
-.notification.error  {border-color:rgba(244,63,94,0.3);background:linear-gradient(135deg,rgba(255,241,243,0.97),rgba(255,255,255,0.97))}
-.notification.warning{border-color:rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(255,251,235,0.97),rgba(255,255,255,0.97))}
-.notification.info   {border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(240,249,255,0.97),rgba(255,255,255,0.97))}
-.notification-content{display:flex;align-items:center;gap:10px}
+.notification.success{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 8px 32px rgba(16,185,129,0.3)}
+.notification.error  {background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 32px rgba(239,68,68,0.3)}
+.notification.warning{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 8px 32px rgba(245,158,11,0.3)}
+.notification.info   {background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 8px 32px rgba(59,130,246,0.3)}
+.notification-content{display:flex;align-items:flex-start;gap:12px}
 .notification-icon{
-  flex-shrink:0;width:22px;height:22px;
+  flex-shrink:0;width:28px;height:28px;
   display:flex;align-items:center;justify-content:center;
-  border-radius:50%;font-size:13px;
+  border-radius:50%;font-size:14px;
+  background:rgba(255,255,255,0.2);
 }
-.notification.success .notification-icon{background:var(--success-light);color:var(--success)}
-.notification.error   .notification-icon{background:var(--danger-light);color:var(--danger)}
-.notification.warning .notification-icon{background:var(--warning-light);color:var(--warning)}
-.notification.info    .notification-icon{background:var(--blue-light);color:var(--blue-1)}
 .notification-text{flex:1}
-.notification-title{font-weight:700;font-size:13px;color:var(--text);line-height:1.3}
-.notification-message{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4}
+.notification-title{font-weight:700;font-size:14px;color:#fff;line-height:1.3;margin-bottom:2px}
+.notification-message{font-size:12px;color:rgba(255,255,255,0.88);line-height:1.4}
 .notification-close{
   flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;
-  background:rgba(0,0,0,0.06);color:var(--text-3);
+  background:rgba(255,255,255,0.2);color:#fff;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:14px;line-height:1;
-  transition:background 0.15s,color 0.15s;padding:0;font-family:inherit;
+  transition:background 0.15s;padding:0;font-family:inherit;
 }
-.notification-close:hover{background:rgba(0,0,0,0.12);color:var(--text)}
+.notification-close:hover{background:rgba(255,255,255,0.32)}
 .notification.single-line .notification-content{align-items:center}
 .notification.single-line .notification-title{margin-bottom:0}
 @media(max-width:480px){
-  .notification{right:12px;left:12px;max-width:none;top:68px}
+  .notification{right:12px;left:12px;max-width:none;top:72px}
 }
 
 /* ── Stock-out form ── */
 .stock-out-form{
-  background:var(--surface);border:1.5px solid var(--border);
-  border-radius:var(--radius-lg);padding:16px;
-  box-shadow:var(--shadow-sm);
+  background:#ffffff;
+  border:2px solid rgba(14,165,233,0.1);
+  border-radius:var(--radius-lg);padding:20px;
+  box-shadow:0 2px 12px rgba(14,165,233,0.06);
 }
 .stock-out-title{
   display:flex;align-items:center;gap:8px;
-  margin-bottom:14px;font-size:15px;color:var(--blue-dark);font-weight:700;
+  margin-bottom:16px;font-size:1.05rem;color:var(--accent-1);font-weight:800;
 }
 
 /* ── Selected item card ── */
 .selected-item-card{
-  background:var(--blue-light);border:1.5px solid var(--blue-mid);
-  border-radius:var(--radius);padding:11px 14px;
-  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:#f8faff;border:2px solid rgba(14,165,233,0.12);
+  border-radius:var(--radius);padding:12px 16px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  transition:all 0.2s ease;
 }
+.selected-item-card:hover{border-color:rgba(14,165,233,0.25);box-shadow:0 4px 12px rgba(14,165,233,0.08)}
 .selected-item-info{flex:1;min-width:0}
-.selected-item-name{font-weight:600;font-size:14px;color:var(--text);margin-bottom:2px}
-.selected-item-meta{font-size:12px;color:var(--text-3)}
+.selected-item-name{font-weight:700;font-size:14px;color:var(--text);margin-bottom:2px}
+.selected-item-meta{font-size:12px;color:var(--muted)}
 .selected-item-actions{display:flex;gap:8px;align-items:center}
 .btn-remove{
-  background:var(--danger-light);color:var(--danger);
-  border:1px solid rgba(244,63,94,0.2);padding:5px 11px;border-radius:7px;
+  background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;
+  border:none;padding:6px 14px;border-radius:8px;
   font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;
-  transition:background 0.15s;
+  transition:all 0.2s ease;box-shadow:0 2px 6px rgba(239,68,68,0.25);
 }
-.btn-remove:hover{background:#fecdd3}
+.btn-remove:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,0.35)}
 
 /* ── Suggestions dropdown ── */
 .stock-out-search-wrapper{position:relative}
 .suggestions-dropdown{
   position:absolute;top:100%;left:0;right:0;
-  background:var(--surface);border:1.5px solid var(--border);
+  background:#ffffff;
+  border:2px solid rgba(14,165,233,0.12);
   border-radius:var(--radius);margin-top:4px;
-  max-height:260px;overflow-y:auto;
-  box-shadow:var(--shadow-lg);z-index:1000;display:none;
+  max-height:280px;overflow-y:auto;
+  box-shadow:0 8px 24px rgba(14,165,233,0.15);
+  z-index:1000;display:none;
 }
 .suggestions-dropdown.show{display:block}
-.suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border-2)}
+.suggestion-item{
+  padding:12px 16px;cursor:pointer;
+  border-bottom:1px solid rgba(14,165,233,0.06);
+  transition:background 0.15s;
+}
 .suggestion-item:last-child{border-bottom:none}
-.suggestion-item:hover{background:var(--blue-light)}
-.suggestion-item-name{font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px}
-.suggestion-item-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap}
+.suggestion-item:hover{background:#f0f9ff}
+.suggestion-item-name{font-weight:700;color:var(--text);font-size:14px;margin-bottom:4px}
+.suggestion-item-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
 .suggestion-item-stock{display:inline-flex;align-items:center;gap:3px}
-.suggestion-item-stock.low{color:var(--danger);font-weight:600}
-.suggestion-item-stock.available{color:var(--success);font-weight:600}
-.suggestion-no-results{padding:16px;text-align:center;color:var(--text-3);font-size:13px}
+.suggestion-item-stock.low{color:var(--danger);font-weight:700}
+.suggestion-item-stock.available{color:var(--success);font-weight:700}
+.suggestion-no-results{padding:16px;text-align:center;color:var(--muted);font-size:13px}
 
 /* ── Signature canvas ── */
 #signatureCanvas{
-  background:var(--blue-light);border:1.5px dashed var(--blue-3);
+  background:#ffffff;border:2px dashed rgba(14,165,233,0.3);
   display:block;width:100%;height:auto;
   cursor:crosshair;touch-action:none;transition:border-color 0.2s;
+  border-radius:var(--radius);
 }
-#signatureCanvas:hover{border-color:var(--blue-1)}
+#signatureCanvas:hover{border-color:var(--accent-1)}
 
 /* ── Responsive ── */
 @media(max-width:480px){
@@ -585,12 +692,12 @@ textarea{resize:vertical;min-height:80px}
 }
 
 /* ── Extra polish ── */
-.main{padding:14px;flex:1}
+.main{padding:16px;flex:1;background:transparent}
 .view.hidden{display:none}
 .btn-barcode,.btn-barcode *{-webkit-tap-highlight-color:transparent}
-select option{background:var(--surface);color:var(--text)}
+select option{background:#ffffff;color:var(--text)}
 @keyframes slideUpModal{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
-#deleteConfirmInput:focus{border-color:#ef4444;box-shadow:0 0 0 3px rgba(244,63,94,0.15)}
+#deleteConfirmInput:focus{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.12)}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -599,21 +706,21 @@ select option{background:var(--surface);color:var(--text)}
 
 <body>
   <!-- Login overlay: shows when not authenticated. Data stays intact (offline-first). -->
-  <div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:linear-gradient(145deg,#075985 0%,#0ea5e9 55%,#38bdf8 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;">
-    <div style="background:#fff;border-radius:24px;padding:36px 28px;max-width:340px;width:100%;box-shadow:0 24px 64px rgba(3,105,161,0.3);">
+  <div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9000;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden;touch-action:none;">
+    <div style="background:rgba(255,255,255,0.12);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);border-top:1px solid rgba(255,255,255,0.55);border-left:1px solid rgba(255,255,255,0.35);border-right:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(255,255,255,0.1);border-radius:28px;padding:36px 28px;max-width:340px;width:100%;box-shadow:0 32px 64px rgba(3,105,161,0.35),0 2px 0 rgba(255,255,255,0.4) inset,0 -1px 0 rgba(0,0,0,0.06) inset;">
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="font-size:44px;margin-bottom:10px;">📦</div>
-        <div style="font-weight:800;font-size:1.3rem;color:#0c1a2e;letter-spacing:-0.02em;">SiMERY</div>
-        <div style="font-size:12px;color:#93aec8;margin-top:4px;">Manajemen Inventory · Twin Insani, S.Kom</div>
+        <div style="font-size:48px;margin-bottom:12px;">📦</div>
+        <div style="font-weight:800;font-size:1.4rem;color:#fff;letter-spacing:-0.02em;text-shadow:0 1px 8px rgba(0,0,0,0.2);">SiMERY</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:5px;font-weight:500;">Manajemen Inventory · Twin Insani, S.Kom</div>
       </div>
-      <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:14px;padding:13px 15px;margin-bottom:22px;">
-        <div style="font-size:13px;font-weight:700;color:#0369a1;margin-bottom:3px;">📱 Mode Offline Tersedia</div>
-        <div style="font-size:12px;color:#0284c7;line-height:1.5;">Data tersimpan di perangkat ini. Login untuk mengaktifkan sinkronisasi Google Drive.</div>
+      <div style="background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.6);border-radius:16px;padding:14px 16px;margin-bottom:24px;">
+        <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:4px;">📱 Mode Offline Tersedia</div>
+        <div style="font-size:12px;color:#0284c7;line-height:1.6;font-weight:500;">Data tersimpan di perangkat ini. Login untuk mengaktifkan sinkronisasi Google Drive.</div>
       </div>
       <div id="overlaySigninBtn" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
       <div id="overlayOfflineBtn" style="display:none;text-align:center;">
-        <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">atau</div>
-        <button onclick="dismissOverlay()" style="width:100%;padding:11px 16px;border-radius:12px;border:1.5px solid #d4e8f7;background:#f0f9ff;font-family:inherit;font-size:13px;font-weight:600;color:#0369a1;cursor:pointer;transition:background 0.2s;">Mode Offline</button>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:10px;">atau</div>
+        <button onclick="dismissOverlay()" style="width:100%;padding:12px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.92);font-family:inherit;font-size:13px;font-weight:700;color:#0369a1;cursor:pointer;transition:all 0.2s ease;letter-spacing:0.01em;box-shadow:0 2px 12px rgba(0,0,0,0.1);">Mode Offline</button>
       </div>
     </div>
   </div>
@@ -623,7 +730,7 @@ select option{background:var(--surface);color:var(--text)}
       <div class="brand">
         <div class="logo">📦</div>
         <div>
-          <div class="title">SiMERY</div>
+          <div class="title" onclick="showOverlay()">SiMERY</div>
           <div class="subtitle">Aplikasi Manajemen Inventory</div>
         </div>
       </div>
@@ -746,7 +853,7 @@ select option{background:var(--surface);color:var(--text)}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
                   </svg>
-                  Scan Barcode
+                  <span class="btn-barcode-text"><span>Scan</span><span>Barcode</span></span>
                 </button>
               </div>
             </label>
@@ -801,7 +908,7 @@ select option{background:var(--surface);color:var(--text)}
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
                       </svg>
-                      Scan
+                      <span class="btn-barcode-text"><span>Scan</span><span>Barcode</span></span>
                     </button>
                   </div>
                   <div id="stockOutSuggestions" class="suggestions-dropdown"></div>
@@ -1021,7 +1128,7 @@ select option{background:var(--surface);color:var(--text)}
 
 <!-- ══ Delete Item Modal (destruktif, ketik HAPUS) ══ -->
 <div id="deleteItemModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.55);z-index:5000;padding:16px;backdrop-filter:blur(6px);">
-  <div style="width:100%;max-width:420px;padding:26px 22px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.28s cubic-bezier(0.34,1.2,0.64,1) both;">
+  <div style="width:100%;max-width:560px;padding:26px 22px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.28s cubic-bezier(0.34,1.2,0.64,1) both;">
     <div style="text-align:center;margin-bottom:18px;">
       <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#fff1f3,#ffe4e8);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;">&#x1F5D1;&#xFE0F;</div>
       <h3 style="font-size:1.05rem;font-weight:800;color:#b91c1c;margin-bottom:6px;">Hapus Barang?</h3>
@@ -1044,7 +1151,7 @@ select option{background:var(--surface);color:var(--text)}
 
 <!-- Delete All Data Modal -->
 <div id="deleteAllModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.55);z-index:4000;padding:16px;backdrop-filter:blur(6px);">
-  <div style="width:100%;max-width:420px;padding:28px 24px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.3s cubic-bezier(0.34,1.2,0.64,1) both;">
+  <div style="width:100%;max-width:560px;padding:28px 24px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.3s cubic-bezier(0.34,1.2,0.64,1) both;">
     <div style="text-align:center;margin-bottom:20px;">
       <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fff1f3,#ffe4e8);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;">🗑️</div>
       <h3 style="font-size:1.15rem;font-weight:800;color:#b91c1c;margin-bottom:8px;">Hapus Semua Data?</h3>
@@ -1097,7 +1204,7 @@ select option{background:var(--surface);color:var(--text)}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M2 6h2v12H2V6zm3 0h1v12H5V6zm2 0h1v12H7V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6zm2 0h2v12h-2V6zm3 0h1v12h-1V6z"/>
                   </svg>
-                  Scan Barcode
+                  <span class="btn-barcode-text"><span>Scan</span><span>Barcode</span></span>
                 </button>
               </div>
             </label>
@@ -1618,7 +1725,7 @@ function renderManageList(query = '', filter = 'all'){
             type: 'delete',
             qty: item.stock,
             date: new Date().toISOString(),
-            recipient: '-',
+            recipient: 'System',
             note: 'Barang dihapus dari inventory. Kategori: ' + (item.category||'-') + '. Stok terakhir: ' + item.stock
           });
           state.items = state.items.filter(x => x.id !== item.id);
@@ -2132,7 +2239,7 @@ function saveEditItem() {
         type: 'edit',
         qty: 0,
         date: new Date().toISOString(),
-        recipient: '-',
+        recipient: 'System',
         note: changes.length > 0 ? changes.join(' | ') : 'Tidak ada perubahan data'
       });
       save();
@@ -2309,7 +2416,7 @@ function initForms(){
           type: 'add',
           qty: item.stock,
           date: new Date().toISOString(),
-          recipient: '-',
+          recipient: 'System',
           note: 'Barang baru ditambahkan. Kategori: ' + (item.category || '-') + '. Stok awal: ' + item.stock + (item.barcode ? '. Barcode: ' + item.barcode : '')
         });
         save(); renderAll();
@@ -2339,8 +2446,22 @@ function initForms(){
       showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Tanda Tangan Diperlukan',desc:'Tanda tangan penerima harus diisi sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
     }
     
-    // Dapatkan signature data
-    const signatureImage = _signatureCanvas.toDataURL('image/png');
+    // Dapatkan signature data – kompres ke JPEG dengan background putih
+    // (jsPDF 2.5.1 tidak mendukung WebP; JPEG jauh lebih kecil dari PNG dan tetap tajam untuk cetak)
+    let signatureImage;
+    try {
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width  = _signatureCanvas.width;
+      offCanvas.height = _signatureCanvas.height;
+      const offCtx = offCanvas.getContext('2d');
+      // Isi background putih agar JPEG tidak transparan/hitam
+      offCtx.fillStyle = '#ffffff';
+      offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+      offCtx.drawImage(_signatureCanvas, 0, 0);
+      signatureImage = offCanvas.toDataURL('image/jpeg', 0.92);
+    } catch (e) {
+      signatureImage = _signatureCanvas.toDataURL('image/png');
+    }
     
     for (let selectedItem of _selectedItems) {
       const item = state.items.find(x => x.id === selectedItem.itemId);
@@ -2910,197 +3031,184 @@ function printTransactionPDF(txKey) {
 
 async function exportHistoryToPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
+
   let filtered = state.history.slice();
-  
+
   if (_currentHistoryFilter !== 'all') {
     filtered = filtered.filter(h => h.type === _currentHistoryFilter);
   }
-  
+
   if (_currentHistoryCategoryFilter) {
     filtered = filtered.filter(h => {
       const item = state.items.find(x => x.id === h.itemId);
       return item && item.category === _currentHistoryCategoryFilter;
     });
   }
-  
+
   if (filtered.length === 0) {
     showConfirmModal({icon:'ℹ️',iconBg:'var(--blue-light)',iconBorder:'var(--blue-mid)',title:'Tidak Ada Data',desc:'Tidak ada data riwayat untuk di-export.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
   }
-  
+
   filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-  
-  // Ambil semua signatures dari IndexedDB
-  let signatures = {};
-  try {
-    signatures = await getAllSignaturesFromIndexedDB();
-  } catch(error) {
-    console.error('Error fetching signatures:', error);
-  }
-  
-  // Group berdasarkan transaksi (recipient + waktu yang dekat + type + note yang sama)
+
+  // ── Grup transaksi (sama persis seperti sebelumnya) ──────────────────────────
   const groupedByRecipient = {};
-  
   filtered.forEach(h => {
     const item = state.items.find(x => x.id === h.itemId);
     const recipient = h.recipient || 'Tanpa Nama';
     const note = h.note || '-';
     const hDate = new Date(h.date);
-    
-    // Cari grup yang cocok (recipient sama, type sama, note sama, waktu dalam 5 detik)
+
     let foundGroup = null;
     for (const key in groupedByRecipient) {
       const group = groupedByRecipient[key];
-      const groupDate = new Date(group.date);
-      const timeDiff = Math.abs(hDate - groupDate);
-      
-      // Jika recipient, type, note sama dan waktu dalam 5 detik, gabungkan
-      if (group.recipient === recipient && 
-          group.type === h.type && 
+      const timeDiff = Math.abs(hDate - new Date(group.date));
+      if (group.recipient === recipient &&
+          group.type === h.type &&
           group.keterangan === note &&
-          timeDiff < 5000) { // 5 detik
+          timeDiff < 5000) {
         foundGroup = key;
         break;
       }
     }
-    
+
     if (foundGroup) {
-      // Tambahkan ke grup yang ada
       groupedByRecipient[foundGroup].items.push({
         nama: item?.name || '[deleted]',
         kategori: item?.category || 'Tanpa Kategori',
         jumlah: h.qty,
         date: hDate
       });
-      
-      // Update signature jika belum ada
-      if (!groupedByRecipient[foundGroup].signature && h.signatureId && signatures[h.signatureId]) {
-        groupedByRecipient[foundGroup].signature = signatures[h.signatureId];
+      // Simpan signatureId pertama yang ditemukan untuk grup ini
+      if (!groupedByRecipient[foundGroup].signatureId && h.signatureId) {
+        groupedByRecipient[foundGroup].signatureId = h.signatureId;
       }
     } else {
-      // Buat grup baru
       const transactionKey = `${recipient}_${h.date}_${h.type}_${uid()}`;
       groupedByRecipient[transactionKey] = {
-        recipient: recipient,
-        type: h.type,
-        date: h.date,
-        items: [{
-          nama: item?.name || '[deleted]',
-          kategori: item?.category || 'Tanpa Kategori',
-          jumlah: h.qty,
-          date: hDate
-        }],
-        signature: h.signatureId ? signatures[h.signatureId] : null,
+        recipient, type: h.type, date: h.date,
+        items: [{ nama: item?.name || '[deleted]', kategori: item?.category || 'Tanpa Kategori', jumlah: h.qty, date: hDate }],
+        signatureId: h.signatureId || null,
         keterangan: note
       };
     }
   });
-  
+
+  const sortedTransactions = Object.entries(groupedByRecipient).sort((a, b) =>
+    new Date(b[1].date) - new Date(a[1].date)
+  );
+  const totalTx = sortedTransactions.length;
+
+  // ── Tampilkan progress ───────────────────────────────────────────────────────
+  // Buat elemen progress sementara di atas halaman
+  let progressEl = document.getElementById('_pdfProgressToast');
+  if (!progressEl) {
+    progressEl = document.createElement('div');
+    progressEl.id = '_pdfProgressToast';
+    progressEl.style.cssText = 'position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;padding:12px 24px;border-radius:14px;font-family:inherit;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(14,165,233,0.35);width:calc(min(560px,100vw) - 32px);max-width:528px;text-align:center;';
+    document.body.appendChild(progressEl);
+  }
+  const updateProgress = (cur, total, label) => {
+    progressEl.textContent = label || `⏳ Menyiapkan PDF… ${cur}/${total} transaksi`;
+  };
+  updateProgress(0, totalTx, '⏳ Memulai export PDF…');
+
+  // Yield ke event loop agar UI sempat render
+  await new Promise(r => setTimeout(r, 0));
+
+  // ── Buat dokumen PDF ─────────────────────────────────────────────────────────
+  const doc = new jsPDF();
+
   doc.setFontSize(18);
   doc.setFont(undefined, 'bold');
   doc.text('LAPORAN RIWAYAT INVENTORY', 105, 15, { align: 'center' });
-  
+
   doc.setFontSize(11);
   doc.setFont(undefined, 'normal');
   doc.text('SiMERY - Aplikasi Manajemen Inventory', 105, 22, { align: 'center' });
-  
+
   doc.setFontSize(9);
-  const exportDate = new Date().toLocaleString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const exportDate = new Date().toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
   doc.text(`Dicetak pada: ${exportDate} WIB`, 105, 28, { align: 'center' });
-  
+
   let yPos = 35;
-  
+
   doc.setFontSize(9);
   doc.setFont(undefined, 'italic');
   let filterText = 'Filter: ';
   if (_currentHistoryFilter === 'in') filterText += 'Stok Masuk';
   else if (_currentHistoryFilter === 'out') filterText += 'Stok Keluar';
   else filterText += 'Semua';
-  
-  if (_currentHistoryCategoryFilter) {
-    filterText += ` | Kategori: ${_currentHistoryCategoryFilter}`;
-  }
+  if (_currentHistoryCategoryFilter) filterText += ` | Kategori: ${_currentHistoryCategoryFilter}`;
   doc.text(filterText, 14, yPos);
   yPos += 10;
-  
-  // Render setiap transaksi sebagai tabel terpisah
+
+  // ── Render transaksi satu per satu (async + yield tiap 10 item) ──────────────
   let transactionNumber = 1;
-  const sortedTransactions = Object.entries(groupedByRecipient).sort((a, b) => 
-    new Date(b[1].date) - new Date(a[1].date)
-  );
-  
-  sortedTransactions.forEach(([key, transaction]) => {
-    // Cek jika perlu halaman baru
+  for (const [key, transaction] of sortedTransactions) {
+
+    // Update progress setiap transaksi
+    updateProgress(transactionNumber, totalTx);
+
+    // Yield ke event loop setiap 10 transaksi agar browser tidak freeze
+    if (transactionNumber % 10 === 0) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    // ── Load signature per-transaksi (bukan load semua sekaligus) ────────────
+    let sigData = null;
+    if (transaction.signatureId) {
+      try {
+        sigData = await getSignatureFromIndexedDB(transaction.signatureId);
+      } catch(e) {
+        console.warn('Gagal load signature:', transaction.signatureId, e);
+      }
+    }
+
+    // Cek halaman baru
     if (yPos > 220) {
       doc.addPage();
       yPos = 20;
     }
-    
+
     // Header transaksi
     const transactionDate = new Date(transaction.date);
-    const dateStr = transactionDate.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    const timeStr = transactionDate.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-    
-    const typeLabel = transaction.type === 'in' ? 'STOK MASUK' : 'STOK KELUAR';
-    const typeColor = transaction.type === 'in' ? [16, 185, 129] : [239, 68, 68];
-    
-    // Box header transaksi
+    const dateStr = transactionDate.toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const timeStr = transactionDate.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false });
+
+    let typeLabel, typeColor;
+    if      (transaction.type === 'in')     { typeLabel = 'STOK MASUK';          typeColor = [16, 185, 129]; }
+    else if (transaction.type === 'out')    { typeLabel = 'STOK KELUAR';         typeColor = [239, 68, 68]; }
+    else if (transaction.type === 'add')    { typeLabel = 'BARANG DITAMBAHKAN';  typeColor = [59, 130, 246]; }
+    else if (transaction.type === 'edit')   { typeLabel = 'BARANG DIEDIT';       typeColor = [245, 158, 11]; }
+    else if (transaction.type === 'delete') { typeLabel = 'BARANG DIHAPUS';      typeColor = [107, 114, 128]; }
+    else                                    { typeLabel = 'TRANSAKSI';           typeColor = [100, 116, 139]; }
+
     doc.setFillColor(...typeColor);
     doc.roundedRect(14, yPos, 182, 12, 2, 2, 'F');
-    
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
     doc.setTextColor(255, 255, 255);
     doc.text(`${typeLabel} - ${transaction.recipient}`, 16, yPos + 5);
-    
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
     doc.text(`${dateStr} | ${timeStr} WIB`, 16, yPos + 10);
-    
     doc.setTextColor(0, 0, 0);
     yPos += 15;
-    
+
     // Tabel items
     const tableData = transaction.items.map((item, idx) => [
-      (idx + 1).toString(),
-      item.nama,
-      item.jumlah.toString(),
-      item.kategori,
-      dateStr,
-      `${timeStr} WIB`,
-      transaction.keterangan
+      (idx + 1).toString(), item.nama, item.jumlah.toString(),
+      item.kategori, dateStr, `${timeStr} WIB`, transaction.keterangan
     ]);
-    
+
     doc.autoTable({
       startY: yPos,
       head: [['No', 'Nama Barang', 'Jumlah', 'Jenis Barang', 'Tanggal', 'Waktu', 'Keterangan']],
       body: tableData,
       theme: 'grid',
-      headStyles: { 
-        fillColor: typeColor,
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-        fontSize: 9
-      },
-      bodyStyles: { 
-        fontSize: 8,
-        valign: 'middle'
-      },
+      headStyles: { fillColor: typeColor, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 8, valign: 'middle' },
       columnStyles: {
         0: { cellWidth: 10, halign: 'center' },
         1: { cellWidth: 45 },
@@ -3112,29 +3220,25 @@ async function exportHistoryToPDF() {
       },
       margin: { left: 14, right: 14 }
     });
-    
+
     yPos = doc.lastAutoTable.finalY + 5;
-    
-    // Tanda tangan - positioned di kanan bawah dengan layout yang rapi
-    if (transaction.signature) {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
+
+    // Tanda tangan
+    if (sigData) {
+      if (yPos > 250) { doc.addPage(); yPos = 20; }
       const signatureWidth = 50;
       const signatureHeight = 20;
-      const signatureX = 196 - signatureWidth - 10; // 10mm dari margin kanan
-      
+      const signatureX = 196 - signatureWidth - 10;
+
       doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       const labelWidth = doc.getTextWidth('Tanda Tangan');
-      const labelX = signatureX + (signatureWidth - labelWidth) / 2; // Center label
-      doc.text('Tanda Tangan', labelX, yPos);
+      doc.text('Tanda Tangan', signatureX + (signatureWidth - labelWidth) / 2, yPos);
       yPos += 4;
-      
+
       try {
-        doc.addImage(transaction.signature, 'PNG', signatureX, yPos, signatureWidth, signatureHeight);
+        const sigFormat = sigData.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
+        doc.addImage(sigData, sigFormat, signatureX, yPos, signatureWidth, signatureHeight);
         yPos += signatureHeight + 2;
       } catch (e) {
         console.error('Error adding signature to PDF:', e);
@@ -3142,90 +3246,94 @@ async function exportHistoryToPDF() {
         doc.setFont(undefined, 'italic');
         doc.setTextColor(150, 150, 150);
         const errorWidth = doc.getTextWidth('[Tanda tangan tidak dapat ditampilkan]');
-        const errorX = signatureX + (signatureWidth - errorWidth) / 2;
-        doc.text('[Tanda tangan tidak dapat ditampilkan]', errorX, yPos);
+        doc.text('[Tanda tangan tidak dapat ditampilkan]', signatureX + (signatureWidth - errorWidth) / 2, yPos);
         doc.setTextColor(0, 0, 0);
         yPos += 5;
       }
-      
+
       doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       const nameText = `(${transaction.recipient})`;
       const nameWidth = doc.getTextWidth(nameText);
-      const nameX = signatureX + (signatureWidth - nameWidth) / 2; // Center nama
-      doc.text(nameText, nameX, yPos);
+      doc.text(nameText, signatureX + (signatureWidth - nameWidth) / 2, yPos);
       yPos += 3;
     } else {
       const signatureWidth = 50;
       const signatureX = 196 - signatureWidth - 10;
-      
       doc.setFontSize(8);
       doc.setFont(undefined, 'italic');
       doc.setTextColor(150, 150, 150);
       const noSignText = 'Tanda Tangan: -';
       const noSignWidth = doc.getTextWidth(noSignText);
-      const noSignX = signatureX + (signatureWidth - noSignWidth) / 2;
-      doc.text(noSignText, noSignX, yPos);
+      doc.text(noSignText, signatureX + (signatureWidth - noSignWidth) / 2, yPos);
       doc.setTextColor(0, 0, 0);
       yPos += 3;
     }
-    
+
     // Garis pemisah
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
     doc.line(14, yPos + 3, 196, yPos + 3);
     yPos += 10;
-    
+
     transactionNumber++;
-  });
-  
-  if (yPos > 240) {
-    doc.addPage();
-    yPos = 20;
+
+    // Bebaskan referensi signature dari memori setelah dipakai
+    sigData = null;
   }
-  
-  // Garis pemisah sebelum ringkasan
+
+  // ── Ringkasan ────────────────────────────────────────────────────────────────
+  updateProgress(totalTx, totalTx, '⏳ Menyusun ringkasan…');
+  await new Promise(r => setTimeout(r, 0));
+
+  if (yPos > 240) { doc.addPage(); yPos = 20; }
+
   doc.setDrawColor(100, 100, 100);
   doc.setLineWidth(1);
   doc.line(14, yPos, 196, yPos);
   yPos += 8;
-  
+
   doc.setFontSize(11);
   doc.setFont(undefined, 'bold');
   doc.text('RINGKASAN', 14, yPos);
   yPos += 8;
-  
+
   const totalTransactions = sortedTransactions.length;
-  const totalIn = sortedTransactions.filter(([k, t]) => t.type === 'in').length;
+  const totalIn  = sortedTransactions.filter(([k, t]) => t.type === 'in').length;
   const totalOut = sortedTransactions.filter(([k, t]) => t.type === 'out').length;
-  
-  const totalItemsIn = sortedTransactions
-    .filter(([k, t]) => t.type === 'in')
-    .reduce((sum, [k, t]) => sum + t.items.reduce((s, i) => s + i.jumlah, 0), 0);
-  
-  const totalItemsOut = sortedTransactions
-    .filter(([k, t]) => t.type === 'out')
-    .reduce((sum, [k, t]) => sum + t.items.reduce((s, i) => s + i.jumlah, 0), 0);
-  
+  const totalAdd = sortedTransactions.filter(([k, t]) => t.type === 'add').length;
+  const totalEdit   = sortedTransactions.filter(([k, t]) => t.type === 'edit').length;
+  const totalDelete = sortedTransactions.filter(([k, t]) => t.type === 'delete').length;
+
+  const totalItemsIn  = sortedTransactions.filter(([k,t])=>t.type==='in').reduce((s,[k,t])=>s+t.items.reduce((a,i)=>a+i.jumlah,0),0);
+  const totalItemsOut = sortedTransactions.filter(([k,t])=>t.type==='out').reduce((s,[k,t])=>s+t.items.reduce((a,i)=>a+i.jumlah,0),0);
+  const totalItemsAdd = sortedTransactions.filter(([k,t])=>t.type==='add').reduce((s,[k,t])=>s+t.items.reduce((a,i)=>a+i.jumlah,0),0);
+
   doc.setFont(undefined, 'normal');
   doc.setFontSize(9);
-  doc.text(`Total Transaksi: ${totalTransactions} transaksi`, 14, yPos);
-  yPos += 5;
-  doc.text(`  - Transaksi Stok Masuk: ${totalIn} transaksi (${totalItemsIn} unit)`, 14, yPos);
-  yPos += 5;
-  doc.text(`  - Transaksi Stok Keluar: ${totalOut} transaksi (${totalItemsOut} unit)`, 14, yPos);
-  yPos += 8;
-  
-  // Unique recipients
+  doc.text(`Total Entri: ${totalTransactions}`, 14, yPos); yPos += 5;
+  doc.text(`  - Stok Masuk: ${totalIn} transaksi (${totalItemsIn} unit)`, 14, yPos); yPos += 5;
+  doc.text(`  - Stok Keluar: ${totalOut} transaksi (${totalItemsOut} unit)`, 14, yPos); yPos += 5;
+  if (totalAdd > 0)    { doc.text(`  - Barang Ditambahkan: ${totalAdd} (${totalItemsAdd} unit stok awal)`, 14, yPos); yPos += 5; }
+  if (totalEdit > 0)   { doc.text(`  - Barang Diedit: ${totalEdit}`, 14, yPos); yPos += 5; }
+  if (totalDelete > 0) { doc.text(`  - Barang Dihapus: ${totalDelete}`, 14, yPos); yPos += 5; }
+  yPos += 3;
+
   const uniqueRecipients = new Set(sortedTransactions.map(([k, t]) => t.recipient));
   doc.text(`Total Penerima/Pengirim Berbeda: ${uniqueRecipients.size}`, 14, yPos);
-  
+
+  // ── Simpan PDF ───────────────────────────────────────────────────────────────
+  updateProgress(totalTx, totalTx, '⏳ Menyimpan file…');
+  await new Promise(r => setTimeout(r, 0));
+
   const fileName = `Riwayat_Inventory_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
-  
+
+  // Hapus progress toast
+  if (progressEl && progressEl.parentNode) progressEl.parentNode.removeChild(progressEl);
+
   showNotification('success', 'PDF berhasil di-export!', `File: ${fileName}`);
 }
-
 function exportPerItemPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -3789,6 +3897,7 @@ function showOverlay(){
   const ov=document.getElementById('loginOverlay');
   if(!ov)return;
   ov.style.display='flex';
+  document.body.style.overflow='hidden';
   const c=document.getElementById('overlaySigninBtn');
   if(c&&c.children.length===0){
     renderSignInButton(c,{type:'standard',size:'large',theme:'outline',text:'sign_in_with',shape:'rectangular',width:280});
@@ -3796,7 +3905,11 @@ function showOverlay(){
   const ob=document.getElementById('overlayOfflineBtn');
   if(ob) ob.style.display='block';
 }
-function hideOverlay(){const ov=document.getElementById('loginOverlay');if(ov)ov.style.display='none';}
+function hideOverlay(){
+  const ov=document.getElementById('loginOverlay');
+  if(ov)ov.style.display='none';
+  document.body.style.overflow='';
+}
 function dismissOverlay(){localStorage.setItem(LS_DISMISSED,'1');hideOverlay();}
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
