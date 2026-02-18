@@ -857,8 +857,8 @@ select option{background:var(--surface);color:var(--text)}
       <section class="view hidden" id="history">
         <div style="margin-bottom:16px;">
 
-          <!-- Export & Action Buttons: full-width grid, always 3 columns -->
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+          <!-- Export buttons: 2 kolom sejajar -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
             <button class="btn primary" id="exportPdfBtn" style="width:100%;padding:10px 8px;font-size:12px;justify-content:center;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
@@ -871,11 +871,14 @@ select option{background:var(--surface);color:var(--text)}
               </svg>
               <span>Export Per Barang</span>
             </button>
-            <button class="btn danger" id="deleteAllDataBtn" style="width:100%;padding:10px 8px;font-size:12px;justify-content:center;">
+          </div>
+          <!-- Tombol hapus: lebar penuh agar selalu muat -->
+          <div style="margin-bottom:12px;">
+            <button class="btn danger" id="deleteAllDataBtn" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
                 <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
               </svg>
-              <span>Hapus Semua</span>
+              Hapus Semua Data
             </button>
           </div>
 
