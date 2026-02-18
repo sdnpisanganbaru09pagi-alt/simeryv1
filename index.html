@@ -97,10 +97,17 @@ body{
   box-shadow:var(--shadow-sm);
 }
 .tab{
-  flex:1;padding:9px 6px;border-radius:var(--radius);border:none;
-  background:transparent;font-family:inherit;font-size:12px;font-weight:600;
+  flex:1;min-width:0;padding:7px 2px;border-radius:var(--radius);border:none;
+  background:transparent;font-family:inherit;
   color:var(--text-2);cursor:pointer;text-align:center;
-  transition:background 0.2s,color 0.2s,box-shadow 0.2s;white-space:nowrap;
+  transition:background 0.2s,color 0.2s,box-shadow 0.2s;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.tab-icon{width:18px;height:18px;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.tab-label{
+  font-size:9.5px;font-weight:600;line-height:1.25;
+  white-space:normal;word-break:break-word;
+  overflow-wrap:break-word;width:100%;
 }
 .tab.active{
   background:linear-gradient(135deg,var(--blue-1),var(--blue-dark));
@@ -635,10 +642,26 @@ select option{background:var(--surface);color:var(--text)}
 
     <main class="main">
       <nav class="tabs">
-        <button class="tab active" data-tab="dashboard">Dasbor</button>
-        <button class="tab" data-tab="manage">Kelola Barang</button>
-        <button class="tab" data-tab="stockOut">Keluarkan Stok</button>
-        <button class="tab" data-tab="history">Riwayat</button>
+        <button class="tab active" data-tab="dashboard">
+          <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span>
+          <span class="tab-label">Dasbor</span>
+        </button>
+        <button class="tab" data-tab="manage">
+          <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm0 12H4V9h16v10zM13 5H11V3H9v2H7V3H5v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3h-2v2h-2V3h-2v2z"/></svg></span>
+          <span class="tab-label">Kelola Barang</span>
+        </button>
+        <button class="tab" data-tab="stockOut">
+          <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14zM12 19l5-4-5-4v3H9v2h3v3z"/></svg></span>
+          <span class="tab-label">Keluarkan Stok</span>
+        </button>
+        <button class="tab" data-tab="history">
+          <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 2.05 4.95L6.63 18.37A9 9 0 1 0 13 3zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12z"/></svg></span>
+          <span class="tab-label">Riwayat Transaksi</span>
+        </button>
+        <button class="tab" data-tab="dataManagement">
+          <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 4.02 2 6.5v11C2 19.98 6.48 22 12 22s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2zm8 15.5c0 1.38-3.58 2.5-8 2.5s-8-1.12-8-2.5V15c1.78 1.18 4.77 1.75 8 1.75s6.22-.57 8-1.75v2.5zm0-5c0 1.38-3.58 2.5-8 2.5s-8-1.12-8-2.5V10c1.78 1.18 4.77 1.75 8 1.75s6.22-.57 8-1.75v2.5zm-8-2.25C7.58 10.25 4 9.13 4 7.75S7.58 5.25 12 5.25s8 1.12 8 2.5-3.58 2.25-8 2.25z"/></svg></span>
+          <span class="tab-label">Manajemen Data</span>
+        </button>
       </nav>
 
       <!-- Dashboard -->
@@ -872,16 +895,6 @@ select option{background:var(--surface);color:var(--text)}
               <span>Export Per Barang</span>
             </button>
           </div>
-          <!-- Tombol hapus: lebar penuh agar selalu muat -->
-          <div style="margin-bottom:12px;">
-            <button class="btn danger" id="deleteAllDataBtn" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
-                <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
-              </svg>
-              Hapus Semua Data
-            </button>
-          </div>
-
           <!-- Filter type: always 3 equal columns -->
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
             <button class="btn ghost active" data-history-filter="all" type="button" style="width:100%;justify-content:center;font-size:12px;">Semua</button>
@@ -889,12 +902,96 @@ select option{background:var(--surface);color:var(--text)}
             <button class="btn ghost" data-history-filter="out" type="button" style="width:100%;justify-content:center;font-size:12px;">Stok Keluar</button>
           </div>
 
-          <!-- Category filter -->
-          <select id="historyCategoryFilter" style="padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);width:100%;background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);">
-            <option value="">Semua Kategori</option>
-          </select>
+          <!-- Category & Month filters: side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <select id="historyCategoryFilter" style="padding:12px 10px;border-radius:10px;border:1.5px solid var(--border);width:100%;background:var(--surface);font-family:inherit;font-size:13px;color:var(--text);">
+              <option value="">Semua Kategori</option>
+            </select>
+            <select id="historyMonthFilter" style="padding:12px 10px;border-radius:10px;border:1.5px solid var(--border);width:100%;background:var(--surface);font-family:inherit;font-size:13px;color:var(--text);">
+              <option value="">Semua Bulan</option>
+            </select>
+          </div>
         </div>
         <div class="list" id="historyList"></div>
+      </section>
+
+
+      <!-- Manajemen Data -->
+      <section class="view hidden" id="dataManagement">
+        <div style="display:grid;gap:14px;">
+
+          <!-- Info Card -->
+          <div style="background:linear-gradient(135deg,var(--blue-light),#e0f2fe);border:1.5px solid var(--blue-mid);border-radius:var(--radius-lg);padding:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="font-size:20px;">🗄️</span>
+              <span style="font-weight:700;font-size:15px;color:var(--blue-dark);">Manajemen Data</span>
+            </div>
+            <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin:0;">Backup dan restore seluruh data inventori (barang & riwayat) dalam format file <strong>.json</strong>. Simpan backup secara berkala untuk mencegah kehilangan data.</p>
+          </div>
+
+          <!-- Backup -->
+          <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-sm);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #6ee7b7;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📥</div>
+              <div>
+                <div style="font-weight:700;font-size:14px;color:var(--text);">Backup Data</div>
+                <div style="font-size:12px;color:var(--text-3);">Unduh seluruh data sebagai file .json</div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-2);line-height:1.5;margin:0 0 14px;">File backup berisi semua data barang dan riwayat transaksi. Simpan file ini di tempat yang aman.</p>
+            <button class="btn green" id="backupDataBtn" style="width:100%;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
+              Unduh Backup (.json)
+            </button>
+          </div>
+
+          <!-- Restore -->
+          <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-sm);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📤</div>
+              <div>
+                <div style="font-weight:700;font-size:14px;color:var(--text);">Restore Data</div>
+                <div style="font-size:12px;color:var(--text-3);">Pulihkan data dari file backup .json</div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-2);line-height:1.5;margin:0 0 14px;">Pilih file backup yang sebelumnya diunduh. <strong>Data saat ini akan digantikan</strong> oleh data dari file backup.</p>
+            <div style="background:var(--bg);border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;" id="restoreDropZone"
+              onclick="el('restoreFileInput').click()"
+              ondragover="event.preventDefault();this.style.borderColor='var(--blue-1)';this.style.background='var(--blue-light)'"
+              ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--bg)'"
+              ondrop="handleRestoreDrop(event)">
+              <div style="font-size:28px;margin-bottom:8px;">📂</div>
+              <div style="font-size:13px;font-weight:600;color:var(--blue-dark);">Pilih File Backup</div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Format: simery_backup_*.json</div>
+              <div id="restoreFileName" style="font-size:12px;color:var(--success);font-weight:600;margin-top:8px;display:none;"></div>
+            </div>
+            <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="handleRestoreFile(this)"/>
+            <button class="btn primary" id="restoreDataBtn" style="width:100%;justify-content:center;opacity:0.45;cursor:not-allowed;" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19,9H15V3H9V9H5L12,16L19,9M5,18V20H19V18H5Z"/></svg>
+              Restore dari File Backup
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div style="height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);border-radius:2px;"></div>
+
+          <!-- Danger Zone -->
+          <div style="background:var(--surface);border:1.5px solid rgba(244,63,94,0.3);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-sm);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#fff1f3,#ffe4e8);border:1.5px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚠️</div>
+              <div>
+                <div style="font-weight:700;font-size:14px;color:#b91c1c;">Hapus Seluruh Data Aplikasi</div>
+                <div style="font-size:12px;color:var(--text-3);">Tindakan permanen yang tidak dapat dibatalkan</div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-2);line-height:1.5;margin:0 0 14px;">Menghapus seluruh data barang dan riwayat secara permanen. Pastikan Anda sudah melakukan <strong>backup</strong> sebelum melanjutkan.</p>
+            <button class="btn danger" id="deleteAllDataBtn" style="width:100%;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
+              Hapus Semua Data
+            </button>
+          </div>
+
+        </div>
       </section>
 
 <!-- ══ Reusable Confirm Modal (aksi non-destruktif) ══ -->
@@ -1270,6 +1367,7 @@ let state = { items: [], history: [] };
 let _selectedItems = [];
 let _currentHistoryFilter = 'all';
 let _currentHistoryCategoryFilter = '';
+let _currentHistoryMonthFilter = '';
 let _currentManageFilter = 'all';
 let _scanner = null;
 let _currentEditItem = null;
@@ -1483,14 +1581,37 @@ function renderManageList(query = '', filter = 'all'){
 function renderSelects() {
   const categoryFilter = el('historyCategoryFilter');
   if (categoryFilter) {
+    const prev = categoryFilter.value;
     const categories = [...new Set(state.items.map(item => item.category).filter(c => c))];
     categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
     categories.forEach(cat => {
       const o = document.createElement('option');
-      o.value = cat;
-      o.textContent = cat;
+      o.value = cat; o.textContent = cat;
       categoryFilter.appendChild(o);
     });
+    categoryFilter.value = prev;
+  }
+
+  const monthFilter = el('historyMonthFilter');
+  if (monthFilter && state.history) {
+    const prev = monthFilter.value;
+    const monthSet = new Set();
+    state.history.forEach(h => {
+      if (!h.date) return;
+      const d = new Date(h.date);
+      monthSet.add(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+    });
+    const months = [...monthSet].sort().reverse();
+    const BULAN = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    monthFilter.innerHTML = '<option value="">Semua Bulan</option>';
+    months.forEach(m => {
+      const [yr, mo] = m.split('-');
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = BULAN[parseInt(mo)] + ' ' + yr;
+      monthFilter.appendChild(o);
+    });
+    monthFilter.value = prev;
   }
 }
 
@@ -1560,6 +1681,14 @@ function renderHistory(){
     filtered = filtered.filter(h => {
       const item = state.items.find(x => x.id === h.itemId);
       return item && item.category === _currentHistoryCategoryFilter;
+    });
+  }
+
+  if (_currentHistoryMonthFilter) {
+    filtered = filtered.filter(h => {
+      if (!h.date) return false;
+      const d = new Date(h.date);
+      return (d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0')) === _currentHistoryMonthFilter;
     });
   }
   
@@ -2315,6 +2444,14 @@ function initSearch(){
   if (historyCategoryFilter) {
     historyCategoryFilter.addEventListener('change', (e) => {
       _currentHistoryCategoryFilter = e.target.value;
+      renderHistory();
+    });
+  }
+
+  const historyMonthFilter = el('historyMonthFilter');
+  if (historyMonthFilter) {
+    historyMonthFilter.addEventListener('change', (e) => {
+      _currentHistoryMonthFilter = e.target.value;
       renderHistory();
     });
   }
@@ -3409,6 +3546,120 @@ document.addEventListener('DOMContentLoaded', async () => {
   el('exportPdfBtn').addEventListener('click', exportHistoryToPDF);
   
   el('exportPerItemBtn').addEventListener('click', exportPerItemPDF);
+
+
+  // ── Backup & Restore ────────────────────────────────────────────────────────
+  let _restoreData = null;
+
+  el('backupDataBtn').addEventListener('click', () => {
+    const totalItems   = (state.items   || []).length;
+    const totalHistory = (state.history || []).length;
+
+    showConfirmModal({
+      icon: '📥',
+      iconBg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)',
+      iconBorder: '#6ee7b7',
+      title: 'Unduh Backup Data?',
+      desc: 'File backup akan berisi <strong>' + totalItems + ' barang</strong> dan <strong>' + totalHistory + ' riwayat</strong>.',
+      okLabel: 'Ya, Unduh',
+      okClass: 'green',
+      onConfirm: () => {
+        const backup = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          appName: 'SiMERY',
+          items: state.items   || [],
+          history: state.history || [],
+          lastModified: state.lastModified || Date.now()
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        const ts   = new Date().toISOString().slice(0,10);
+        a.href     = url;
+        a.download = 'simery_backup_' + ts + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showNotification('success', 'Backup berhasil diunduh', 'File simery_backup_' + ts + '.json tersimpan.');
+      }
+    });
+  });
+
+  window.handleRestoreFile = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    readRestoreFile(file);
+  };
+
+  window.handleRestoreDrop = function(event) {
+    event.preventDefault();
+    const zone = el('restoreDropZone');
+    zone.style.borderColor = 'var(--border)';
+    zone.style.background  = 'var(--bg)';
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    readRestoreFile(file);
+  };
+
+  function readRestoreFile(file) {
+    if (!file.name.endsWith('.json')) {
+      showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Format Tidak Valid',desc:'Pilih file <strong>.json</strong> yang merupakan hasil backup SiMERY.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!Array.isArray(parsed.items)) throw new Error('invalid');
+        _restoreData = parsed;
+        const nameEl = el('restoreFileName');
+        nameEl.textContent = '✓ ' + file.name + ' (' + (parsed.items.length) + ' barang, ' + ((parsed.history||[]).length) + ' riwayat)';
+        nameEl.style.display = 'block';
+        const btn = el('restoreDataBtn');
+        btn.disabled      = false;
+        btn.style.opacity = '1';
+        btn.style.cursor  = 'pointer';
+      } catch(err) {
+        showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'File Tidak Valid',desc:'File yang dipilih bukan file backup SiMERY yang valid.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
+        _restoreData = null;
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  el('restoreDataBtn').addEventListener('click', () => {
+    if (!_restoreData) return;
+    const itemCount    = (_restoreData.items   || []).length;
+    const historyCount = (_restoreData.history || []).length;
+    const exportedAt   = _restoreData.exportedAt ? new Date(_restoreData.exportedAt).toLocaleString('id-ID') : '-';
+
+    showConfirmModal({
+      icon: '📤',
+      iconBg: 'linear-gradient(135deg,#eff6ff,#dbeafe)',
+      iconBorder: '#93c5fd',
+      title: 'Restore Data?',
+      desc: 'Data saat ini akan <strong>digantikan sepenuhnya</strong> oleh:<br><span style="font-size:12px;color:var(--text-3);">📦 ' + itemCount + ' barang &nbsp;·&nbsp; 📋 ' + historyCount + ' riwayat &nbsp;·&nbsp; 🕐 Backup: ' + exportedAt + '</span><br><br><strong>Pastikan Anda sudah backup data saat ini.</strong>',
+      okLabel: 'Ya, Restore Sekarang',
+      okClass: 'primary',
+      onConfirm: () => {
+        state.items        = _restoreData.items   || [];
+        state.history      = _restoreData.history || [];
+        state.lastModified = Date.now();
+        save();
+        renderAll();
+        // Reset file input UI
+        _restoreData = null;
+        el('restoreFileName').style.display = 'none';
+        el('restoreFileName').textContent   = '';
+        el('restoreFileInput').value        = '';
+        const btn = el('restoreDataBtn');
+        btn.disabled      = true;
+        btn.style.opacity = '0.45';
+        btn.style.cursor  = 'not-allowed';
+        showNotification('success', 'Data berhasil di-restore', itemCount + ' barang dan ' + historyCount + ' riwayat telah dipulihkan.');
+      }
+    });
+  });
 
   // ── Hapus Semua Data ──────────────────────────────────────────────────────
   const deleteAllModal    = el('deleteAllModal');
