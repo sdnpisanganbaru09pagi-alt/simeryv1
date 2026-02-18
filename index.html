@@ -571,6 +571,8 @@ textarea{resize:vertical;min-height:80px}
 .view.hidden{display:none}
 .btn-barcode,.btn-barcode *{-webkit-tap-highlight-color:transparent}
 select option{background:var(--surface);color:var(--text)}
+@keyframes slideUpModal{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+#deleteConfirmInput:focus{border-color:#ef4444;box-shadow:0 0 0 3px rgba(244,63,94,0.15)}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -854,34 +856,106 @@ select option{background:var(--surface);color:var(--text)}
       <!-- History -->
       <section class="view hidden" id="history">
         <div style="margin-bottom:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-            <div style="font-weight:600;color:var(--blue-dark);">Filter Riwayat</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn primary" id="exportPdfBtn" style="padding:10px 16px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
-                </svg>
-                Export Riwayat
-              </button>
-              <button class="btn green" id="exportPerItemBtn" style="padding:10px 16px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
-                </svg>
-                Export Per Barang
-              </button>
-            </div>
+
+          <!-- Export & Action Buttons: full-width grid, always 3 columns -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+            <button class="btn primary" id="exportPdfBtn" style="width:100%;padding:10px 8px;font-size:12px;justify-content:center;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
+              </svg>
+              <span>Export Riwayat</span>
+            </button>
+            <button class="btn green" id="exportPerItemBtn" style="width:100%;padding:10px 8px;font-size:12px;justify-content:center;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
+              </svg>
+              <span>Export Per Barang</span>
+            </button>
+            <button class="btn danger" id="deleteAllDataBtn" style="width:100%;padding:10px 8px;font-size:12px;justify-content:center;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
+                <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+              </svg>
+              <span>Hapus Semua</span>
+            </button>
           </div>
-          <div class="actions" style="gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-            <button class="btn ghost active" data-history-filter="all" type="button">Semua</button>
-            <button class="btn ghost" data-history-filter="in" type="button">Stok Masuk</button>
-            <button class="btn ghost" data-history-filter="out" type="button">Stok Keluar</button>
+
+          <!-- Filter type: always 3 equal columns -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
+            <button class="btn ghost active" data-history-filter="all" type="button" style="width:100%;justify-content:center;font-size:12px;">Semua</button>
+            <button class="btn ghost" data-history-filter="in" type="button" style="width:100%;justify-content:center;font-size:12px;">Stok Masuk</button>
+            <button class="btn ghost" data-history-filter="out" type="button" style="width:100%;justify-content:center;font-size:12px;">Stok Keluar</button>
           </div>
+
+          <!-- Category filter -->
           <select id="historyCategoryFilter" style="padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);width:100%;background:var(--surface);font-family:inherit;font-size:14px;color:var(--text);">
             <option value="">Semua Kategori</option>
           </select>
         </div>
         <div class="list" id="historyList"></div>
       </section>
+
+<!-- ══ Reusable Confirm Modal (aksi non-destruktif) ══ -->
+<div id="confirmModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.5);z-index:5000;padding:16px;backdrop-filter:blur(6px);">
+  <div style="width:100%;max-width:400px;padding:24px 22px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(14,165,233,0.2);animation:slideUpModal 0.28s cubic-bezier(0.34,1.2,0.64,1) both;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div id="confirmModalIcon" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;"></div>
+      <h3 id="confirmModalTitle" style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;"></h3>
+      <p id="confirmModalDesc" style="font-size:13px;color:var(--text-2);line-height:1.6;"></p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn ghost" id="confirmModalCancel" style="flex:1;">Batal</button>
+      <button class="btn primary" id="confirmModalOk" style="flex:1;"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Delete Item Modal (destruktif, ketik HAPUS) ══ -->
+<div id="deleteItemModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.55);z-index:5000;padding:16px;backdrop-filter:blur(6px);">
+  <div style="width:100%;max-width:420px;padding:26px 22px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.28s cubic-bezier(0.34,1.2,0.64,1) both;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#fff1f3,#ffe4e8);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;">&#x1F5D1;&#xFE0F;</div>
+      <h3 style="font-size:1.05rem;font-weight:800;color:#b91c1c;margin-bottom:6px;">Hapus Barang?</h3>
+      <p id="deleteItemDesc" style="font-size:13px;color:var(--text-2);line-height:1.6;"></p>
+    </div>
+    <div style="background:#fff1f3;border:1.5px solid #fca5a5;border-radius:12px;padding:12px 14px;margin-bottom:18px;">
+      <div style="font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:7px;">Untuk melanjutkan, ketik <strong>HAPUS</strong> pada kolom di bawah:</div>
+      <input id="deleteItemInput" type="text" placeholder="Ketik HAPUS untuk konfirmasi"
+        style="width:100%;padding:10px 13px;border-radius:9px;border:2px solid #fca5a5;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.05em;color:#b91c1c;background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;"/>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn ghost" id="deleteItemCancelBtn" style="flex:1;">Batal</button>
+      <button class="btn danger" id="deleteItemConfirmBtn" style="flex:1;opacity:0.45;cursor:not-allowed;" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
+        Ya, Hapus Barang
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete All Data Modal -->
+<div id="deleteAllModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.55);z-index:4000;padding:16px;backdrop-filter:blur(6px);">
+  <div style="width:100%;max-width:420px;padding:28px 24px;border-radius:20px;background:#fff;box-shadow:0 20px 60px rgba(244,63,94,0.2);animation:slideUpModal 0.3s cubic-bezier(0.34,1.2,0.64,1) both;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fff1f3,#ffe4e8);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;">🗑️</div>
+      <h3 style="font-size:1.15rem;font-weight:800;color:#b91c1c;margin-bottom:8px;">Hapus Semua Data?</h3>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;">Tindakan ini akan <strong>menghapus seluruh data barang dan riwayat aplikasi secara permanen</strong>. Data yang sudah dihapus tidak dapat dikembalikan.</p>
+    </div>
+    <div style="background:#fff1f3;border:1.5px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:8px;">⚠️ Untuk melanjutkan, ketik <strong>HAPUS</strong> pada kolom di bawah:</div>
+      <input id="deleteConfirmInput" type="text" placeholder='Ketik "HAPUS" untuk konfirmasi'
+        style="width:100%;padding:11px 14px;border-radius:9px;border:2px solid #fca5a5;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.05em;color:#b91c1c;background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;"/>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn ghost" id="cancelDeleteBtn" style="flex:1;">Batal</button>
+      <button class="btn danger" id="confirmDeleteBtn" style="flex:1;opacity:0.45;cursor:not-allowed;" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+        </svg>
+        Hapus Semua Data
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Item Modal -->
       <div id="editModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,89,133,0.5);z-index:3000;padding:16px;backdrop-filter:blur(4px);">
@@ -893,7 +967,15 @@ select option{background:var(--surface);color:var(--text)}
               <input id="editName" placeholder="Nama barang" required />
             </label>
             <label>Kategori
-              <input id="editCategory" placeholder="Kategori barang" />
+              <select id="editCategory" required>
+                <option value="">Pilih Kategori</option>
+                <option value="Alat Kebersihan">Alat Kebersihan</option>
+                <option value="Bahan Kebersihan">Bahan Kebersihan</option>
+                <option value="Alat Tulis Kantor">Alat Tulis Kantor</option>
+                <option value="Alat Kelistrikan">Alat Kelistrikan</option>
+                <option value="Alat Olahraga">Alat Olahraga</option>
+                <option value="Alat Kesehatan">Alat Kesehatan</option>
+              </select>
             </label>
             <label>Stok
               <input id="editStock" type="number" min="0" required />
@@ -1272,10 +1354,11 @@ function renderItems(query=''){
     `;
 
     const actions = document.createElement('div');
-    actions.className = 'actions';
+    actions.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;';
 
     const outBtn = document.createElement('button');
     outBtn.className = 'btn orange';
+    outBtn.style.cssText = 'width:100%;justify-content:center;';
     outBtn.textContent = 'Keluarkan';
     outBtn.onclick = () => {
       switchTab('stockOut');
@@ -1292,6 +1375,7 @@ function renderItems(query=''){
 
     const editBtn = document.createElement('button');
     editBtn.className = 'btn green';
+    editBtn.style.cssText = 'width:100%;justify-content:center;';
     editBtn.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
@@ -1363,11 +1447,27 @@ function renderManageList(query = '', filter = 'all'){
     del.className = 'btn';
     del.textContent = 'Hapus';
     del.onclick = () => {
-      if(confirm(`Hapus ${item.name}?`)){
-        state.items = state.items.filter(x => x.id !== item.id);
-        save(); renderAll();
-        showNotification('error', 'Barang dihapus', `${item.name} telah dihapus dari inventory`);
-      }
+      showDeleteItemModal({
+        itemName: item.name,
+        itemCategory: item.category,
+        itemStock: item.stock,
+        onConfirm: () => {
+          state.history = state.history || [];
+          state.history.push({
+            id: uid(),
+            itemId: item.id,
+            itemName: item.name,
+            type: 'delete',
+            qty: item.stock,
+            date: new Date().toISOString(),
+            recipient: '-',
+            note: 'Barang dihapus dari inventory. Kategori: ' + (item.category||'-') + '. Stok terakhir: ' + item.stock
+          });
+          state.items = state.items.filter(x => x.id !== item.id);
+          save(); renderAll();
+          showNotification('error', 'Barang dihapus', item.name + ' telah dihapus dari inventory');
+        }
+      });
     };
 
     actions.appendChild(edit);
@@ -1429,9 +1529,10 @@ function groupHistoryByTransaction(historyArr) {
     }
     transactions[txKey].items.push({
       historyId: h.id,
-      itemName: item?.name || '[dihapus]',
+      itemName: item?.name || h.itemName || '[dihapus]',
       category: item?.category || '-',
       qty: h.qty,
+      note: h.note || '',
     });
   });
   
@@ -1468,6 +1569,9 @@ function renderHistory(){
   
   transactions.forEach(tx => {
     const isOut = tx.type === 'out';
+    const isAdd = tx.type === 'add';
+    const isEdit = tx.type === 'edit';
+    const isDelete = tx.type === 'delete';
     const dateStr = fmtDate(tx.date);
     const totalQty = tx.items.reduce((s, i) => s + i.qty, 0);
     
@@ -1476,13 +1580,28 @@ function renderHistory(){
     card.style.cssText = 'gap:0;padding:0;overflow:hidden;';
     
     // Header bar
-    const headerBg = isOut
-      ? 'linear-gradient(135deg,#fff1f3,#fff5f7)'
-      : 'linear-gradient(135deg,#ecfdf5,#f0fff8)';
-    const badgeColor = isOut ? 'empty' : 'available';
-    const badgeLabel = isOut ? '↑ Stok Keluar' : '↓ Stok Masuk';
-    const accentColor = isOut ? 'var(--danger)' : 'var(--success)';
-    const borderColor = isOut ? 'rgba(244,63,94,0.18)' : 'rgba(16,185,129,0.18)';
+    let headerBg, badgeColor, badgeLabel, accentColor, borderColor;
+    if (isOut) {
+      headerBg = 'linear-gradient(135deg,#fff1f3,#fff5f7)';
+      badgeColor = 'empty'; badgeLabel = '↑ Stok Keluar';
+      accentColor = 'var(--danger)'; borderColor = 'rgba(244,63,94,0.18)';
+    } else if (isAdd) {
+      headerBg = 'linear-gradient(135deg,#ecfdf5,#f0fff8)';
+      badgeColor = 'available'; badgeLabel = '✚ Barang Ditambahkan';
+      accentColor = 'var(--success)'; borderColor = 'rgba(16,185,129,0.18)';
+    } else if (isEdit) {
+      headerBg = 'linear-gradient(135deg,#fffbeb,#fefce8)';
+      badgeColor = 'low'; badgeLabel = '✎ Barang Diedit';
+      accentColor = 'var(--warning)'; borderColor = 'rgba(245,158,11,0.18)';
+    } else if (isDelete) {
+      headerBg = 'linear-gradient(135deg,#fff1f3,#fff5f7)';
+      badgeColor = 'empty'; badgeLabel = '✕ Barang Dihapus';
+      accentColor = 'var(--danger)'; borderColor = 'rgba(244,63,94,0.25)';
+    } else {
+      headerBg = 'linear-gradient(135deg,#ecfdf5,#f0fff8)';
+      badgeColor = 'available'; badgeLabel = '↓ Stok Masuk';
+      accentColor = 'var(--success)'; borderColor = 'rgba(16,185,129,0.18)';
+    }
     
     // Build items preview (first 2 then "...+N lagi")
     const previewItems = tx.items.slice(0, 2);
@@ -1507,6 +1626,21 @@ function renderHistory(){
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/></svg>
         Cetak PDF
       </button>` : '';
+
+    // For add/edit/delete: show item name prominently; for out/in: show recipient
+    const primaryLabel = (isAdd || isEdit || isDelete)
+      ? escapeHtml(tx.items[0]?.itemName || '-')
+      : escapeHtml(tx.recipient);
+    // Note to show under badge
+    const noteText = (isAdd || isEdit || isDelete)
+      ? (tx.items[0]?.note || tx.note || '')
+      : tx.note;
+    // Subtitle line
+    const subtitleLine = (isAdd || isDelete)
+      ? `🕐 ${dateStr} &nbsp;·&nbsp; 📦 Stok: ${totalQty}`
+      : isEdit
+        ? `🕐 ${dateStr}`
+        : `🕐 ${dateStr} &nbsp;·&nbsp; 📦 ${tx.items.length} jenis · ${totalQty} unit`;
     
     card.innerHTML = `
       <div style="padding:13px 14px 11px;background:${headerBg};border-bottom:1px solid ${borderColor};">
@@ -1514,18 +1648,16 @@ function renderHistory(){
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px;">
               <span class="badge ${badgeColor}" style="border:1px solid ${borderColor};">${badgeLabel}</span>
-              <span style="font-size:12px;font-weight:700;color:var(--text);">${escapeHtml(tx.recipient)}</span>
+              <span style="font-size:12px;font-weight:700;color:var(--text);">${primaryLabel}</span>
             </div>
             <div style="font-size:11px;color:var(--text-3);">
-              🕐 ${dateStr} &nbsp;·&nbsp; 📦 ${tx.items.length} jenis · ${totalQty} unit
-              ${tx.note ? `&nbsp;·&nbsp; 📝 ${escapeHtml(tx.note)}` : ''}
+              ${subtitleLine}
             </div>
+            ${noteText ? `<div style="font-size:11px;color:var(--text-2);margin-top:5px;line-height:1.5;background:rgba(0,0,0,0.03);border-radius:6px;padding:5px 8px;">📝 ${escapeHtml(noteText)}</div>` : ''}
           </div>
           ${printBtnHtml}
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">
-          ${itemsHtml}
-        </div>
+        ${(!isEdit && !isAdd && !isDelete) ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">${itemsHtml}</div>` : ''}
       </div>
       ${tx.items.length > 2 ? `
         <div style="padding:10px 14px;">
@@ -1582,24 +1714,24 @@ function addItemToStockOutList() {
   const qty = parseInt(qtyEl.value) || 0;
   
   if (!selectedItemId) {
-    alert('Pilih barang dari daftar terlebih dahulu');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Belum Dipilih',desc:'Tambahkan minimal 1 barang ke daftar sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
     return;
   }
   
   const item = state.items.find(x => x.id === selectedItemId);
   
   if (!item) {
-    alert('Barang tidak ditemukan');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang yang dipilih tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
     return;
   }
 
   if (qty <= 0) {
-    alert('Jumlah harus lebih dari 0');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Jumlah Tidak Valid',desc:'Jumlah barang yang dikeluarkan harus lebih dari 0.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
     return;
   }
 
   if (qty > item.stock) {
-    alert(`Stok tidak cukup. Stok tersedia: ${item.stock}`);
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Stok Tidak Cukup',desc:'Stok tidak mencukupi. Stok tersedia: <strong>' + item.stock + '</strong> unit.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
     return;
   }
 
@@ -1607,7 +1739,7 @@ function addItemToStockOutList() {
   if (existingIndex >= 0) {
     const totalQty = _selectedItems[existingIndex].qty + qty;
     if (totalQty > item.stock) {
-      alert(`Total jumlah melebihi stok. Stok tersedia: ${item.stock}`);
+      showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Stok Tidak Cukup',desc:'Total jumlah melebihi stok yang tersedia: <strong>' + item.stock + '</strong> unit.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
       return;
     }
     _selectedItems[existingIndex].qty = totalQty;
@@ -1672,7 +1804,7 @@ function renderSelectedItems() {
 
 function addStock(itemId){
   const item = state.items.find(x=>x.id===itemId);
-  if(!item) return alert('Barang tidak ditemukan');
+  if(!item){ showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return; }
   
   _currentAddStockItem = item;
   
@@ -1700,7 +1832,7 @@ function saveAddStock() {
   const notes = (el('addStockNotes').value || '').trim();
   
   if (addQuantity <= 0) {
-    alert('Jumlah stok yang ditambah harus lebih dari 0');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Jumlah Tidak Valid',desc:'Jumlah stok yang ditambahkan harus lebih dari 0.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
     return;
   }
   
@@ -1708,32 +1840,41 @@ function saveAddStock() {
   const oldStock = _currentAddStockItem.stock;
   const newStock = oldStock + addQuantity;
   
-  _currentAddStockItem.stock += addQuantity;
-  
-  state.history = state.history || [];
-  state.history.push({ 
-    id: uid(), 
-    itemId: _currentAddStockItem.id, 
-    type: 'in', 
-    qty: addQuantity, 
-    date: new Date().toISOString(), 
-    recipient: 'System',
-    note: notes || 'Penambahan stok'
-  });
-  
-  save();
-  renderAll();
+  const addStockTarget = _currentAddStockItem; // capture ref
+
   closeAddStockModal();
-  
-  showSuccessNotification(
-    `Stok berhasil ditambahkan!`,
-    `${itemName}: ${oldStock} → ${newStock} (+${addQuantity})`
-  );
+  showConfirmModal({
+    icon: '📥',
+    iconBg: 'linear-gradient(135deg,#ecfdf5,#f0fff8)',
+    iconBorder: '#6ee7b7',
+    title: 'Tambah Stok?',
+    desc: 'Stok <strong>' + escapeHtml(itemName) + '</strong> akan bertambah dari <strong>' + oldStock + '</strong> menjadi <strong>' + newStock + '</strong> unit (+' + addQuantity + ').',
+    okLabel: 'Ya, Tambah Stok',
+    okClass: 'green',
+    onConfirm: () => {
+      if (addStockTarget) {
+        addStockTarget.stock = newStock;
+        state.history = state.history || [];
+        state.history.push({
+          id: uid(),
+          itemId: addStockTarget.id,
+          type: 'in',
+          qty: addQuantity,
+          date: new Date().toISOString(),
+          recipient: 'System',
+          note: notes || 'Penambahan stok'
+        });
+      }
+      save();
+      renderAll();
+      showSuccessNotification('Stok berhasil ditambahkan!', itemName + ': ' + oldStock + ' -> ' + newStock + ' (+' + addQuantity + ')');
+    }
+  });
 }
 
 function editItem(itemId){
   const item = state.items.find(x=>x.id===itemId);
-  if(!item) return alert('Barang tidak ditemukan');
+  if(!item){ showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return; }
   
   _currentEditItem = item;
   
@@ -1761,19 +1902,52 @@ function saveEditItem() {
   const newBarcode = el('editBarcode').value.trim();
   
   if (!newName) {
-    alert('Nama barang tidak boleh kosong');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Nama Kosong',desc:'Nama barang tidak boleh kosong.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
     return;
   }
   
-  _currentEditItem.name = newName;
-  _currentEditItem.category = newCategory;
-  _currentEditItem.stock = newStock;
-  _currentEditItem.barcode = newBarcode;
-  
-  save();
-  renderAll();
+  const oldName     = _currentEditItem.name;
+  const oldCategory = _currentEditItem.category;
+  const oldStock    = _currentEditItem.stock;
+  const oldBarcode  = _currentEditItem.barcode;
+  const editTarget  = _currentEditItem; // capture ref before modal closes
+
+  // Catat perubahan yang terjadi
+  const changes = [];
+  if (oldName     !== newName)     changes.push('Nama: "' + oldName + '" -> "' + newName + '"');
+  if (oldCategory !== newCategory) changes.push('Kategori: "' + (oldCategory||'-') + '" -> "' + (newCategory||'-') + '"');
+  if (oldStock    !== newStock)    changes.push('Stok: ' + oldStock + ' -> ' + newStock);
+  if (oldBarcode  !== newBarcode)  changes.push('Barcode: "' + (oldBarcode||'-') + '" -> "' + (newBarcode||'-') + '"');
+
   closeEditModal();
-  showNotification('success', 'Barang berhasil diperbarui', `${newName} telah diperbarui`);
+  showConfirmModal({
+    icon: '✏️',
+    iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)',
+    iconBorder: '#fde68a',
+    title: 'Simpan Perubahan?',
+    desc: 'Perubahan pada barang <strong>' + escapeHtml(newName) + '</strong> akan disimpan.' + (changes.length > 0 ? '<br><span style="font-size:12px;color:var(--text-3);">' + changes.map(c => escapeHtml(c)).join(' | ') + '</span>' : ''),
+    okLabel: 'Ya, Simpan',
+    okClass: 'primary',
+    onConfirm: () => {
+      editTarget.name     = newName;
+      editTarget.category = newCategory;
+      editTarget.stock    = newStock;
+      editTarget.barcode  = newBarcode;
+      state.history = state.history || [];
+      state.history.push({
+        id: uid(),
+        itemId: editTarget.id,
+        type: 'edit',
+        qty: 0,
+        date: new Date().toISOString(),
+        recipient: '-',
+        note: changes.length > 0 ? changes.join(' | ') : 'Tidak ada perubahan data'
+      });
+      save();
+      renderAll();
+      showNotification('success', 'Barang berhasil diperbarui', newName + ' telah diperbarui');
+    }
+  });
 }
 
 function showToast(text){
@@ -1836,6 +2010,89 @@ function showNotification(type = 'info', title, message = null) {
   }
 }
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// MODAL CONFIRMATION SYSTEM
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── 1. Reusable confirm modal (for non-destructive actions) ──────────────────
+let _confirmCallback = null;
+
+function showConfirmModal({ icon, iconBg, iconBorder, title, desc, okLabel, okClass, onConfirm }) {
+  const modal       = el('confirmModal');
+  const iconEl      = el('confirmModalIcon');
+  const titleEl     = el('confirmModalTitle');
+  const descEl      = el('confirmModalDesc');
+  const okBtn       = el('confirmModalOk');
+
+  iconEl.style.background = iconBg || 'var(--blue-light)';
+  iconEl.style.border     = '2px solid ' + (iconBorder || 'var(--blue-mid)');
+  iconEl.textContent      = icon  || 'ℹ️';
+  titleEl.textContent     = title || '';
+  descEl.innerHTML        = desc  || '';
+  okBtn.textContent       = okLabel || 'Konfirmasi';
+  okBtn.className         = 'btn ' + (okClass || 'primary');
+  okBtn.style.flex        = '1';
+
+  _confirmCallback = onConfirm;
+  modal.style.display = 'flex';
+}
+
+function closeConfirmModal() {
+  el('confirmModal').style.display = 'none';
+  _confirmCallback = null;
+}
+
+el('confirmModalOk').addEventListener('click', () => {
+  const cb = _confirmCallback;
+  closeConfirmModal();
+  if (typeof cb === 'function') cb();
+});
+el('confirmModalCancel').addEventListener('click', closeConfirmModal);
+el('confirmModal').addEventListener('click', e => { if (e.target === el('confirmModal')) closeConfirmModal(); });
+
+// ── 2. Delete item modal (destructive — must type HAPUS) ─────────────────────
+let _deleteItemCallback = null;
+
+function showDeleteItemModal({ itemName, itemCategory, itemStock, onConfirm }) {
+  const modal   = el('deleteItemModal');
+  const descEl  = el('deleteItemDesc');
+  const input   = el('deleteItemInput');
+  const btn     = el('deleteItemConfirmBtn');
+
+  descEl.innerHTML = `Barang <strong>${escapeHtml(itemName)}</strong> akan dihapus permanen dari inventori. Stok saat ini: <strong>${itemStock}</strong> unit. Tindakan ini tidak dapat dibatalkan.`;
+  input.value = '';
+  btn.disabled = true;
+  btn.style.opacity = '0.45';
+  btn.style.cursor  = 'not-allowed';
+
+  _deleteItemCallback = onConfirm;
+  modal.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function closeDeleteItemModal() {
+  el('deleteItemModal').style.display = 'none';
+  el('deleteItemInput').value = '';
+  _deleteItemCallback = null;
+}
+
+el('deleteItemInput').addEventListener('input', () => {
+  const btn   = el('deleteItemConfirmBtn');
+  const valid = el('deleteItemInput').value.trim() === 'HAPUS';
+  btn.disabled      = !valid;
+  btn.style.opacity = valid ? '1' : '0.45';
+  btn.style.cursor  = valid ? 'pointer' : 'not-allowed';
+});
+el('deleteItemConfirmBtn').addEventListener('click', () => {
+  if (el('deleteItemInput').value.trim() !== 'HAPUS') return;
+  const cb = _deleteItemCallback;
+  closeDeleteItemModal();
+  if (typeof cb === 'function') cb();
+});
+el('deleteItemCancelBtn').addEventListener('click', closeDeleteItemModal);
+el('deleteItemModal').addEventListener('click', e => { if (e.target === el('deleteItemModal')) closeDeleteItemModal(); });
+
 function initForms(){
   const addForm = el('addForm');
   addForm.addEventListener('submit', e => {
@@ -1847,10 +2104,31 @@ function initForms(){
       stock: parseInt(el('stock').value) || 0,
       barcode: (el('barcode').value || '').trim()
     };
-    state.items.push(item);
-    save(); renderAll();
-    addForm.reset();
-    showNotification('success', 'Barang berhasil ditambahkan!', `${item.name} dengan stok ${item.stock} telah ditambahkan`);
+    showConfirmModal({
+      icon: '📦',
+      iconBg: 'linear-gradient(135deg,#ecfdf5,#f0fff8)',
+      iconBorder: '#6ee7b7',
+      title: 'Tambah Barang Baru?',
+      desc: 'Barang <strong>' + escapeHtml(item.name) + '</strong> akan ditambahkan ke inventori dengan stok awal <strong>' + item.stock + '</strong> unit.',
+      okLabel: 'Ya, Tambahkan',
+      okClass: 'green',
+      onConfirm: () => {
+        state.items.push(item);
+        state.history = state.history || [];
+        state.history.push({
+          id: uid(),
+          itemId: item.id,
+          type: 'add',
+          qty: item.stock,
+          date: new Date().toISOString(),
+          recipient: '-',
+          note: 'Barang baru ditambahkan. Kategori: ' + (item.category || '-') + '. Stok awal: ' + item.stock + (item.barcode ? '. Barcode: ' + item.barcode : '')
+        });
+        save(); renderAll();
+        addForm.reset();
+        showNotification('success', 'Barang berhasil ditambahkan!', item.name + ' dengan stok ' + item.stock + ' telah ditambahkan');
+      }
+    });
   });
 
   const stockOutForm = el('stockOutForm');
@@ -1858,7 +2136,7 @@ function initForms(){
     e.preventDefault();
     
     if (_selectedItems.length === 0) {
-      alert('Tambahkan minimal 1 barang ke daftar');
+      showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Daftar Barang Kosong',desc:'Tambahkan minimal 1 barang ke daftar sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
       return;
     }
     
@@ -1866,12 +2144,12 @@ function initForms(){
     const notes = (el('stockOutNotes').value || '').trim();
     
     if(!recipient){ 
-      return alert('Nama penerima harus diisi'); 
+      showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Nama Penerima Kosong',desc:'Nama penerima harus diisi sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return; 
     }
     
     // Validasi tanda tangan
     if (!isSignatureValid()) {
-      alert('Tanda tangan penerima harus diisi!');
+      showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Tanda Tangan Diperlukan',desc:'Tanda tangan penerima harus diisi sebelum melanjutkan.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
       return;
     }
     
@@ -1881,60 +2159,70 @@ function initForms(){
     for (let selectedItem of _selectedItems) {
       const item = state.items.find(x => x.id === selectedItem.itemId);
       if (!item) {
-        alert(`Barang ${selectedItem.itemName} tidak ditemukan`);
+        showConfirmModal({ icon: '⚠️', iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)', iconBorder: '#fde68a', title: 'Barang Tidak Ditemukan', desc: 'Barang <strong>' + escapeHtml(selectedItem.itemName) + '</strong> tidak ditemukan dalam inventori.', okLabel: 'OK', okClass: 'primary', onConfirm: () => {} });
         return;
       }
       if (selectedItem.qty > item.stock) {
-        alert(`Stok ${item.name} tidak cukup. Stok tersedia: ${item.stock}`);
+        showConfirmModal({ icon: '⚠️', iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)', iconBorder: '#fde68a', title: 'Stok Tidak Cukup', desc: 'Stok <strong>' + escapeHtml(item.name) + '</strong> tidak cukup. Tersedia: <strong>' + item.stock + '</strong> unit.', okLabel: 'OK', okClass: 'primary', onConfirm: () => {} });
         return;
       }
     }
-    
+
+    const totalItems = _selectedItems.length;
+    const totalUnits = _selectedItems.reduce((s, i) => s + i.qty, 0);
+    const itemsList = _selectedItems.map(i => escapeHtml(i.itemName) + ' (' + i.qty + ' unit)').join(', ');
+
+    showConfirmModal({
+      icon: '📤',
+      iconBg: 'linear-gradient(135deg,#fff7ed,#ffedd5)',
+      iconBorder: '#fdba74',
+      title: 'Keluarkan Stok?',
+      desc: '<strong>' + totalItems + ' jenis</strong> barang (<strong>' + totalUnits + ' unit</strong>) akan dikeluarkan untuk penerima <strong>' + escapeHtml(recipient) + '</strong>.<br><span style="font-size:12px;color:var(--text-3);">' + itemsList + '</span>',
+      okLabel: 'Ya, Keluarkan',
+      okClass: 'orange',
+      onConfirm: async () => {
+        await doStockOut(signatureImage, recipient, notes);
+      }
+    });
+    return; // processing moved to doStockOut()
+  });
+
+  // ── Helper: execute stock-out after confirmation ───────────────────────────
+  async function doStockOut(signatureImage, recipient, notes) {
     const processedItems = [];
-    const transactionId = uid(); // ID transaksi yang sama untuk semua item dalam 1 pengiriman
+    const transactionId = uid();
     const transactionDate = new Date().toISOString();
-    
+
     for (let selectedItem of _selectedItems) {
       const item = state.items.find(x => x.id === selectedItem.itemId);
       if (item) {
         item.stock -= selectedItem.qty;
-        
         const historyId = uid();
-        
         state.history = state.history || [];
-        state.history.push({ 
-          id: historyId, 
-          itemId: item.id, 
-          type: 'out', 
-          qty: selectedItem.qty, 
-          date: transactionDate, 
+        state.history.push({
+          id: historyId,
+          itemId: item.id,
+          type: 'out',
+          qty: selectedItem.qty,
+          date: transactionDate,
           recipient: recipient,
           note: notes,
           signatureId: historyId,
-          transactionId: transactionId  // group key
+          transactionId: transactionId
         });
-        
-        // Simpan signature ke IndexedDB
-        try {
-          await saveSignatureToIndexedDB(historyId, signatureImage);
-        } catch(error) {
-          console.error('Error saving signature:', error);
-        }
-        
-        processedItems.push(`${item.name} (${selectedItem.qty} unit)`);
+        try { await saveSignatureToIndexedDB(historyId, signatureImage); } catch(err) { console.error(err); }
+        processedItems.push(item.name + ' (' + selectedItem.qty + ' unit)');
       }
     }
-    
-    save(); 
+
+    save();
     renderAll();
     stockOutForm.reset();
     _selectedItems = [];
     renderSelectedItems();
     clearSignature();
-    
-    showNotification('warning', 'Stok berhasil dikeluarkan', 
-      `${processedItems.length} jenis barang untuk ${recipient}`);
-  });
+    showNotification('warning', 'Stok berhasil dikeluarkan', processedItems.length + ' jenis barang untuk ' + recipient);
+  }
 
   const addStockForm = el('addStockForm');
   addStockForm.addEventListener('submit', e => {
@@ -2496,7 +2784,7 @@ async function exportHistoryToPDF() {
   }
   
   if (filtered.length === 0) {
-    alert('Tidak ada data riwayat untuk di-export');
+    showConfirmModal({icon:'ℹ️',iconBg:'var(--blue-light)',iconBorder:'var(--blue-mid)',title:'Tidak Ada Data',desc:'Tidak ada data riwayat untuk di-export.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
     return;
   }
   
@@ -2802,7 +3090,7 @@ function exportPerItemPDF() {
   const doc = new jsPDF();
 
   if (state.items.length === 0) {
-    alert('Tidak ada data barang untuk di-export');
+    showConfirmModal({icon:'ℹ️',iconBg:'var(--blue-light)',iconBorder:'var(--blue-mid)',title:'Tidak Ada Data',desc:'Tidak ada data barang untuk di-export.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
     return;
   }
 
@@ -3032,7 +3320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('IndexedDB ready');
   } catch(error) {
     console.error('Failed to initialize IndexedDB:', error);
-    alert('Peringatan: Penyimpanan tanda tangan mungkin tidak berfungsi dengan baik.');
+    showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Peringatan',desc:'Penyimpanan tanda tangan mungkin tidak berfungsi dengan baik di browser ini.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return;
   }
   
   load();
@@ -3118,6 +3406,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   el('exportPdfBtn').addEventListener('click', exportHistoryToPDF);
   
   el('exportPerItemBtn').addEventListener('click', exportPerItemPDF);
+
+  // ── Hapus Semua Data ──────────────────────────────────────────────────────
+  const deleteAllModal    = el('deleteAllModal');
+  const deleteConfirmInput= el('deleteConfirmInput');
+  const confirmDeleteBtn  = el('confirmDeleteBtn');
+  const cancelDeleteBtn   = el('cancelDeleteBtn');
+
+  el('deleteAllDataBtn').addEventListener('click', () => {
+    deleteConfirmInput.value = '';
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteBtn.style.opacity = '0.45';
+    confirmDeleteBtn.style.cursor = 'not-allowed';
+    deleteAllModal.style.display = 'flex';
+    setTimeout(() => deleteConfirmInput.focus(), 100);
+  });
+
+  deleteConfirmInput.addEventListener('input', () => {
+    const valid = deleteConfirmInput.value.trim() === 'HAPUS';
+    confirmDeleteBtn.disabled = !valid;
+    confirmDeleteBtn.style.opacity = valid ? '1' : '0.45';
+    confirmDeleteBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
+  });
+
+  cancelDeleteBtn.addEventListener('click', () => {
+    deleteAllModal.style.display = 'none';
+    deleteConfirmInput.value = '';
+  });
+
+  deleteAllModal.addEventListener('click', (e) => {
+    if(e.target === deleteAllModal){
+      deleteAllModal.style.display = 'none';
+      deleteConfirmInput.value = '';
+    }
+  });
+
+  confirmDeleteBtn.addEventListener('click', () => {
+    if(deleteConfirmInput.value.trim() !== 'HAPUS') return;
+    // Reset semua data
+    state.items = [];
+    state.history = [];
+    state.lastModified = Date.now();
+    save();
+    renderAll();
+    deleteAllModal.style.display = 'none';
+    deleteConfirmInput.value = '';
+    showNotification('success', 'Data Dihapus', 'Seluruh data barang dan riwayat berhasil dihapus.');
+  });
 
   renderAll();
 });
