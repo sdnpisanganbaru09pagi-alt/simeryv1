@@ -1,14 +1,18 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SiMERY – Aplikasi Manajemen Inventory</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>" type="image/svg+xml">
+  <!-- [FIX #1] Preconnect font domains untuk mempercepat loading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+  <!-- [FIX #2] defer pada kedua Google scripts agar tidak blokir render -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" defer></script>
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 :root {
   --accent-1:#0ea5e9;
@@ -42,7 +46,6 @@ html,body{height:100%}
 body{
   font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;
   background:linear-gradient(135deg,var(--bg-start) 0%,var(--bg-end) 100%);
-  background-attachment:fixed;
   color:var(--text);
   font-size:14px; line-height:1.6;
   -webkit-font-smoothing:antialiased;
@@ -58,14 +61,24 @@ body{
     justify-content:center;
     min-height:100vh;
     padding:32px 0 48px;
-    /* Background dekoratif desktop: grid dots */
+    background:transparent;
+    /* background-attachment:fixed dihapus — tidak reliable di mobile/iOS */
+  }
+
+  /* Background dekoratif pakai pseudo-element fixed agar TIDAK ikut scroll */
+  body::after{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
     background:
       radial-gradient(circle at 20% 20%, rgba(14,165,233,0.12) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(139,92,246,0.1) 0%, transparent 50%),
       radial-gradient(circle at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 70%),
       linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 50%,#ede9fe 100%);
-    background-attachment:fixed;
+    pointer-events:none;
   }
+
   /* Label "Mobile App" di atas frame — selalu di atas semua elemen termasuk modal */
   body::before{
     content:'📱 SiMERY — Mobile App Preview';
@@ -86,6 +99,10 @@ body{
 
 /* ── Shell ── */
 .app{width:100%;min-height:100vh;display:flex;flex-direction:column;background:#fff}
+
+/* [FIX #8] Skeleton loading state — sembunyikan konten saat inisialisasi */
+.app.app-loading main { opacity: 0; }
+.app main { opacity: 1; transition: opacity 0.25s ease; }
 
 @media(min-width:768px){
   .app{
@@ -132,7 +149,6 @@ body{
   display:flex; align-items:center; gap:12px;
   position:sticky; top:0; z-index:100;
   box-shadow:0 4px 20px rgba(14,165,233,0.2);
-  will-change:background-position;
 }
 
 .brand{display:flex;gap:12px;align-items:center;flex:1;min-width:0;position:relative;z-index:1}
@@ -576,16 +592,17 @@ textarea{resize:vertical;min-height:80px}
   opacity:0;
   animation:toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
-/* Pada desktop, pastikan notifikasi muncul di dalam frame 560px */
+/* Pada desktop, pastikan notifikasi muncul di dalam frame 560px yang centered */
 @media(min-width:768px){
   .notification{
-    left:50%;right:auto;
-    transform:translateX(-50%);
+    left:calc(50% - 280px + 16px);
+    right:auto;
     width:calc(560px - 32px);
     max-width:calc(560px - 32px);
+    transform:none;
   }
   .notification.hiding{
-    transform:translateX(-50%) translateY(-8px) scale(0.97);
+    transform:translateY(-8px) scale(0.97);
   }
 }
 .notification.hiding{animation:toastOut 0.22s ease forwards}
@@ -699,9 +716,7 @@ select option{background:#ffffff;color:var(--text)}
 @keyframes slideUpModal{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 #deleteConfirmInput:focus{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.12)}
 </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <!-- [FIX-A] html5-qrcode & jsPDF DIHAPUS dari sini — dimuat lazy saat dibutuhkan -->
 </head>
 
 <body>
@@ -1373,7 +1388,8 @@ function initIndexedDB() {
   });
 }
 
-// Save signature to IndexedDB
+// Save signature to IndexedDB — [FIX-C] simpan sebagai Blob bukan Base64 string
+// Blob ~33% lebih kecil (tidak ada Base64 encoding overhead)
 function saveSignatureToIndexedDB(historyId, signatureData) {
   return new Promise((resolve, reject) => {
     if (!_db) {
@@ -1383,10 +1399,28 @@ function saveSignatureToIndexedDB(historyId, signatureData) {
     
     const transaction = _db.transaction([SIGNATURE_STORE], 'readwrite');
     const objectStore = transaction.objectStore(SIGNATURE_STORE);
+
+    // Konversi Base64 data URL ke Blob untuk penyimpanan yang lebih efisien
+    let storeValue = signatureData;
+    let mimeType = 'image/jpeg';
+    try {
+      const arr = signatureData.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while(n--) u8arr[n] = bstr.charCodeAt(n);
+      storeValue = new Blob([u8arr], { type: mime });
+      mimeType = mime;
+    } catch(e) {
+      // Fallback: tetap simpan sebagai string jika konversi gagal
+      console.warn('Signature Blob conversion failed, storing as string:', e);
+    }
     
     const data = {
       historyId: historyId,
-      signature: signatureData,
+      signature: storeValue,
+      mimeType: mimeType,
       timestamp: new Date().toISOString()
     };
     
@@ -1404,7 +1438,8 @@ function saveSignatureToIndexedDB(historyId, signatureData) {
   });
 }
 
-// Get signature from IndexedDB
+// Get signature from IndexedDB — [FIX-C] konversi Blob kembali ke data URL untuk jsPDF
+// Backward-compatible: signature lama yang tersimpan sebagai string tetap bekerja
 function getSignatureFromIndexedDB(historyId) {
   return new Promise((resolve, reject) => {
     if (!_db) {
@@ -1417,11 +1452,29 @@ function getSignatureFromIndexedDB(historyId) {
     const request = objectStore.get(historyId);
     
     request.onsuccess = () => {
-      if (request.result) {
-        resolve(request.result.signature);
-      } else {
-        resolve(null);
+      if (!request.result) { resolve(null); return; }
+      
+      const stored = request.result.signature;
+
+      // Jika tersimpan sebagai string (legacy Base64), kembalikan langsung
+      if (typeof stored === 'string') {
+        resolve(stored);
+        return;
       }
+
+      // Jika tersimpan sebagai Blob (baru), konversi ke data URL untuk jsPDF
+      if (stored instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result);
+        reader.onerror = () => {
+          console.error('Error reading signature Blob');
+          resolve(null);
+        };
+        reader.readAsDataURL(stored);
+        return;
+      }
+
+      resolve(null);
     };
     
     request.onerror = () => {
@@ -1503,6 +1556,12 @@ let _signatureCtx = null;
 let _isDrawing = false;
 let _signatureData = null;
 
+// [FIX #3] Item lookup Map — O(1) sebagai ganti find() O(n) di setiap filter/render
+let _itemMap = new Map();
+function buildItemMap() {
+  _itemMap = new Map(state.items.map(i => [i.id, i]));
+}
+
 // ── IDB helpers: read/write appState ────────────────────────────────────────
 function idbGetState() {
   return new Promise((resolve) => {
@@ -1552,6 +1611,7 @@ async function load() {
       ];
       await save();
     }
+    buildItemMap(); // [FIX #3] Build O(1) lookup map setelah state dimuat
   } catch(e) {
     console.error('load error', e);
     state = { items: [], history: [] };
@@ -1559,11 +1619,25 @@ async function load() {
 }
 
 // ── Save: write to IDB (fire-and-forget from sync callers) ──────────────────
+const HISTORY_MAX = 1000; // [FIX-B] Batas entri history aktif — cegah bloat data
+
 async function save() {
   try {
     state.lastModified = Date.now();
+    buildItemMap(); // [FIX #3] Rebuild lookup map setiap kali data berubah
+
+    // [FIX-B] Trim history jika melebihi batas — pertahankan entri TERBARU
+    if (state.history && state.history.length > HISTORY_MAX) {
+      // Sort by date descending, ambil 1000 terbaru
+      state.history = state.history
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, HISTORY_MAX);
+      console.log('[SiMERY] History di-trim ke', HISTORY_MAX, 'entri terbaru');
+    }
+
     await idbPutState(state);
-    if (typeof syncToDrive === 'function') syncToDrive(state);
+    if (typeof debouncedSyncToDrive === 'function') debouncedSyncToDrive(state);
   } catch(e) { console.error('save error', e); }
 }
 
@@ -1588,7 +1662,6 @@ function stockBadge(stock){
 
 function renderItems(query=''){
   const container = el('items');
-  container.innerHTML = '';
   const q = (query||'').toString().trim().toLowerCase();
 
   let filtered = state.items.filter(item => {
@@ -1605,6 +1678,9 @@ function renderItems(query=''){
 
   // Urutan: kosong → hampir habis → tersedia, lalu alphabetical
   filtered.sort((a, b) => stockPriority(a) - stockPriority(b) || (a.name||'').localeCompare(b.name||''));
+
+  // [FIX #4] Gunakan DocumentFragment untuk batch insert (satu kali reflow)
+  const frag = document.createDocumentFragment();
 
   filtered.forEach(item => {
     const card = document.createElement('div');
@@ -1626,6 +1702,7 @@ function renderItems(query=''){
     outBtn.className = 'btn orange';
     outBtn.style.cssText = 'width:100%;justify-content:center;';
     outBtn.textContent = 'Keluarkan';
+    outBtn.setAttribute('aria-label', `Keluarkan ${item.name}`);
     outBtn.onclick = () => {
       switchTab('stockOut');
       setTimeout(() => {
@@ -1642,8 +1719,9 @@ function renderItems(query=''){
     const editBtn = document.createElement('button');
     editBtn.className = 'btn green';
     editBtn.style.cssText = 'width:100%;justify-content:center;';
+    editBtn.setAttribute('aria-label', `Tambah stok ${item.name}`);
     editBtn.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
       </svg>
       Tambah Stok
@@ -1653,12 +1731,15 @@ function renderItems(query=''){
     actions.appendChild(outBtn);
     actions.appendChild(editBtn);
     card.appendChild(actions);
-    container.appendChild(card);
+    frag.appendChild(card);
   });
+
+  // Satu kali reflow — kosongkan dan isi sekaligus
+  container.innerHTML = '';
+  container.appendChild(frag);
 }
 function renderManageList(query = '', filter = 'all'){
   const container = el('manageList');
-  container.innerHTML = '';
   if(state.items.length === 0){ 
     container.innerHTML = '<div style="padding:12px;color:var(--text-2)">Belum ada barang.</div>'; 
     return; 
@@ -1690,6 +1771,9 @@ function renderManageList(query = '', filter = 'all'){
   // Urutan: kosong → hampir habis → tersedia, lalu alphabetical
   filtered.sort((a, b) => stockPriority(a) - stockPriority(b) || (a.name||'').localeCompare(b.name||''));
 
+  // [FIX #4] DocumentFragment untuk batch insert
+  const frag = document.createDocumentFragment();
+
   filtered.forEach(item => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -1707,11 +1791,13 @@ function renderManageList(query = '', filter = 'all'){
     const edit = document.createElement('button');
     edit.className = 'btn ghost';
     edit.textContent = 'Edit';
+    edit.setAttribute('aria-label', `Edit ${item.name}`);
     edit.onclick = () => editItem(item.id);
 
     const del = document.createElement('button');
     del.className = 'btn';
     del.textContent = 'Hapus';
+    del.setAttribute('aria-label', `Hapus ${item.name}`);
     del.onclick = () => {
       showDeleteItemModal({
         itemName: item.name,
@@ -1738,8 +1824,12 @@ function renderManageList(query = '', filter = 'all'){
     actions.appendChild(edit);
     actions.appendChild(del);
     card.appendChild(actions);
-    container.appendChild(card);
+    frag.appendChild(card);
   });
+
+  // Satu kali reflow
+  container.innerHTML = '';
+  container.appendChild(frag);
 }
 
 function renderSelects() {
@@ -1783,7 +1873,8 @@ function groupHistoryByTransaction(historyArr) {
   const transactions = {};
   
   historyArr.forEach(h => {
-    const item = state.items.find(x => x.id === h.itemId);
+    // [FIX #3] O(1) lookup via _itemMap sebagai ganti find() O(n)
+    const item = _itemMap.get(h.itemId);
     
     // Gunakan transactionId jika ada, fallback ke grouping by recipient+time
     let txKey;
@@ -1843,7 +1934,8 @@ function renderHistory(){
   
   if (_currentHistoryCategoryFilter) {
     filtered = filtered.filter(h => {
-      const item = state.items.find(x => x.id === h.itemId);
+      // [FIX #3] O(1) lookup via _itemMap
+      const item = _itemMap.get(h.itemId);
       return item && item.category === _currentHistoryCategoryFilter;
     });
   }
@@ -2021,7 +2113,7 @@ function addItemToStockOutList() {
     return;
   }
   
-  const item = state.items.find(x => x.id === selectedItemId);
+  const item = _itemMap.get(selectedItemId);
   
   if (!item) {
     showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang yang dipilih tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}});
@@ -2106,7 +2198,7 @@ function renderSelectedItems() {
 }
 
 function addStock(itemId){
-  const item = state.items.find(x=>x.id===itemId);
+  const item = _itemMap.get(itemId);
   if(!item){ showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return; }
   
   _currentAddStockItem = item;
@@ -2174,7 +2266,7 @@ function saveAddStock() {
 }
 
 function editItem(itemId){
-  const item = state.items.find(x=>x.id===itemId);
+  const item = _itemMap.get(itemId);
   if(!item){ showConfirmModal({icon:'⚠️',iconBg:'linear-gradient(135deg,#fffbeb,#fefce8)',iconBorder:'#fde68a',title:'Barang Tidak Ditemukan',desc:'Barang tidak ditemukan dalam inventori.',okLabel:'OK',okClass:'primary',onConfirm:()=>{}}); return; }
   
   _currentEditItem = item;
@@ -2260,6 +2352,9 @@ function showNotification(type = 'info', title, message = null) {
   try {
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
+    // [FIX #9] role="status" + aria-live agar screen reader mengumumkan notifikasi
+    notification.setAttribute('role', 'status');
+    notification.setAttribute('aria-live', 'polite');
     const iconSvg = NOTIF_ICONS[type] || NOTIF_ICONS.info;
     
     notification.innerHTML = `
@@ -2389,6 +2484,40 @@ function debounce(fn, delay = 200) {
   return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
 }
 
+// ── [FIX-A] Lazy script loader — muat library hanya saat dibutuhkan ──────────
+const _loadedScripts = new Set();
+function loadScript(url) {
+  if (_loadedScripts.has(url)) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload  = () => { _loadedScripts.add(url); resolve(); };
+    s.onerror = () => reject(new Error('Gagal memuat: ' + url));
+    document.head.appendChild(s);
+  });
+}
+
+// Lazy loader untuk jsPDF + autoTable (dipakai di 3 fungsi PDF)
+let _jsPDFLoading = null;
+async function ensureJsPDF() {
+  if (window.jspdf) return; // sudah dimuat
+  if (_jsPDFLoading) return _jsPDFLoading; // sedang dimuat, tunggu
+  _jsPDFLoading = (async () => {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+  })();
+  await _jsPDFLoading;
+}
+
+// Lazy loader untuk html5-qrcode (dipakai hanya saat scanner dibuka)
+let _qrLoading = null;
+async function ensureHtml5Qrcode() {
+  if (window.Html5Qrcode) return; // sudah dimuat
+  if (_qrLoading) return _qrLoading;
+  _qrLoading = loadScript('https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js');
+  await _qrLoading;
+}
+
 function initForms(){
   const addForm = el('addForm');
   addForm.addEventListener('submit', e => {
@@ -2464,7 +2593,7 @@ function initForms(){
     }
     
     for (let selectedItem of _selectedItems) {
-      const item = state.items.find(x => x.id === selectedItem.itemId);
+      const item = _itemMap.get(selectedItem.itemId);
       if (!item) {
         showConfirmModal({ icon: '⚠️', iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)', iconBorder: '#fde68a', title: 'Barang Tidak Ditemukan', desc: 'Barang <strong>' + escapeHtml(selectedItem.itemName) + '</strong> tidak ditemukan dalam inventori.', okLabel: 'OK', okClass: 'primary', onConfirm: () => {} });
         return;
@@ -2501,7 +2630,7 @@ function initForms(){
     const transactionDate = new Date().toISOString();
 
     for (let selectedItem of _selectedItems) {
-      const item = state.items.find(x => x.id === selectedItem.itemId);
+      const item = _itemMap.get(selectedItem.itemId);
       if (item) {
         item.stock -= selectedItem.qty;
         const historyId = uid();
@@ -2607,10 +2736,9 @@ function initStockOutSearch() {
   const suggestionsDiv = el('stockOutSuggestions');
   
   if (!searchInput || !suggestionsDiv) return;
-  
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.trim().toLowerCase();
-    
+
+  // [FIX #5] Debounce pada stockOut search (konsisten dengan search lain)
+  const handleSearch = debounce((query) => {
     if (query.length === 0) {
       hideSuggestions();
       searchInput.dataset.selectedId = '';
@@ -2627,7 +2755,7 @@ function initStockOutSearch() {
       suggestionsDiv.innerHTML = '<div class="suggestion-no-results">Tidak ada barang yang sesuai</div>';
       suggestionsDiv.classList.add('show');
     } else {
-      suggestionsDiv.innerHTML = '';
+      const frag = document.createDocumentFragment();
       filtered.forEach(item => {
         const suggestionItem = document.createElement('div');
         suggestionItem.className = 'suggestion-item';
@@ -2655,10 +2783,17 @@ function initStockOutSearch() {
           }
         });
         
-        suggestionsDiv.appendChild(suggestionItem);
+        frag.appendChild(suggestionItem);
       });
+      suggestionsDiv.innerHTML = '';
+      suggestionsDiv.appendChild(frag);
       suggestionsDiv.classList.add('show');
     }
+  }, 180);
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    handleSearch(query);
   });
   
   searchInput.addEventListener('blur', () => {
@@ -2764,7 +2899,14 @@ function isSignatureValid() {
 }
 
 // ── Cetak PDF per Transaksi (tanda tangan basah) ─────────────────────────────
-function printTransactionPDF(txKey) {
+async function printTransactionPDF(txKey) {
+  // [FIX-A] Muat jsPDF hanya saat pertama kali dibutuhkan
+  try {
+    await ensureJsPDF();
+  } catch(e) {
+    showNotification('error', 'Gagal memuat library PDF', 'Periksa koneksi internet Anda');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   
   // Kumpulkan semua history entry yang masuk transaksi ini
@@ -2866,7 +3008,8 @@ function printTransactionPDF(txKey) {
   y += 4;
   
   const tableItems = entries.map((h, idx) => {
-    const item = state.items.find(x => x.id === h.itemId);
+    // [FIX #3] O(1) lookup
+    const item = _itemMap.get(h.itemId);
     return [
       (idx + 1).toString(),
       item?.name || '[dihapus]',
@@ -3030,6 +3173,13 @@ function printTransactionPDF(txKey) {
 }
 
 async function exportHistoryToPDF() {
+  // [FIX-A] Lazy load jsPDF
+  try {
+    await ensureJsPDF();
+  } catch(e) {
+    showNotification('error', 'Gagal memuat library PDF', 'Periksa koneksi internet Anda');
+    return;
+  }
   const { jsPDF } = window.jspdf;
 
   let filtered = state.history.slice();
@@ -3040,7 +3190,8 @@ async function exportHistoryToPDF() {
 
   if (_currentHistoryCategoryFilter) {
     filtered = filtered.filter(h => {
-      const item = state.items.find(x => x.id === h.itemId);
+      // [FIX #3] O(1) lookup
+      const item = _itemMap.get(h.itemId);
       return item && item.category === _currentHistoryCategoryFilter;
     });
   }
@@ -3054,7 +3205,8 @@ async function exportHistoryToPDF() {
   // ── Grup transaksi (sama persis seperti sebelumnya) ──────────────────────────
   const groupedByRecipient = {};
   filtered.forEach(h => {
-    const item = state.items.find(x => x.id === h.itemId);
+    // [FIX #3] O(1) lookup
+    const item = _itemMap.get(h.itemId);
     const recipient = h.recipient || 'Tanpa Nama';
     const note = h.note || '-';
     const hDate = new Date(h.date);
@@ -3334,7 +3486,14 @@ async function exportHistoryToPDF() {
 
   showNotification('success', 'PDF berhasil di-export!', `File: ${fileName}`);
 }
-function exportPerItemPDF() {
+async function exportPerItemPDF() {
+  // [FIX-A] Lazy load jsPDF
+  try {
+    await ensureJsPDF();
+  } catch(e) {
+    showNotification('error', 'Gagal memuat library PDF', 'Periksa koneksi internet Anda');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -3344,8 +3503,15 @@ function exportPerItemPDF() {
 
   const sanitize = (v) => (v === null || v === undefined || v === '' ? '-' : String(v).replace(/&/g, 'dan'));
 
+  // [FIX #3] Pre-group history by itemId sekali, O(n), daripada filter O(n) per item
+  const historyByItem = {};
+  (state.history || []).forEach(h => {
+    if (!historyByItem[h.itemId]) historyByItem[h.itemId] = [];
+    historyByItem[h.itemId].push(h);
+  });
+
   const itemStats = state.items.map(item => {
-    const itemHistory = (state.history || []).filter(h => h.itemId === item.id);
+    const itemHistory = historyByItem[item.id] || [];
     const stockIn = itemHistory.filter(h => h.type === 'in').reduce((sum, h) => sum + h.qty, 0);
     const stockOut = itemHistory.filter(h => h.type === 'out').reduce((sum, h) => sum + h.qty, 0);
     return {
@@ -3460,14 +3626,26 @@ function exportPerItemPDF() {
   showNotification('success', 'PDF berhasil di-export!', `File: ${fileName}`);
 }
 
-function openScanner(onScan){
+async function openScanner(onScan){
   el('scannerModal').style.display = 'flex';
   
   // Reset status
   const statusText = document.querySelector('.scanner-status-text');
   const statusDot  = document.querySelector('.scanner-status-dot');
-  if (statusText) statusText.textContent = 'Memulai kamera…';
+  if (statusText) statusText.textContent = 'Memuat library scanner…';
   if (statusDot)  statusDot.style.background = 'rgba(255,255,255,0.4)';
+
+  // [FIX-A] Lazy load html5-qrcode hanya saat scanner pertama kali dibuka
+  try {
+    await ensureHtml5Qrcode();
+  } catch(e) {
+    if (statusText) statusText.textContent = 'Gagal memuat scanner — cek koneksi';
+    if (statusDot)  statusDot.style.background = 'var(--danger)';
+    showNotification('error', 'Gagal memuat library scanner', 'Periksa koneksi internet Anda');
+    return;
+  }
+
+  if (statusText) statusText.textContent = 'Memulai kamera…';
   
   if(_scanner){
     try{ _scanner.stop().then(()=> _scanner.clear()); } catch(e){ console.warn('Scanner cleanup error:', e); }
@@ -3562,6 +3740,10 @@ function closeScanner(){
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // [FIX #8] Sembunyikan konten selama inisialisasi untuk cegah flash of empty content
+  const appEl = document.querySelector('.app');
+  if (appEl) appEl.classList.add('app-loading');
+
   // Initialize IndexedDB first
   try {
     await initIndexedDB();
@@ -3577,6 +3759,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSearch();
   initSignatureCanvas();
   renderAll();
+
+  // [FIX #8] Tampilkan konten setelah data siap (fade-in)
+  if (appEl) appEl.classList.remove('app-loading');
 
   el('scanBarcodeBtn').addEventListener('click', () => {
     openScanner(code => { 
@@ -3822,6 +4007,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 <script>
 // ─── Google Drive Sync + Offline-First Overlay ────────────────────────────────
+
+// ⚠️  KEAMANAN — API Key & Client ID [FIX-D / AUDIT P0]
+// Kredensial di bawah terlihat di source code (view-source). Ini AMAN selama:
+// 1. CLIENT_ID  → Google Cloud Console > OAuth > "Authorized JavaScript origins"
+//    hanya berisi domain produksi Anda (mis. https://inventori.namadomain.com)
+//    Kunjungi: https://console.cloud.google.com/apis/credentials
+// 2. API_KEY    → Google Cloud Console > API & Services > Credentials > Restrict Key
+//    a. "Application restrictions" → HTTP referrers → tambah domain Anda + localhost
+//    b. "API restrictions"         → Drive API saja
+// JANGAN deploy ke publik sebelum dua langkah di atas selesai!
 const CLIENT_ID      = "1030288606883-712ik0rkv9jkp0meivlv80jkkaksl09f.apps.googleusercontent.com";
 const API_KEY        = "AIzaSyD5GK3ox9KGeyLBfed1P9ScqPA9aSNsW4Q";
 const DISCOVERY_DOC  = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
@@ -3926,6 +4121,7 @@ async function handleCredentialResponse(response){
     driveFileId = null;
     // Reset state in-memory
     state = { items: [], history: [] };
+    buildItemMap(); // [FIX #3] Rebuild map setelah state di-reset
     renderAll();
     showNotification('info', 'Akun berbeda terdeteksi', 'Data lokal akun sebelumnya dihapus, memuat data akun baru…');
   }
@@ -4049,6 +4245,7 @@ async function pullFromDrive(){
     const driveData=await resp.json();
     if((driveData.lastModified||0)>(state.lastModified||0)){
       state=driveData;
+      buildItemMap(); // [FIX #3] Rebuild lookup map setelah data Drive masuk
       await idbPutState(state);
       if(typeof renderAll==='function')renderAll();
       showNotification("info","Data diperbarui dari perangkat lain");
@@ -4081,21 +4278,45 @@ async function pushToDrive(data){
 
 function syncToDrive(data){if(!accessToken){syncPending=true;return;}pushToDrive(data);}
 
+// [FIX #6] Debounced sync — tunggu 3 detik setelah operasi terakhir sebelum kirim ke Drive
+// Ini mencegah 10x API call saat user melakukan banyak operasi berturut-turut
+let _driveSyncTimer = null;
+function debouncedSyncToDrive(data) {
+  if (!accessToken) { syncPending = true; return; }
+  clearTimeout(_driveSyncTimer);
+  _driveSyncTimer = setTimeout(() => {
+    pushToDrive(data);
+  }, 3000);
+}
+
 // ── Logout: show overlay, keep data ──────────────────────────────────────────
 document.getElementById("logoutBtn").addEventListener("click",()=>{
-  google.accounts.id.disableAutoSelect();
-  if(pollTimer)clearInterval(pollTimer);
-  window.removeEventListener("focus",onFocus);
-  localStorage.removeItem("google_logged_in");
-  localStorage.removeItem(LS_FILE_ID);
-  // Sengaja TIDAK hapus LS_HINT — dipakai untuk deteksi ganti akun saat login berikutnya
-  localStorage.removeItem(LS_DISMISSED);
-  accessToken=null;driveFileId=null;driveStarted=false;
-  document.getElementById("logoutBtn").style.display="none";
-  const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
-  document.querySelector(".g_id_signin").style.display="block";
-  setSyncStatus('');
-  showOverlay();
+  // [FIX #7] Konfirmasi sebelum logout agar tidak terjadi tidak sengaja
+  showConfirmModal({
+    icon: '🚪',
+    iconBg: 'linear-gradient(135deg,#fff1f3,#fff5f7)',
+    iconBorder: '#fecdd3',
+    title: 'Keluar dari Akun?',
+    desc: 'Anda akan keluar dari akun Google. Data lokal tetap tersimpan dan bisa diakses kembali setelah login ulang.',
+    okLabel: 'Ya, Keluar',
+    okClass: 'danger',
+    onConfirm: () => {
+      google.accounts.id.disableAutoSelect();
+      if(pollTimer)clearInterval(pollTimer);
+      if(_driveSyncTimer)clearTimeout(_driveSyncTimer);
+      window.removeEventListener("focus",onFocus);
+      localStorage.removeItem("google_logged_in");
+      localStorage.removeItem(LS_FILE_ID);
+      // Sengaja TIDAK hapus LS_HINT — dipakai untuk deteksi ganti akun saat login berikutnya
+      localStorage.removeItem(LS_DISMISSED);
+      accessToken=null;driveFileId=null;driveStarted=false;
+      document.getElementById("logoutBtn").style.display="none";
+      const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
+      document.querySelector(".g_id_signin").style.display="block";
+      setSyncStatus('');
+      showOverlay();
+    }
+  });
 });
 
 // ── Page load ─────────────────────────────────────────────────────────────────
