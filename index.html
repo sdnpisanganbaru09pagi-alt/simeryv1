@@ -970,7 +970,7 @@ select option{background:#ffffff;color:var(--text)}
           </button>
 
           <!-- Collapsible body -->
-          <div id="manageListBody" style="max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1);">
+          <div id="manageListBody" style="max-height:0;overflow:hidden;transition:max-height 0.38s cubic-bezier(0.25,0.46,0.45,0.94);">
             <div style="padding:14px 14px 6px;background:#fff;border-top:1.5px solid rgba(14,165,233,0.1);">
 
               <!-- Search -->
@@ -2240,26 +2240,51 @@ function renderAll(){
 
 let _suppressSyncNotif = false; // [GUARD] suppress notif saat proses ganti user
 let _manageListOpen = false;
+let _manageListHeight = 0; // cache tinggi terakhir saat open, hindari reflow saat collapse
+
 function toggleManageList(){
   _manageListOpen = !_manageListOpen;
-  const body = el('manageListBody');
+  const body    = el('manageListBody');
   const chevron = el('manageListChevron');
-  const toggle = el('manageListToggle');
+  const toggle  = el('manageListToggle');
+
   if(_manageListOpen){
-    // Expand: render dulu baru set height
+    // ── Expand ──
+    // 1. Render konten dulu (DOM diisi, tapi belum di-layout oleh browser)
     renderManageCategoryDropdown();
     renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
-    body.style.maxHeight = body.scrollHeight + 'px';
-    // Setelah animasi selesai, buka max-height agar tidak terpotong saat konten berubah
-    setTimeout(() => { if(_manageListOpen) body.style.maxHeight = '9999px'; }, 360);
+
+    // 2. Buka visibility sementara agar browser bisa hitung tinggi, tapi tetap invisible
+    body.style.maxHeight = 'none';
+    body.style.visibility = 'hidden';
+
+    // 3. Tunggu satu frame — browser layout konten, baru ukur scrollHeight
+    requestAnimationFrame(() => {
+      _manageListHeight = body.scrollHeight;
+      // 4. Kembalikan ke 0 dan tampilkan, lalu animasikan ke tinggi target
+      body.style.maxHeight = '0';
+      body.style.visibility = '';
+      requestAnimationFrame(() => {
+        body.style.maxHeight = _manageListHeight + 'px';
+        setTimeout(() => { if(_manageListOpen) body.style.maxHeight = 'none'; }, 400);
+      });
+    });
+
     chevron.style.transform = 'rotate(180deg)';
     toggle.style.borderBottomColor = 'rgba(14,165,233,0.12)';
+
   } else {
-    // Collapse: set height dulu baru ke 0
-    body.style.maxHeight = body.scrollHeight + 'px';
+    // ── Collapse ──
+    // Pakai cache tinggi — hindari baca scrollHeight saat max-height=none (reflow besar)
+    const currentHeight = _manageListHeight || body.offsetHeight;
+    body.style.maxHeight = currentHeight + 'px';
+
     requestAnimationFrame(() => {
-      body.style.maxHeight = '0';
+      requestAnimationFrame(() => {
+        body.style.maxHeight = '0';
+      });
     });
+
     chevron.style.transform = 'rotate(0deg)';
     toggle.style.borderBottomColor = 'transparent';
   }
@@ -2969,7 +2994,6 @@ function initSearch(){
   const manageSearch = el('manageSearch');
   if (manageSearch) {
     manageSearch.addEventListener('input', debounce(e => renderManageList(e.target.value, _currentManageFilter), 180));
-    manageSearch.addEventListener('focus', () => setTimeout(() => manageSearch.scrollIntoView({ behavior:'smooth', block:'start' }), 300));
   }
   
   const clearManageSearch = el('clearManageSearch');
