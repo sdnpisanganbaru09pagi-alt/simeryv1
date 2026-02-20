@@ -2237,6 +2237,7 @@ function renderAll(){
 }
 
 let _suppressSyncNotif = false; // [GUARD] suppress notif saat proses ganti user
+let _manageListOpen = false;
 function toggleManageList(){
   _manageListOpen = !_manageListOpen;
   const body = el('manageListBody');
@@ -2429,6 +2430,7 @@ function saveAddStock() {
         state.history.push({
           id: uid(),
           itemId: addStockTarget.id,
+          itemName: addStockTarget.name, // Bug fix: simpan nama agar tetap tampil jika barang dihapus
           type: 'in',
           qty: addQuantity,
           date: new Date().toISOString(),
@@ -2506,6 +2508,7 @@ function saveEditItem() {
       state.history.push({
         id: uid(),
         itemId: editTarget.id,
+        itemName: newName, // Bug fix: simpan nama agar tetap tampil jika barang dihapus
         type: 'edit',
         qty: 0,
         date: new Date().toISOString(),
@@ -2743,6 +2746,7 @@ function initForms(){
         state.history.push({
           id: uid(),
           itemId: item.id,
+          itemName: item.name, // Bug fix: simpan nama agar tetap tampil jika barang dihapus
           type: 'add',
           qty: item.stock,
           date: new Date().toISOString(),
@@ -2838,6 +2842,7 @@ function initForms(){
         state.history.push({
           id: historyId,
           itemId: item.id,
+          itemName: item.name, // Bug fix: simpan nama agar tetap tampil jika barang dihapus
           type: 'out',
           qty: selectedItem.qty,
           date: transactionDate,
@@ -4148,6 +4153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.items        = _restoreData.items   || [];
         state.history      = _restoreData.history || [];
         state.lastModified = Date.now();
+        buildItemMap(); // Bug fix: rebuild map setelah restore agar filter & lookup benar
         await idbPutState(state);
         if (typeof syncToDrive === 'function') syncToDrive(state);
         renderAll();
@@ -4201,18 +4207,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   confirmDeleteBtn.addEventListener('click', async () => {
     if(deleteConfirmInput.value.trim() !== 'HAPUS') return;
-    // Reset semua data
     state.items = [];
     state.history = [];
     state.lastModified = Date.now();
+    buildItemMap(); // Bug fix: rebuild map setelah data dihapus
     await idbPutState(state);
+    if (typeof debouncedSyncToDrive === 'function') debouncedSyncToDrive(state); // Bug fix: sync ke Drive
     renderAll();
     deleteAllModal.style.display = 'none';
     deleteConfirmInput.value = '';
     showNotification('success', 'Data Dihapus', 'Seluruh data barang dan riwayat berhasil dihapus.');
   });
-
-  renderAll();
 });
 </script>
 <script>
@@ -4343,7 +4348,7 @@ async function handleCredentialResponse(response){
 
 // [GUARD] Tampilkan modal konfirmasi pergantian user, dengan opsi backup
 async function handleUserSwitch({ prevEmail, newEmail, newName }){
-  // Buat backup otomatis dulu sebelum tampilkan modal
+  // [GUARD] Backup otomatis dulu sebelum tampilkan modal
   const backupKey = `simery_offline_backup_${prevEmail}_${Date.now()}`;
   try {
     localStorage.setItem(backupKey, JSON.stringify({
@@ -4353,6 +4358,12 @@ async function handleUserSwitch({ prevEmail, newEmail, newName }){
       history   : state.history,
       lastModified: state.lastModified || 0
     }));
+    // Bug fix: bersihkan backup lama, pertahankan hanya 3 terbaru per user
+    const backupPrefix = `simery_offline_backup_${prevEmail}_`;
+    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(backupPrefix));
+    if (allKeys.length > 3) {
+      allKeys.sort().slice(0, allKeys.length - 3).forEach(k => localStorage.removeItem(k));
+    }
   } catch(e) {
     console.warn('[GUARD] Backup offline gagal (storage penuh?):', e);
   }
