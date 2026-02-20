@@ -363,6 +363,64 @@ textarea{resize:vertical;min-height:80px}
   color:#fff;
 }
 
+/* ── Manage chip filters ── */
+.manage-chip{
+  padding:5px 12px;border-radius:20px;border:1.5px solid rgba(14,165,233,0.18);
+  background:#fff;font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--muted);cursor:pointer;
+  transition:all 0.18s ease;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+}
+.manage-chip:hover{border-color:var(--accent-1);color:var(--accent-1);background:var(--blue-light);}
+.manage-chip.active{
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+  color:#fff;border-color:transparent;
+  box-shadow:0 2px 8px rgba(14,165,233,0.3);
+}
+.manage-chip-warn.active{
+  background:linear-gradient(135deg,var(--warning),#fbbf24) !important;
+  box-shadow:0 2px 8px rgba(245,158,11,0.3) !important;
+}
+.manage-chip-danger.active{
+  background:linear-gradient(135deg,var(--danger),#f87171) !important;
+  box-shadow:0 2px 8px rgba(239,68,68,0.3) !important;
+}
+
+/* ── Category dropdown custom ── */
+.manage-cat-select-wrap{
+  position:relative;display:flex;align-items:center;
+}
+.manage-cat-icon{ display:none; }
+.manage-cat-chevron{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;flex-shrink:0;
+  display:flex;align-items:center;transition:transform 0.2s;
+}
+.manage-cat-select{
+  width:100%;padding:9px 32px 9px 12px;
+  border:1.5px solid rgba(14,165,233,0.15);
+  border-radius:10px;
+  background:#f8fafc;
+  font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--text);cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  transition:all 0.18s ease;
+}
+.manage-cat-select:focus{
+  outline:none;
+  border-color:var(--accent-1);
+  box-shadow:0 0 0 3px rgba(14,165,233,0.1);
+  background:#fff;
+}
+.manage-cat-select:focus + .manage-cat-chevron,
+.manage-cat-select-wrap:focus-within .manage-cat-chevron{
+  transform:translateY(-50%) rotate(180deg);
+  color:var(--accent-1);
+}
+.manage-cat-select option{ background:#fff; color:var(--text); font-weight:500; }
+
+#manageListToggle:hover{background:linear-gradient(135deg,#e0f2fe,#bae6fd);}
+
 /* ── Form ── */
 .form{display:grid;gap:18px}
 .form label{
@@ -765,9 +823,6 @@ select option{background:#ffffff;color:var(--text)}
        data-text="signin"
        data-shape="pill">
   </div>
-  <div id="offlineBadge" style="font-size:11px;color:rgba(255,255,255,0.7);text-align:right;white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:5px;">
-    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);flex-shrink:0;"></span>Mode Offline
-  </div>
   <button id="connectDriveBtn">☁️ Sambungkan Drive</button>
   <button id="logoutBtn">Keluar</button>
   <div id="syncStatus"></div>
@@ -882,20 +937,84 @@ select option{background:#ffffff;color:var(--text)}
           </form>
         </div>
         
-        <div style="height:1px;background:linear-gradient(90deg,transparent,#eee,transparent);margin:16px 0;border-radius:2px;"></div>
-        
-        <div class="search">
-          <input id="manageSearch" placeholder="Cari barang yang sudah ada..." />
-          <button class="btn ghost" id="clearManageSearch">Bersihkan</button>
-        </div>
-        
-        <div class="actions" style="margin-bottom:12px; gap:6px; flex-wrap:wrap">
-          <button class="btn ghost active" data-manage-filter="all" type="button">Semua</button>
-          <button class="btn ghost" data-manage-filter="available" type="button">Tersedia</button>
-          <button class="btn ghost" data-manage-filter="empty" type="button">Stok Habis</button>
-        </div>
+        <!-- Collapsible Daftar Barang -->
+        <div id="manageListSection" style="border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);">
+          <!-- Header toggle -->
+          <button id="manageListToggle" type="button" onclick="toggleManageList()" style="
+            width:100%;display:flex;align-items:center;justify-content:space-between;
+            padding:14px 16px;background:linear-gradient(135deg,var(--blue-light),#e0f2fe);
+            border:none;cursor:pointer;font-family:inherit;text-align:left;
+            transition:background 0.2s;gap:10px;
+            border-bottom:1.5px solid transparent;
+          ">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(14,165,233,0.25);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:14px;color:var(--blue-dark);">Daftar Barang yang Ada</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px;">Klik untuk lihat & kelola barang</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <span id="manageListBadge" style="
+                background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+                color:#fff;font-size:11px;font-weight:700;
+                padding:3px 10px;border-radius:20px;
+                box-shadow:0 2px 6px rgba(14,165,233,0.3);
+              ">0 barang</span>
+              <svg id="manageListChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue-dark)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s ease;flex-shrink:0;">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </button>
 
-        <div class="list" id="manageList"></div>
+          <!-- Collapsible body -->
+          <div id="manageListBody" style="max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1);">
+            <div style="padding:14px 14px 6px;background:#fff;border-top:1.5px solid rgba(14,165,233,0.1);">
+
+              <!-- Search -->
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <div style="position:relative;flex:1;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="var(--muted)" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;flex-shrink:0;">
+                    <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+                  </svg>
+                  <input id="manageSearch" placeholder="Cari nama barang..." style="
+                    width:100%;padding:10px 12px 10px 34px;
+                    border:1.5px solid rgba(14,165,233,0.15);border-radius:10px;
+                    background:#f8fafc;font-family:inherit;font-size:13px;color:var(--text);
+                    transition:all 0.2s;
+                  " />
+                </div>
+                <button class="btn ghost" id="clearManageSearch" style="padding:10px 12px;font-size:12px;flex-shrink:0;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+                </button>
+              </div>
+
+              <!-- Filter baris 1: stok chips -->
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                <button class="manage-chip active" data-manage-filter="all" type="button">Semua</button>
+                <button class="manage-chip" data-manage-filter="available" type="button">✓ Tersedia</button>
+                <button class="manage-chip manage-chip-warn" data-manage-filter="low" type="button">⚠ Hampir Habis</button>
+                <button class="manage-chip manage-chip-danger" data-manage-filter="empty" type="button">✕ Stok Habis</button>
+              </div>
+
+              <!-- Filter baris 2: dropdown kategori -->
+              <div class="manage-cat-select-wrap" style="margin-bottom:12px;">
+                <select id="manageCategoryDropdown" class="manage-cat-select">
+                  <option value="">Semua Kategori</option>
+                </select>
+                <div class="manage-cat-chevron">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+
+            </div>
+            <div style="padding:0 14px 14px;background:#fff;">
+              <div class="list" id="manageList"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Stock Out - Multi-item Selection -->
@@ -1741,8 +1860,32 @@ function renderItems(query=''){
   container.innerHTML = '';
   container.appendChild(frag);
 }
+let _currentManageCategoryFilter = '';
+
+function updateManageBadge(){
+  const badge = el('manageListBadge');
+  if(badge) badge.textContent = state.items.length + ' barang';
+}
+
+function renderManageCategoryDropdown(){
+  const sel = el('manageCategoryDropdown');
+  if(!sel) return;
+  const prev = sel.value;
+  const categories = [...new Set(state.items.map(i => i.category).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Semua Kategori</option>';
+  categories.forEach(cat => {
+    const o = document.createElement('option');
+    o.value = cat; o.textContent = cat;
+    sel.appendChild(o);
+  });
+  // Restore pilihan sebelumnya jika masih ada
+  if(categories.includes(prev)) sel.value = prev;
+  else { sel.value = ''; _currentManageCategoryFilter = ''; }
+}
+
 function renderManageList(query = '', filter = 'all'){
   const container = el('manageList');
+  updateManageBadge();
   if(state.items.length === 0){ 
     container.innerHTML = '<div style="padding:12px;color:var(--text-2)">Belum ada barang.</div>'; 
     return; 
@@ -1758,12 +1901,16 @@ function renderManageList(query = '', filter = 'all'){
     
     let matchesFilter = true;
     if (filter === 'available') {
-      matchesFilter = item.stock > 0;
+      matchesFilter = item.stock > 5;
+    } else if (filter === 'low') {
+      matchesFilter = item.stock > 0 && item.stock <= 5;
     } else if (filter === 'empty') {
       matchesFilter = item.stock <= 0;
     }
+
+    const matchesCategory = !_currentManageCategoryFilter || item.category === _currentManageCategoryFilter;
     
-    return matchesSearch && matchesFilter;
+    return matchesSearch && matchesFilter && matchesCategory;
   });
 
   if(filtered.length === 0){
@@ -2080,11 +2227,39 @@ function getActiveTab() {
 function renderAll(){
   renderCounts();
   renderSelects();
+  updateManageBadge();
+  renderManageCategoryDropdown();
   const tab = getActiveTab();
   if (tab === 'dashboard')       renderItems(el('q')?.value || '');
-  else if (tab === 'manage')     renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
+  else if (tab === 'manage')     { if(_manageListOpen) renderManageList(el('manageSearch')?.value || '', _currentManageFilter); }
   else if (tab === 'history')    renderHistory();
   // stockOut & dataManagement have no dynamic list renders
+}
+
+let _manageListOpen = false;
+function toggleManageList(){
+  _manageListOpen = !_manageListOpen;
+  const body = el('manageListBody');
+  const chevron = el('manageListChevron');
+  const toggle = el('manageListToggle');
+  if(_manageListOpen){
+    // Expand: render dulu baru set height
+    renderManageCategoryDropdown();
+    renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
+    body.style.maxHeight = body.scrollHeight + 'px';
+    // Setelah animasi selesai, buka max-height agar tidak terpotong saat konten berubah
+    setTimeout(() => { if(_manageListOpen) body.style.maxHeight = '9999px'; }, 360);
+    chevron.style.transform = 'rotate(180deg)';
+    toggle.style.borderBottomColor = 'rgba(14,165,233,0.12)';
+  } else {
+    // Collapse: set height dulu baru ke 0
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      body.style.maxHeight = '0';
+    });
+    chevron.style.transform = 'rotate(0deg)';
+    toggle.style.borderBottomColor = 'transparent';
+  }
 }
 
 function switchTab(tabName){
@@ -2705,6 +2880,15 @@ function initSearch(){
       renderManageList(manageSearch?.value || '', _currentManageFilter);
     });
   });
+
+  // Category dropdown listener
+  const manageCatDropdown = el('manageCategoryDropdown');
+  if(manageCatDropdown){
+    manageCatDropdown.addEventListener('change', (e) => {
+      _currentManageCategoryFilter = e.target.value;
+      renderManageList(el('manageSearch')?.value || '', _currentManageFilter);
+    });
+  }
   
   document.querySelectorAll('[data-history-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4028,6 +4212,7 @@ const DRIVE_FILENAME = "simery_backup.json";
 const LS_FILE_ID     = "simery_drive_file_id";
 const LS_HINT        = "simery_user_hint";
 const LS_DISMISSED   = "simery_overlay_dismissed";
+const LS_ACTIVE_USER = "simery_active_user"; // [GUARD] email user yang sedang aktif di IDB
 const POLL_MS        = 30000;
 
 let accessToken = null, tokenClient = null;
@@ -4114,28 +4299,188 @@ function dismissOverlay(){localStorage.setItem(LS_DISMISSED,'1');hideOverlay();}
 async function handleCredentialResponse(response){
   const p = decodeJwt(response.credential);
   const newEmail = p.email || '';
+  const newName  = p.name  || newEmail;
 
-  // Deteksi ganti akun — hapus data lokal milik user sebelumnya
-  const prevEmail = localStorage.getItem(LS_HINT) || '';
-  if(prevEmail && newEmail && prevEmail !== newEmail){
-    // Bersihkan data inventori & Drive file ID milik akun lama
-    await idbPutState({ items: [], history: [] });
-    localStorage.removeItem(LS_FILE_ID);
-    driveFileId = null;
-    // Reset state in-memory
-    state = { items: [], history: [] };
-    buildItemMap(); // [FIX #3] Rebuild map setelah state di-reset
-    renderAll();
-    showNotification('info', 'Akun berbeda terdeteksi', 'Data lokal akun sebelumnya dihapus, memuat data akun baru…');
+  const prevEmail  = localStorage.getItem(LS_HINT)        || '';
+  const activeUser = localStorage.getItem(LS_ACTIVE_USER) || '';
+
+  // [GUARD] Deteksi login user berbeda dari yang datanya ada di IDB
+  const isDifferentUser = prevEmail && newEmail && prevEmail !== newEmail;
+  const hasLocalData    = state.items.length > 0 || (state.history && state.history.length > 0);
+
+  if(isDifferentUser && hasLocalData){
+    // Ada data milik user lain di lokal — tanya dulu sebelum lanjut
+    await handleUserSwitch({ prevEmail, newEmail, newName });
+    return; // handleUserSwitch yang akan melanjutkan login setelah user konfirmasi
   }
 
+  // Tidak ada konflik — lanjut login normal
+  await _finalizeLogin(newEmail);
+}
+
+// [GUARD] Tampilkan modal konfirmasi pergantian user, dengan opsi backup
+async function handleUserSwitch({ prevEmail, newEmail, newName }){
+  // Buat backup otomatis dulu sebelum tampilkan modal
+  const backupKey = `simery_offline_backup_${prevEmail}_${Date.now()}`;
+  try {
+    localStorage.setItem(backupKey, JSON.stringify({
+      savedAt   : new Date().toISOString(),
+      savedBy   : prevEmail,
+      items     : state.items,
+      history   : state.history,
+      lastModified: state.lastModified || 0
+    }));
+  } catch(e) {
+    console.warn('[GUARD] Backup offline gagal (storage penuh?):', e);
+  }
+
+  // Tampilkan modal peringatan
+  showUserSwitchWarning({
+    prevEmail,
+    newEmail,
+    newName,
+    backupKey,
+    onContinue: async () => {
+      // User pilih lanjut → hapus data lama, login sebagai user baru
+      await idbPutState({ items: [], history: [] });
+      localStorage.removeItem(LS_FILE_ID);
+      driveFileId = null;
+      state = { items: [], history: [] };
+      buildItemMap();
+      renderAll();
+      await _finalizeLogin(newEmail);
+      showNotification('info', `Login sebagai ${newName}`, 'Data akun sebelumnya telah diamankan sebagai backup lokal.');
+    },
+    onCancel: () => {
+      // User batal → hapus backup yang baru dibuat, tetap di sesi saat ini
+      try { localStorage.removeItem(backupKey); } catch(e){}
+      showNotification('info', 'Login dibatalkan', 'Anda tetap menggunakan data sesi sebelumnya.');
+    },
+    onDownload: () => {
+      // Unduh data user lama sebagai file JSON sebelum lanjut
+      try {
+        const blob = new Blob([JSON.stringify({
+          items  : state.items,
+          history: state.history,
+          exportedAt: new Date().toISOString(),
+          exportedBy: prevEmail
+        }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = `simery_backup_${prevEmail.split('@')[0]}_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showNotification('success', 'Backup diunduh', 'File backup berhasil diunduh.');
+      } catch(e) {
+        showNotification('error', 'Gagal mengunduh backup');
+      }
+    }
+  });
+}
+
+// [GUARD] Modal peringatan pergantian user
+function showUserSwitchWarning({ prevEmail, newEmail, newName, onContinue, onCancel, onDownload }){
+  // Buat overlay modal
+  const overlay = document.createElement('div');
+  overlay.id = 'userSwitchModal';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(2,32,58,0.72);backdrop-filter:blur(8px);
+    padding:20px;
+  `;
+
+  overlay.innerHTML = `
+    <div style="
+      background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;
+      box-shadow:0 24px 60px rgba(0,0,0,0.25);
+      animation:slideUp 0.3s cubic-bezier(0.34,1.2,0.64,1) both;
+    ">
+      <!-- Icon -->
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="
+          width:60px;height:60px;border-radius:16px;margin:0 auto 12px;
+          background:linear-gradient(135deg,#fff7ed,#ffedd5);
+          border:1.5px solid #fed7aa;
+          display:flex;align-items:center;justify-content:center;font-size:28px;
+        ">⚠️</div>
+        <div style="font-weight:800;font-size:16px;color:var(--text);letter-spacing:-0.02em;">Pergantian Akun Terdeteksi</div>
+      </div>
+
+      <!-- Info -->
+      <div style="
+        background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;
+        padding:12px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.6;color:#92400e;
+      ">
+        <div style="font-weight:700;margin-bottom:6px;">⚠ Data belum tersinkronisasi!</div>
+        Ada perubahan data dari <strong>${prevEmail}</strong> yang dibuat secara offline dan belum ter-upload ke Drive.
+        Jika kamu lanjut login sebagai <strong>${newName}</strong>, data ini <strong>akan digantikan</strong> oleh data akun baru.
+      </div>
+
+      <!-- Akun info -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:20px;">
+        <div style="background:#f1f5f9;border-radius:10px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">SAAT INI</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all;">${prevEmail.split('@')[0]}</div>
+        </div>
+        <div style="font-size:16px;color:var(--muted);">→</div>
+        <div style="background:linear-gradient(135deg,var(--blue-light),#e0f2fe);border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--blue-dark);font-weight:700;margin-bottom:2px;">LOGIN BARU</div>
+          <div style="font-size:12px;font-weight:600;color:var(--blue-dark);word-break:break-all;">${newEmail.split('@')[0]}</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:grid;gap:8px;">
+        <button id="uswDownload" style="
+          width:100%;padding:11px;border-radius:10px;border:1.5px solid rgba(14,165,233,0.2);
+          background:#f0f9ff;font-family:inherit;font-size:13px;font-weight:700;
+          color:var(--blue-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
+          transition:all 0.15s;
+        ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
+          Unduh Backup Data Dulu
+        </button>
+        <button id="uswContinue" style="
+          width:100%;padding:11px;border-radius:10px;border:none;
+          background:linear-gradient(135deg,#f97316,#fb923c);
+          font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;
+          box-shadow:0 2px 8px rgba(249,115,22,0.3);transition:all 0.15s;
+        ">Lanjut Login, Ganti Data</button>
+        <button id="uswCancel" style="
+          width:100%;padding:10px;border-radius:10px;border:1.5px solid rgba(14,165,233,0.15);
+          background:#fff;font-family:inherit;font-size:13px;font-weight:600;
+          color:var(--muted);cursor:pointer;transition:all 0.15s;
+        ">Batal, Tetap di Sesi Ini</button>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--text-3);">
+        🔒 Backup otomatis telah disimpan di perangkat ini
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#uswDownload').addEventListener('click', () => { onDownload(); });
+  overlay.querySelector('#uswContinue').addEventListener('click', () => {
+    overlay.remove();
+    onContinue();
+  });
+  overlay.querySelector('#uswCancel').addEventListener('click', () => {
+    overlay.remove();
+    onCancel();
+  });
+}
+
+async function _finalizeLogin(email){
   localStorage.setItem("google_logged_in","true");
   localStorage.removeItem(LS_DISMISSED);
-  if(newEmail) localStorage.setItem(LS_HINT, newEmail);
+  localStorage.setItem(LS_HINT, email);
+  localStorage.setItem(LS_ACTIVE_USER, email);
 
   document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
   document.getElementById("logoutBtn").style.display="inline-flex";
-  const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="none";
   hideOverlay();
   startDrive();
 }
@@ -4248,8 +4593,21 @@ async function pullFromDrive(){
     if(!resp.ok){setSyncStatus('error');isSyncing=false;return;}
     const driveData=await resp.json();
     if((driveData.lastModified||0)>(state.lastModified||0)){
+      // [GUARD] Cek apakah ada data lokal yang belum pernah ke-sync ke Drive
+      // Jika state.lastModified ada tapi Drive lebih baru DAN ada item lokal → potensi konflik
+      const hasLocalUnsync = (state.lastModified||0) > 0 && state.items.length > 0 && !syncPending;
+      if(hasLocalUnsync){
+        // Backup otomatis data lokal sebelum ditimpa
+        const activeUser = localStorage.getItem(LS_ACTIVE_USER) || 'unknown';
+        try {
+          localStorage.setItem(
+            `simery_auto_backup_${activeUser}_${Date.now()}`,
+            JSON.stringify({ savedAt: new Date().toISOString(), items: state.items, history: state.history, lastModified: state.lastModified })
+          );
+        } catch(e){ console.warn('[GUARD] Auto-backup gagal:', e); }
+      }
       state=driveData;
-      buildItemMap(); // [FIX #3] Rebuild lookup map setelah data Drive masuk
+      buildItemMap();
       await idbPutState(state);
       if(typeof renderAll==='function')renderAll();
       showNotification("info","Data diperbarui dari perangkat lain");
@@ -4311,13 +4669,13 @@ document.getElementById("logoutBtn").addEventListener("click",()=>{
       window.removeEventListener("focus",onFocus);
       localStorage.removeItem("google_logged_in");
       localStorage.removeItem(LS_FILE_ID);
+      localStorage.removeItem(LS_ACTIVE_USER);
       // Sengaja TIDAK hapus LS_HINT — dipakai untuk deteksi ganti akun saat login berikutnya
       localStorage.removeItem(LS_DISMISSED);
       accessToken=null;driveFileId=null;driveStarted=false;
       document.getElementById("logoutBtn").style.display="none";
       const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
       document.querySelector(".g_id_signin").style.display="block";
-      const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="flex";
       setSyncStatus('');
       showOverlay();
     }
@@ -4339,9 +4697,11 @@ window.addEventListener("load",()=>{
   const loggedIn=localStorage.getItem("google_logged_in")==="true";
   const dismissed=localStorage.getItem(LS_DISMISSED)==="1";
   if(loggedIn){
+    // Pastikan LS_ACTIVE_USER terisi jika user sudah login sebelumnya
+    const hint = localStorage.getItem(LS_HINT)||'';
+    if(hint && !localStorage.getItem(LS_ACTIVE_USER)) localStorage.setItem(LS_ACTIVE_USER, hint);
     document.querySelector(".g_id_signin").style.display="none";
     document.getElementById("logoutBtn").style.display="inline-flex";
-    const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="none";
     startDrive();
   } else if(!dismissed){
     setTimeout(showOverlay,300);
