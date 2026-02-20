@@ -2236,7 +2236,7 @@ function renderAll(){
   // stockOut & dataManagement have no dynamic list renders
 }
 
-let _manageListOpen = false;
+let _suppressSyncNotif = false; // [GUARD] suppress notif saat proses ganti user
 function toggleManageList(){
   _manageListOpen = !_manageListOpen;
   const body = el('manageListBody');
@@ -2526,15 +2526,31 @@ const NOTIF_ICONS = {
   info:    '<path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>',
 };
 
+// ── Notification queue system ─────────────────────────────────────────────────
+const _notifQueue = [];
+let _notifActive = false;
+
 function showNotification(type = 'info', title, message = null) {
+  _notifQueue.push({ type, title, message });
+  if (!_notifActive) _processNotifQueue();
+}
+
+function _processNotifQueue() {
+  if (_notifQueue.length === 0) { _notifActive = false; return; }
+  _notifActive = true;
+
+  const { type, title, message } = _notifQueue.shift();
+
   try {
+    // Hapus toast aktif yang masih ada (fail-safe)
+    document.querySelectorAll('.notification').forEach(n => n.remove());
+
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${message ? '' : 'single-line'}`;
-    // [FIX #9] role="status" + aria-live agar screen reader mengumumkan notifikasi
     notification.setAttribute('role', 'status');
     notification.setAttribute('aria-live', 'polite');
     const iconSvg = NOTIF_ICONS[type] || NOTIF_ICONS.info;
-    
+
     notification.innerHTML = `
       <div class="notification-content">
         <div class="notification-icon">
@@ -2551,24 +2567,31 @@ function showNotification(type = 'info', title, message = null) {
     `;
 
     document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 50);
 
-    const dismissNotification = () => {
+    const duration = message ? 4000 : 2800;
+    let dismissed = false;
+
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
       notification.classList.add('hiding');
-      setTimeout(() => notification.remove(), 250);
+      setTimeout(() => {
+        notification.remove();
+        // Jeda singkat antar toast agar tidak terasa berdempetan
+        setTimeout(_processNotifQueue, 180);
+      }, 240);
     };
 
-    notification.querySelector('.notification-close').addEventListener('click', dismissNotification);
+    const autoTimer = setTimeout(dismiss, duration);
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+      clearTimeout(autoTimer);
+      dismiss();
+    }, { once: true });
 
-    setTimeout(() => notification.classList.add('show'), 100);
-
-    const duration = message ? 4500 : 3000;
-    const autoRemove = setTimeout(dismissNotification, duration);
-
-    // Cancel auto-remove if user manually closes
-    notification.querySelector('.notification-close').addEventListener('click', () => clearTimeout(autoRemove), { once: true });
-    
-  } catch(e) { 
-    console.log(`${type.toUpperCase()}: ${title}${message ? ' - ' + message : ''}`); 
+  } catch(e) {
+    console.log(`${type.toUpperCase()}: ${title}${message ? ' - ' + message : ''}`);
+    setTimeout(_processNotifQueue, 200);
   }
 }
 
@@ -4348,7 +4371,7 @@ async function handleUserSwitch({ prevEmail, newEmail, newName }){
       state = { items: [], history: [] };
       buildItemMap();
       renderAll();
-      await _finalizeLogin(newEmail);
+      await _finalizeLogin(newEmail, true);
       showNotification('info', `Login sebagai ${newName}`, 'Data akun sebelumnya telah diamankan sebagai backup lokal.');
     },
     onCancel: () => {
@@ -4473,7 +4496,8 @@ function showUserSwitchWarning({ prevEmail, newEmail, newName, onContinue, onCan
   });
 }
 
-async function _finalizeLogin(email){
+async function _finalizeLogin(email, suppressSyncNotif = false){
+  _suppressSyncNotif = suppressSyncNotif;
   localStorage.setItem("google_logged_in","true");
   localStorage.removeItem(LS_DISMISSED);
   localStorage.setItem(LS_HINT, email);
@@ -4483,6 +4507,8 @@ async function _finalizeLogin(email){
   document.getElementById("logoutBtn").style.display="inline-flex";
   hideOverlay();
   startDrive();
+  // Reset flag setelah Drive selesai init (estimasi 5 detik)
+  setTimeout(() => { _suppressSyncNotif = false; }, 5000);
 }
 
 function startDrive(){
@@ -4610,7 +4636,7 @@ async function pullFromDrive(){
       buildItemMap();
       await idbPutState(state);
       if(typeof renderAll==='function')renderAll();
-      showNotification("info","Data diperbarui dari perangkat lain");
+      if(!_suppressSyncNotif) showNotification("info","Data diperbarui dari perangkat lain");
     }
     setSyncStatus('ok');
   }catch(err){console.error("pullFromDrive:",err);setSyncStatus('error');}
