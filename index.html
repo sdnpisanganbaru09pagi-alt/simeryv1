@@ -2789,7 +2789,23 @@ async function ensureHtml5Qrcode() {
   await _qrLoading;
 }
 
+// Helper: scroll field ke posisi yang tepat, tidak tertutup sticky header
+function smoothScrollToField(fieldEl, extraPadding = 16) {
+  const header = document.querySelector('.header');
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 80;
+  const fieldTop = fieldEl.getBoundingClientRect().top;
+  const offset = fieldTop - headerBottom - extraPadding;
+  if (Math.abs(offset) < 10) return; // sudah di posisi yang baik
+  window.scrollBy({ top: offset, behavior: 'smooth' });
+}
+
 function initForms(){
+  // Auto-scroll saat field nama barang di-focus (konsisten dengan field cari di dashboard)
+  const nameInput = el('name');
+  if (nameInput) {
+    nameInput.addEventListener('focus', () => setTimeout(() => smoothScrollToField(nameInput), 300));
+  }
+
   const addForm = el('addForm');
   addForm.addEventListener('submit', e => {
     e.preventDefault();
@@ -2987,7 +3003,7 @@ function initTabs(){
 function initSearch(){
   const q = el('q');
   q.addEventListener('input', debounce(e => renderItems(e.target.value), 180));
-  q.addEventListener('focus', () => setTimeout(() => q.scrollIntoView({ behavior:'smooth', block:'start' }), 300));
+  q.addEventListener('focus', () => setTimeout(() => smoothScrollToField(q), 300));
   
   el('clearSearch').addEventListener('click', () => { q.value = ''; renderItems(); });
   
@@ -3057,7 +3073,9 @@ function initStockOutSearch() {
   
   if (!searchInput || !suggestionsDiv) return;
 
-  // [FIX #5] Debounce pada stockOut search (konsisten dengan search lain)
+  // Auto-scroll saat field pilih barang di-focus — scroll ke tepi atas kontainer, bukan field
+  const stockOutContainer = document.querySelector('.stock-out-title');
+  searchInput.addEventListener('focus', () => setTimeout(() => smoothScrollToField(stockOutContainer || searchInput), 300));
   const handleSearch = debounce((query) => {
     if (query.length === 0) {
       hideSuggestions();
