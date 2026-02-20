@@ -1728,8 +1728,10 @@ async function load() {
     } else {
       // Fresh install: seed demo data
       state.items = [
-        { id: 'itm-1', name: 'Pulpen', category: 'Alat Tulis Kantor', stock: 25, barcode: '123456789' },
-        { id: 'itm-2', name: 'Kertas A4', category: 'Alat Tulis Kantor', stock: 15, barcode: '987654321' }
+        { id: 'itm-1', name: 'Pulpen',        category: 'Alat Tulis Kantor', stock: 25, barcode: '1234567890' },
+        { id: 'itm-2', name: 'Sapu Lantai',   category: 'Alat Kebersihan',   stock: 4,  barcode: '2345678901' },
+        { id: 'itm-3', name: 'Sabun Lantai',  category: 'Bahan Kebersihan',  stock: 10, barcode: '3456789012' },
+        { id: 'itm-4', name: 'Lampu LED 10W', category: 'Alat Kelistrikan',  stock: 0,  barcode: '4567890123' }
       ];
       await save();
     }
@@ -2484,6 +2486,46 @@ function saveEditItem() {
   const oldBarcode  = _currentEditItem.barcode;
   const editTarget  = _currentEditItem; // capture ref before modal closes
 
+  // Cek duplikat nama — kecualikan barang itu sendiri
+  const dupName = state.items.find(x =>
+    x.id !== editTarget.id &&
+    x.name.trim().toLowerCase() === newName.toLowerCase()
+  );
+  if (dupName) {
+    showConfirmModal({
+      icon: '⚠️',
+      iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)',
+      iconBorder: '#fde68a',
+      title: 'Nama Barang Sudah Ada',
+      desc: 'Barang dengan nama <strong>' + escapeHtml(newName) + '</strong> sudah ada di inventori (kategori: <strong>' + escapeHtml(dupName.category || '-') + '</strong>).<br><br>Gunakan nama yang berbeda.',
+      okLabel: 'OK',
+      okClass: 'primary',
+      onConfirm: () => {}
+    });
+    return;
+  }
+
+  // Cek duplikat barcode — kecualikan barang itu sendiri, hanya jika barcode diisi
+  if (newBarcode) {
+    const dupBarcode = state.items.find(x =>
+      x.id !== editTarget.id &&
+      x.barcode && x.barcode.trim().toLowerCase() === newBarcode.toLowerCase()
+    );
+    if (dupBarcode) {
+      showConfirmModal({
+        icon: '⚠️',
+        iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)',
+        iconBorder: '#fde68a',
+        title: 'Barcode Sudah Digunakan',
+        desc: 'Barcode <strong>' + escapeHtml(newBarcode) + '</strong> sudah digunakan oleh barang <strong>' + escapeHtml(dupBarcode.name) + '</strong>.<br><br>Setiap barang harus memiliki barcode yang unik.',
+        okLabel: 'OK',
+        okClass: 'primary',
+        onConfirm: () => {}
+      });
+      return;
+    }
+  }
+
   // Catat perubahan yang terjadi
   const changes = [];
   if (oldName     !== newName)     changes.push('Nama: "' + oldName + '" -> "' + newName + '"');
@@ -2733,6 +2775,45 @@ function initForms(){
       stock: parseInt(el('stock').value) || 0,
       barcode: (el('barcode').value || '').trim()
     };
+
+    // Cek duplikat nama (case-insensitive)
+    const dupName = state.items.find(x =>
+      x.name.trim().toLowerCase() === item.name.toLowerCase()
+    );
+    if (dupName) {
+      showConfirmModal({
+        icon: '⚠️',
+        iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)',
+        iconBorder: '#fde68a',
+        title: 'Nama Barang Sudah Ada',
+        desc: 'Barang dengan nama <strong>' + escapeHtml(item.name) + '</strong> sudah ada di inventori (kategori: <strong>' + escapeHtml(dupName.category || '-') + '</strong>, stok: <strong>' + dupName.stock + '</strong>).<br><br>Gunakan fitur <em>Tambah Stok</em> jika ingin menambah stok barang ini.',
+        okLabel: 'OK',
+        okClass: 'primary',
+        onConfirm: () => {}
+      });
+      return;
+    }
+
+    // Cek duplikat barcode (hanya jika barcode diisi)
+    if (item.barcode) {
+      const dupBarcode = state.items.find(x =>
+        x.barcode && x.barcode.trim().toLowerCase() === item.barcode.toLowerCase()
+      );
+      if (dupBarcode) {
+        showConfirmModal({
+          icon: '⚠️',
+          iconBg: 'linear-gradient(135deg,#fffbeb,#fefce8)',
+          iconBorder: '#fde68a',
+          title: 'Barcode Sudah Digunakan',
+          desc: 'Barcode <strong>' + escapeHtml(item.barcode) + '</strong> sudah digunakan oleh barang <strong>' + escapeHtml(dupBarcode.name) + '</strong>.<br><br>Setiap barang harus memiliki barcode yang unik.',
+          okLabel: 'OK',
+          okClass: 'primary',
+          onConfirm: () => {}
+        });
+        return;
+      }
+    }
+
     showConfirmModal({
       icon: '📦',
       iconBg: 'linear-gradient(135deg,#ecfdf5,#f0fff8)',
