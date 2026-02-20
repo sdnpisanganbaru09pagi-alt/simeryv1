@@ -765,6 +765,9 @@ select option{background:#ffffff;color:var(--text)}
        data-text="signin"
        data-shape="pill">
   </div>
+  <div id="offlineBadge" style="font-size:11px;color:rgba(255,255,255,0.7);text-align:right;white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:5px;">
+    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);flex-shrink:0;"></span>Mode Offline
+  </div>
   <button id="connectDriveBtn">☁️ Sambungkan Drive</button>
   <button id="logoutBtn">Keluar</button>
   <div id="syncStatus"></div>
@@ -4132,6 +4135,7 @@ async function handleCredentialResponse(response){
 
   document.querySelectorAll(".g_id_signin").forEach(d=>d.style.display="none");
   document.getElementById("logoutBtn").style.display="inline-flex";
+  const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="none";
   hideOverlay();
   startDrive();
 }
@@ -4313,6 +4317,7 @@ document.getElementById("logoutBtn").addEventListener("click",()=>{
       document.getElementById("logoutBtn").style.display="none";
       const cb=document.getElementById('connectDriveBtn');if(cb)cb.style.display='none';
       document.querySelector(".g_id_signin").style.display="block";
+      const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="flex";
       setSyncStatus('');
       showOverlay();
     }
@@ -4336,6 +4341,7 @@ window.addEventListener("load",()=>{
   if(loggedIn){
     document.querySelector(".g_id_signin").style.display="none";
     document.getElementById("logoutBtn").style.display="inline-flex";
+    const ob=document.getElementById("offlineBadge");if(ob)ob.style.display="none";
     startDrive();
   } else if(!dismissed){
     setTimeout(showOverlay,300);
